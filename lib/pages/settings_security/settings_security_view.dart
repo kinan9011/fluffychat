@@ -8,8 +8,10 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/app_lock.dart';
+import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
@@ -58,6 +60,8 @@ class SettingsSecurityView extends StatelessWidget {
               }
               return Column(
                 children: [
+                  if (isDatabaseUnencrypted)
+                    const DatabaseUnencryptedWarningTile(),
                   ListTile(
                     title: Text(
                       L10n.of(context).privacy,

@@ -6,6 +6,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/link_scheme_policy.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -18,6 +19,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'platform_infos.dart';
+
+const _maxSnackBarUrlLength = 200;
+
+String _shortened(String url) => url.length <= _maxSnackBarUrlLength
+    ? url
+    : '${url.substring(0, _maxSnackBarUrlLength)}…';
 
 class UrlLauncher {
   /// The url to open.
@@ -49,6 +56,28 @@ class UrlLauncher {
       return;
     }
 
+    final action = linkSchemeAction(uri);
+
+    if (action == LinkSchemeAction.block) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.linkSchemeBlocked(_shortened(url!)))),
+      );
+      return;
+    }
+
+    if (action == LinkSchemeAction.confirm) {
+      final consent = await showOkCancelAlertDialog(
+        context: context,
+        title: l10n.openLinkInOtherAppTitle,
+        message: l10n.openLinkInOtherAppMessage(url!),
+        okLabel: l10n.open,
+        cancelLabel: l10n.cancel,
+      );
+      if (consent != OkCancelResult.ok) return;
+      launchUrlString(url!);
+      return;
+    }
+
     if (name != null && url != name) {
       // If there is a name which differs from the url, we need to make sure
       // that the user can see the actual url before opening the browser.
@@ -62,11 +91,9 @@ class UrlLauncher {
       if (consent != OkCancelResult.ok) return;
     }
 
-    if (!{'https', 'http'}.contains(uri.scheme)) {
-      // just launch non-https / non-http uris directly
-
+    if (action != LinkSchemeAction.web) {
       // we need to transmute geo URIs on every platform
-      if (uri.scheme == 'geo') {
+      if (action == LinkSchemeAction.geo) {
         final latlong = uri.path
             .split(';')
             .first

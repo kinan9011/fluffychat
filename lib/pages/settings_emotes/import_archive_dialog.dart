@@ -5,10 +5,10 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
+import 'package:fluffychat/utils/archive_guard.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -18,12 +18,12 @@ import 'package:matrix/matrix.dart';
 
 class ImportEmoteArchiveDialog extends StatefulWidget {
   final EmotesSettingsController controller;
-  final Archive archive;
+  final List<ArchiveEntryBytes> entries;
 
   const ImportEmoteArchiveDialog({
     super.key,
     required this.controller,
-    required this.archive,
+    required this.entries,
   });
 
   @override
@@ -32,7 +32,7 @@ class ImportEmoteArchiveDialog extends StatefulWidget {
 }
 
 class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
-  Map<ArchiveFile, String> _importMap = {};
+  Map<ArchiveEntryBytes, String> _importMap = {};
 
   bool _loading = false;
 
@@ -88,8 +88,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
 
   void _importFileMap() {
     _importMap = Map.fromEntries(
-      widget.archive.files
-          .where((e) => e.isFile)
+      widget.entries
           .map((e) => MapEntry(e, e.name.emoteNameFromPath))
           .sorted((a, b) => a.value.compareTo(b.value)),
     );
@@ -144,7 +143,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       final imageCode = entry.value;
 
       try {
-        var mxcFile = MatrixImageFile(bytes: file.content, name: file.name);
+        var mxcFile = MatrixImageFile(bytes: file.bytes, name: file.name);
 
         final thumbnail = (await mxcFile.generateThumbnail(
           nativeImplementations: ClientManager.nativeImplementations,
@@ -204,7 +203,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
 }
 
 class _EmojiImportPreview extends StatefulWidget {
-  final MapEntry<ArchiveFile, String> entry;
+  final MapEntry<ArchiveEntryBytes, String> entry;
   final ValueChanged<String> onNameChanged;
   final VoidCallback onRemove;
 
@@ -260,9 +259,11 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
               crossAxisAlignment: .center,
               children: [
                 Image.memory(
-                  widget.entry.key.content,
+                  widget.entry.key.bytes,
                   height: 64,
                   width: 64,
+                  cacheWidth: 128,
+                  cacheHeight: 128,
                   errorBuilder: (context, e, s) {
                     WidgetsBinding.instance.addPostFrameCallback(
                       (_) => _setRenderError(),

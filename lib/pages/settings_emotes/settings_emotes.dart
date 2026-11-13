@@ -9,6 +9,7 @@ import 'package:archive/archive.dart'
     if (dart.library.io) 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/archive_guard.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -369,11 +370,14 @@ class EmotesSettingsController extends State<EmotesSettings> {
   Future<void> importEmojiZip() async {
     final result = await selectFiles(context, type: FileType.any);
 
-    if (result.isEmpty) return;
+    if (result.isEmpty || !mounted) return;
 
-    final buffer = InputMemoryStream(await result.single.readAsBytes());
-
-    final archive = ZipDecoder().decodeStream(buffer);
+    final entries = await showFutureLoadingDialog(
+      context: context,
+      future: () => readArchiveFile(result.single),
+    );
+    final archiveEntries = entries.result;
+    if (archiveEntries == null) return;
     if (!mounted) return;
 
     await showDialog(
@@ -381,7 +385,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       // breaks [Matrix.of] calls otherwise
       useRootNavigator: false,
       builder: (context) =>
-          ImportEmoteArchiveDialog(controller: this, archive: archive),
+          ImportEmoteArchiveDialog(controller: this, entries: archiveEntries),
     );
     setState(() {});
   }

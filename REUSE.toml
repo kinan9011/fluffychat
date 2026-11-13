@@ -27,7 +27,8 @@ path = [
     "snap/**",
     "windows/**",
     "web/**",
-    "test/metadata/**"
+    "test/metadata/**",
+    "test/goldens/**"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2019-Present Christian Kußowski"

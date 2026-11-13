@@ -6,10 +6,12 @@
 import 'dart:convert';
 
 import 'package:async/async.dart';
+import 'package:collection/collection.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:managed_configurations/managed_configurations.dart';
+import 'package:matrix/matrix.dart' show ShareKeysWith;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,6 +50,11 @@ enum AppSettings<T> {
   shareKeysWith<String>('chat.fluffy.share_keys_with_2', 'all'),
   noEncryptionWarningShown<bool>(
     'chat.fluffy.no_encryption_warning_shown',
+    false,
+  ),
+  databaseUnencrypted<bool>('chat.fluffy.database_unencrypted', false),
+  databaseUnencryptedNoticeDismissed<bool>(
+    'chat.fluffy.database_unencrypted_notice_dismissed',
     false,
   ),
   displayChatDetailsColumn('chat.fluffy.display_chat_details_column', false),
@@ -101,6 +108,13 @@ enum AppSettings<T> {
     return _defaultValue;
   }
 
+  static void applyPlatformConfiguration(
+    Map<String, Object?>? config,
+    PlatformConfigSource source,
+  ) => _platformConfiguration = config == null
+      ? null
+      : filterPlatformConfiguration(config, source);
+
   static Future<void> reset({bool loadWebConfigFile = true}) async {
     for (final setting in AppSettings.values) {
       await AppSettings.store.remove(setting.key);
@@ -138,15 +152,19 @@ enum AppSettings<T> {
 
     // Load configuration from config.json file or MDM:
     if (PlatformInfos.isMobile) {
-      _platformConfiguration =
-          await ManagedConfigurations().getManagedConfigurations;
+      applyPlatformConfiguration(
+        await ManagedConfigurations().getManagedConfigurations,
+        PlatformConfigSource.mdm,
+      );
     } else if (kIsWeb && loadWebConfigFile) {
       try {
         final configJsonString = utf8.decode(
           (await http.get(Uri.parse('config.json'))).bodyBytes,
         );
-        _platformConfiguration =
-            json.decode(configJsonString) as Map<String, Object?>;
+        applyPlatformConfiguration(
+          json.decode(configJsonString) as Map<String, Object?>,
+          PlatformConfigSource.web,
+        );
       } on FormatException catch (_) {
         Logs().v('[ConfigLoader] config.json not found');
       } catch (e) {
@@ -156,6 +174,116 @@ enum AppSettings<T> {
 
     return store;
   }
+}
+
+enum PlatformConfigSource {
+  /// config.json served next to the web app. Not authenticated and often
+  /// cached or edited separately from the app, so only an allowlist applies.
+  web,
+
+  mdm,
+}
+
+const runtimeStateSettings = <AppSettings<Object?>>{
+  AppSettings.showNoGoogle,
+  AppSettings.unifiedPushRegistered,
+  AppSettings.unifiedPushEndpoint,
+  AppSettings.noEncryptionWarningShown,
+  AppSettings.databaseUnencrypted,
+  AppSettings.databaseUnencryptedNoticeDismissed,
+  AppSettings.knownErrorHashes,
+  AppSettings.lastUpdateCheckDate,
+};
+
+/// Can redirect data to a third party or weaken the message flow, so a
+/// config.json must not change them. Still configurable via MDM.
+const webDeniedSettings = <AppSettings<Object?>>{
+  ...runtimeStateSettings,
+  AppSettings.pushNotificationsGatewayUrl,
+  AppSettings.pushNotificationsPusherFormat,
+  AppSettings.fallbackLiveKitInstance,
+};
+
+bool _isHttpsUrl(Object? value) =>
+    value is String && Uri.tryParse(value)?.scheme == 'https';
+
+/// Privacy settings where config.json may only choose the more private value,
+/// and links that are opened with launchUrlString (must be https).
+final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
+  AppSettings.sendTypingNotifications: (value) => value == false,
+  AppSettings.sendPublicReadReceipts: (value) => value == false,
+  AppSettings.autoSendErrorReports: (value) => value == false,
+  AppSettings.shareKeysWith: (value) =>
+      value is String &&
+      value != ShareKeysWith.all.name &&
+      ShareKeysWith.values.any((share) => share.name == value),
+  AppSettings.website: _isHttpsUrl,
+  AppSettings.logoUrl: _isHttpsUrl,
+  AppSettings.privacyPolicy: _isHttpsUrl,
+  AppSettings.tos: _isHttpsUrl,
+};
+
+const webAllowedSettings = <AppSettings<Object?>>{
+  AppSettings.applicationName,
+  AppSettings.defaultHomeserver,
+  AppSettings.presetHomeserver,
+  AppSettings.welcomeText,
+  AppSettings.colorSchemeSeedInt,
+  AppSettings.enableMatrixNativeOIDC,
+  AppSettings.enableSoftLogout,
+  AppSettings.checkForUpdates,
+  AppSettings.textMessageMaxLength,
+  AppSettings.messagePreviewMaxLines,
+  AppSettings.sendTimelineEventTimeout,
+  AppSettings.chatFilter,
+  AppSettings.emojiSuggestionLocale,
+  AppSettings.benchmarksInLogs,
+  AppSettings.audioRecordingNumChannels,
+  AppSettings.audioRecordingAutoGain,
+  AppSettings.audioRecordingEchoCancel,
+  AppSettings.audioRecordingNoiseSuppress,
+  AppSettings.audioRecordingBitRate,
+  AppSettings.audioRecordingSamplingRate,
+  AppSettings.renderHtml,
+  AppSettings.fontSizeFactor,
+  AppSettings.hideRedactedEvents,
+  AppSettings.hideUnknownEvents,
+  AppSettings.autoplayImages,
+  AppSettings.swipeRightToLeftToReply,
+  AppSettings.sendOnEnter,
+  AppSettings.displayNavigationRail,
+  AppSettings.displayChatDetailsColumn,
+  AppSettings.webNotificationSound,
+  AppSettings.hideRoomsInSpaces,
+  AppSettings.showThumbnailsInTimeline,
+  AppSettings.doubleTapToReact,
+  AppSettings.doubleTapReaction,
+};
+
+Map<String, Object?> filterPlatformConfiguration(
+  Map<String, Object?> config,
+  PlatformConfigSource source,
+) {
+  final result = <String, Object?>{};
+  for (final entry in config.entries) {
+    final setting = AppSettings.values.firstWhereOrNull(
+      (setting) => setting.name == entry.key,
+    );
+    final isAllowed =
+        setting != null &&
+        !runtimeStateSettings.contains(setting) &&
+        (source == PlatformConfigSource.mdm ||
+            (!webDeniedSettings.contains(setting) &&
+                (webAllowedSettings.contains(setting) ||
+                    (webValidatedSettings[setting]?.call(entry.value) ??
+                        false))));
+    if (isAllowed) {
+      result[entry.key] = entry.value;
+      continue;
+    }
+    Logs().w('[ConfigLoader] Ignoring "${entry.key}" (${source.name})');
+  }
+  return result;
 }
 
 extension AppSettingsBoolNExtension on AppSettings<bool?> {

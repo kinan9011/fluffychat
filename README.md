@@ -76,6 +76,13 @@ cd fluffychat
   An example can be found at `config.sample.json`. All values there are optional.
   **Please only the values, you really need**. If you e.g. only want
   to change the default homeserver, then only modify the `defaultHomeserver` key.
+  Because a `config.json` is not authenticated, the web app only applies branding and
+  harmless UX keys from it. Keys that could redirect data (`pushNotificationsGatewayUrl`,
+  `pushNotificationsPusherFormat`, `fallbackLiveKitInstance`), runtime state keys and unknown keys
+  are ignored (a warning is logged with the key name). Privacy settings
+  (`sendTypingNotifications`, `sendPublicReadReceipts`, `autoSendErrorReports`, `shareKeysWith`)
+  can only be made more private, and `website`, `logoUrl`, `privacyPolicy` and `tos` must be `https` URLs.
+  On Android and iOS the MDM configuration is not restricted except for runtime state keys.
 
 ## How to run integration tests
 
