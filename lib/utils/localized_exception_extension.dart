@@ -7,6 +7,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/archive_guard.dart';
+import 'package:fluffychat/utils/backup_dump_validator.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -39,6 +41,20 @@ extension LocalizedExceptionExtension on Object {
       return L10n.of(
         context,
       ).fileIsTooBigForServer(_formatFileSize(exception.maxFileSize));
+    }
+    if (this is ArchiveGuardException) {
+      final l10n = L10n.of(context);
+      return switch ((this as ArchiveGuardException).error) {
+        ArchiveGuardError.tooLarge => l10n.archiveTooLarge,
+        ArchiveGuardError.tooManyEntries => l10n.archiveTooManyFiles,
+        ArchiveGuardError.unsafePaths => l10n.archiveUnsafePaths,
+        ArchiveGuardError.invalid => l10n.archiveInvalid,
+      };
+    }
+    if (this is InvalidBackupException) {
+      return (this as InvalidBackupException).tooLarge
+          ? L10n.of(context).backupFileTooLarge
+          : L10n.of(context).backupFileInvalid;
     }
     if (this is OtherPartyCanNotReceiveMessages) {
       return L10n.of(context).otherPartyNotLoggedIn;

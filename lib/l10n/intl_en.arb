@@ -2852,5 +2852,32 @@
                 "type": "String"
             }
         }
-    }
+    },
+    "openLinkInOtherAppTitle": "Open link in another app?",
+    "openLinkInOtherAppMessage": "This link opens another app on your device. Only continue if you trust it:\n\n{url}",
+    "@openLinkInOtherAppMessage": {
+        "type": "String",
+        "placeholders": {
+            "url": {
+                "type": "String"
+            }
+        }
+    },
+    "linkSchemeBlocked": "This link type is blocked for your safety: {url}",
+    "@linkSchemeBlocked": {
+        "type": "String",
+        "placeholders": {
+            "url": {
+                "type": "String"
+            }
+        }
+    },
+    "archiveTooLarge": "This archive is too large to import.",
+    "archiveTooManyFiles": "This archive contains too many files.",
+    "archiveUnsafePaths": "This archive contains unsafe file paths and was rejected.",
+    "archiveInvalid": "This file is not a valid archive.",
+    "backupFileTooLarge": "This backup file is too large.",
+    "backupFileInvalid": "This file is not a valid backup.",
+    "databaseNotEncrypted": "Your local data is not encrypted",
+    "databaseNotEncryptedDescription": "Secure storage is unavailable on this device, so messages and keys stored by the app are not encrypted on disk."
 }

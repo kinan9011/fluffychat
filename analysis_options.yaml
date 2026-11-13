@@ -66,15 +66,15 @@ dart_code_linter:
     - prefer-immediate-return
     - prefer-enums-by-name
     - avoid-unnecessary-conditionals
+    - avoid-banned-imports:
+        entries:
+          - paths: ['lib/.*\.dart']
+            deny: ['package:flutter/material.dart']
+            message: 'Import package:material_ui/material_ui.dart instead of the Flutter Material library.'
     # TODO:
     # - member-ordering
     # - avoid-global-state
     # - prefer-match-file-name
-    # - avoid-banned-imports:
-    #     entries:
-    #     - paths: ['some/folder/.*\.dart', 'another/folder/.*\.dart']
-    #       deny: ['package:flutter/material.dart']
-    #       message: 'Do not import Flutter Material Design library, we should not depend on it!'
     # - no-magic-number:
     #     allowed: [-1, 0, 1,2,4,6,8,12,16,32,40,56,64]
     #     allow-only-once: true

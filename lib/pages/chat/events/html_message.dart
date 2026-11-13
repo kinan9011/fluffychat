@@ -10,6 +10,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/code_highlight_theme.dart';
 import 'package:fluffychat/utils/event_checkbox_extension.dart';
+import 'package:fluffychat/utils/html_image_size.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -387,21 +388,20 @@ class HtmlMessage extends StatelessWidget {
           return TextSpan(text: node.attributes['alt']);
         }
 
-        final width = double.tryParse(node.attributes['width'] ?? '');
-        final height = double.tryParse(node.attributes['height'] ?? '');
-        const defaultDimension = 64.0;
-        final actualWidth = width ?? height ?? defaultDimension;
-        final actualHeight = height ?? width ?? defaultDimension;
+        final size = htmlImageSize(
+          node.attributes['width'],
+          node.attributes['height'],
+        );
 
         return WidgetSpan(
           child: SizedBox(
-            width: actualWidth,
-            height: actualHeight,
+            width: size.width,
+            height: size.height,
             child: MxcImage(
               uri: mxcUrl,
-              width: actualWidth,
-              height: actualHeight,
-              isThumbnail: (actualWidth * actualHeight) > (256 * 256),
+              width: size.width,
+              height: size.height,
+              isThumbnail: size.isThumbnail,
             ),
           ),
         );

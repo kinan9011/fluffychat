@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/utils/backup_dump_validator.dart';
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -18,18 +19,17 @@ Future<void> restoreBackupFlow(BuildContext context) async {
   if (!context.mounted) return;
   final result = await showFutureLoadingDialog(
     context: context,
-    future: () async {
+    future: () => importBackupFile(file, (dump) async {
       final client = await matrix.getLoginClient();
-      await client.database.importDump(
-        String.fromCharCodes(await file.readAsBytes()),
-      );
+      final imported = await client.database.importDump(dump);
+      if (!imported) throw const InvalidBackupException();
       await client.init(
         waitForFirstSync: false,
         waitUntilLoadCompletedLoaded: false,
       );
       matrix.initMatrix();
       return client.isLogged();
-    },
+    }),
   );
 
   if (result.result == true && context.mounted) {
