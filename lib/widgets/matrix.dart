@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -33,6 +34,7 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/server_capabilities/server_capabilities_service.dart';
 import 'local_notifications_extension.dart';
 
 class Matrix extends StatefulWidget {
@@ -61,7 +63,8 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix> {
-  int _activeClient = -1;
+  Client? _activeClientRef;
+  late final ValueNotifier<int> loggedInAccountCount = ValueNotifier(0);
   String? activeBundle;
 
   SharedPreferences get store => widget.store;
@@ -74,10 +77,17 @@ class MatrixState extends State<Matrix> {
   );
 
   Client get client {
-    if (_activeClient < 0 || _activeClient >= widget.clients.length) {
-      return currentBundle!.first!;
+    final active = _activeClientRef;
+    if (active != null && widget.clients.contains(active)) return active;
+    return currentBundle!.first!;
+  }
+
+  Client? get activeClientOrNull {
+    try {
+      return client;
+    } catch (_) {
+      return null;
     }
-    return widget.clients[_activeClient];
   }
 
   bool get isMultiAccount => widget.clients.length > 1;
@@ -85,13 +95,73 @@ class MatrixState extends State<Matrix> {
   int getClientIndexByMatrixId(String matrixId) =>
       widget.clients.indexWhere((client) => client.userID == matrixId);
 
-  void setActiveClient(Client? cl) {
-    final i = widget.clients.indexWhere((c) => c == cl);
-    if (i != -1) {
-      _activeClient = i;
-    } else {
-      Logs().w('Tried to set an unknown client ${cl!.userID} as active');
+  final ServerCapabilitiesService serverCapabilities =
+      ServerCapabilitiesService();
+
+  final StreamController<Client> _activeClientChanged =
+      StreamController.broadcast();
+  final StreamController<Client> _accountSwitched =
+      StreamController.broadcast();
+  final StreamController<Client> _ownProfileChanged =
+      StreamController.broadcast();
+
+  Stream<Client> get onActiveClientChanged => _activeClientChanged.stream;
+
+  // Switches that come with a destination (notification, call, `?client=`
+  // link) must not reset the tabs, so they have their own stream.
+  Stream<Client> get onAccountSwitched => _accountSwitched.stream;
+
+  Stream<Client> get onOwnProfileChanged => _ownProfileChanged.stream;
+
+  void notifyOwnProfileChanged() => _ownProfileChanged.add(client);
+
+  void _emitIfChanged(Client? before, {required bool resetTabs}) {
+    final after = activeClientOrNull;
+    if (after == null || identical(before, after)) return;
+    _activeClientChanged.add(after);
+    if (resetTabs) _accountSwitched.add(after);
+  }
+
+  void setActiveClient(Client? cl, {bool resetTabs = true}) {
+    if (cl == null || !widget.clients.contains(cl)) {
+      Logs().w('Tried to set an unknown client ${cl?.userID} as active');
+      return;
     }
+    final before = activeClientOrNull;
+    _activeClientRef = cl;
+    _emitIfChanged(before, resetTabs: resetTabs);
+  }
+
+  static const defaultStartupHooks = runAppStartHooks;
+
+  @visibleForTesting
+  static void Function(MatrixState matrix) startupHooks = defaultStartupHooks;
+
+  final List<StreamSubscription> startupSubscriptions = [];
+  bool _startupHooksDone = false;
+
+  void runStartupHooksOnce() {
+    if (_startupHooksDone) return;
+    _startupHooksDone = true;
+    startupHooks(this);
+  }
+
+  void joinCall(Client client, String roomId) {
+    setActiveClient(client, resetTabs: false);
+    FluffyChatApp.router.go('/rooms/$roomId?action=call');
+  }
+
+  void _updateAccountCount() => loggedInAccountCount.value = widget.clients
+      .where((client) => client.isLogged())
+      .length;
+
+  void _removeClient(Client c) {
+    final before = activeClientOrNull;
+    widget.clients.remove(c);
+    _updateAccountCount();
+    serverCapabilities.forget(c);
+    if (identical(_activeClientRef, c)) _activeClientRef = null;
+    _emitIfChanged(before, resetTabs: true);
   }
 
   List<Client?>? get currentBundle {
@@ -142,6 +212,16 @@ class MatrixState extends State<Matrix> {
   AudioPlayer? audioPlayer;
   final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
 
+  @visibleForTesting
+  void addLoggedInClient(Client client) {
+    if (!widget.clients.contains(client)) widget.clients.add(client);
+    ClientManager.addClientNameToStore(client.clientName, store);
+    _registerSubs(client.clientName);
+    serverCapabilities.load(client, force: true);
+    _updateAccountCount();
+    setActiveClient(client, resetTabs: false);
+  }
+
   Future<Client> getLoginClient() async {
     if (widget.clients.isNotEmpty && !client.isLogged()) {
       return client;
@@ -155,15 +235,7 @@ class MatrixState extends State<Matrix> {
               .where((l) => l == LoginState.loggedIn)
               .first
               .then((_) {
-                if (!widget.clients.contains(_loginClientCandidate)) {
-                  widget.clients.add(_loginClientCandidate!);
-                }
-                ClientManager.addClientNameToStore(
-                  _loginClientCandidate!.clientName,
-                  store,
-                );
-                _registerSubs(_loginClientCandidate!.clientName);
-                setActiveClient(_loginClientCandidate);
+                addLoggedInClient(_loginClientCandidate!);
                 _loginClientCandidate = null;
                 FluffyChatApp.router.go('/backup');
               });
@@ -260,7 +332,7 @@ class MatrixState extends State<Matrix> {
           final loggedInWithMultipleClients = widget.clients.length > 1;
 
           _cancelSubs(c.clientName);
-          widget.clients.remove(c);
+          _removeClient(c);
           ClientManager.removeClientNameFromStore(c.clientName, store);
           InitWithRestoreExtension.deleteSessionBackup(name);
 
@@ -372,6 +444,7 @@ class MatrixState extends State<Matrix> {
     for (final c in widget.clients) {
       _registerSubs(c.clientName);
     }
+    _updateAccountCount();
   }
 
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -415,6 +488,9 @@ class MatrixState extends State<Matrix> {
     for (final sub in onReceipts.values) {
       sub.cancel();
     }
+    for (final sub in startupSubscriptions) {
+      sub.cancel();
+    }
     onRoomKeyRequestSub.clear();
     onKeyVerificationRequestSub.clear();
     onLogoutSub.clear();
@@ -422,6 +498,11 @@ class MatrixState extends State<Matrix> {
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();
+    serverCapabilities.dispose();
+    _activeClientChanged.close();
+    _accountSwitched.close();
+    _ownProfileChanged.close();
+    loggedInAccountCount.dispose();
 
     super.dispose();
   }

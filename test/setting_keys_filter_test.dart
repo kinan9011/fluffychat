@@ -101,6 +101,15 @@ void main() {
       );
     });
 
+    test('calls can be switched off by the deployer, default is on', () {
+      expect(web({'callsEnabled': false}), {'callsEnabled': false});
+      expect(AppSettings.callsEnabled.defaultValue, isTrue);
+    });
+
+    test('the removed spaces rail setting is no longer accepted', () {
+      expect(web({'displayNavigationRail': true}), isEmpty);
+    });
+
     test('unknown keys are dropped', () {
       expect(web({'somethingNew': 'x'}), isEmpty);
     });

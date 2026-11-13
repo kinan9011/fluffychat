@@ -89,14 +89,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.4"
-  badges:
-    dependency: "direct main"
-    description:
-      name: badges
-      sha256: "4d53519c5883c74974b8efd2ea3cef85bab17b79406b83b91a022285c46e5560"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
   barbecue:
     dependency: transitive
     description:

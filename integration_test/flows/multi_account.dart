@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';
 import 'auth_flows.dart';
+import 'shell_navigation.dart';
 
 Future<void> multiAccount(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
@@ -28,10 +29,11 @@ extension on FluffyChatTester {
     await tapOn(Key('accounts_and_settings_buttons'));
     await tapOn(user2Name);
     await tapOn(Key('accounts_and_settings_buttons'));
-    await tapOn('Settings');
+    await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'Settings'));
     await scrollUntilVisible('Logout');
     await tapOn('Logout');
     await tapOn(Key('ok_cancel_alert_dialog_ok_button'));
     await waitFor('One of your clients has been logged out');
+    await openTab('Chats');
   }
 }

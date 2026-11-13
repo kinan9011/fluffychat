@@ -11,21 +11,45 @@ import 'package:fluffychat/utils/oklch.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+enum ShellMode {
+  mobile,
+  twoPane,
+  rail,
+  wide;
+
+  static ShellMode forWidth(double width) {
+    if (width >= FluffyThemes.threePaneBreakpoint) return wide;
+    if (width >= FluffyThemes.railBreakpoint) return rail;
+    if (width >= FluffyThemes.twoPaneBreakpoint) return twoPane;
+    return mobile;
+  }
+
+  bool get hasRail => this == rail || this == wide;
+}
+
 abstract class FluffyThemes {
   static const double columnWidth = 380.0;
 
   static const double maxTimelineWidth = columnWidth * 2;
 
-  static const double navRailWidth = 80.0;
+  static const double navRailWidth = 76.0;
+  static const double listColumnWidth = 350.0;
+  static const double detailsPanelWidth = 340.0;
 
-  static bool isColumnModeByWidth(double width) =>
-      width > columnWidth * 2 + navRailWidth;
+  static const double twoPaneBreakpoint = 600.0;
+  static const double railBreakpoint = 900.0;
+  static const double threePaneBreakpoint = 1280.0;
+
+  static bool isColumnModeByWidth(double width) => width >= twoPaneBreakpoint;
+
+  static bool isThreeColumnModeByWidth(double width) =>
+      width >= threePaneBreakpoint;
 
   static bool isColumnMode(BuildContext context) =>
       isColumnModeByWidth(MediaQuery.sizeOf(context).width);
 
   static bool isThreeColumnMode(BuildContext context) =>
-      MediaQuery.sizeOf(context).width > FluffyThemes.columnWidth * 3.5;
+      isThreeColumnModeByWidth(MediaQuery.sizeOf(context).width);
 
   static LinearGradient backgroundGradient(BuildContext context, int alpha) {
     final colorScheme = Theme.of(context).colorScheme;

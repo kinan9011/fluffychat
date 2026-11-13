@@ -40,7 +40,7 @@ GoRouter _router() => GoRouter(
   routes: [
     GoRoute(path: '/', builder: (_, _) => const _BannerHost()),
     GoRoute(
-      path: '/rooms/settings/security',
+      path: '/settings/security',
       builder: (_, _) => const Text('security page'),
     ),
   ],

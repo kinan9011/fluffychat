@@ -97,8 +97,7 @@ class SettingsSecurityView extends StatelessWidget {
                         Matrix.of(context).client.ignoredUsers.length,
                       ),
                     ),
-                    onTap: () =>
-                        context.go('/rooms/settings/security/ignorelist'),
+                    onTap: () => context.go('/settings/security/ignorelist'),
                   ),
                   if (PlatformInfos.supportsAppLock) ...[
                     Divider(color: theme.dividerColor),
@@ -209,8 +208,7 @@ class SettingsSecurityView extends StatelessWidget {
                       leading: const Icon(Icons.password_outlined),
                       trailing: const Icon(Icons.chevron_right_outlined),
                       title: Text(L10n.of(context).changePassword),
-                      onTap: () =>
-                          context.go('/rooms/settings/security/password'),
+                      onTap: () => context.go('/settings/security/password'),
                     ),
                   Divider(color: theme.dividerColor),
                   ListTile(

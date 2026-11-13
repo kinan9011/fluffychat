@@ -371,7 +371,9 @@ class ChatListItem extends StatelessWidget {
                           ),
                   ),
                   const SizedBox(width: 8),
-                  UnreadBubble(room: room),
+                  room.isSpace && room.membership == Membership.join
+                      ? SpaceUnreadBubble(space: room)
+                      : UnreadBubble(room: room),
                 ],
               ),
               onTap: onTap,

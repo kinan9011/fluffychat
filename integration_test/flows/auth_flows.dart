@@ -48,7 +48,7 @@ extension AuthFlows on FluffyChatTester {
   Future<void> logout() async {
     await ensureLoggedIn();
     await tapOn(Key('accounts_and_settings_buttons'));
-    await tapOn('Settings');
+    await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'Settings'));
     await scrollUntilVisible('Logout');
     await tapOn('Logout');
     await tapOn(Key('ok_cancel_alert_dialog_ok_button'));

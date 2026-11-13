@@ -3,21 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// ignore_for_file: experimental_member_use
-
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:cross_file/cross_file.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/utils/show_update_snackbar.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -25,21 +19,14 @@ import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart'
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_callkit_incoming/entities/entities.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:go_router/go_router.dart';
-import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../utils/account_bundles.dart';
 import '../../config/setting_keys.dart';
-import '../../utils/url_launcher.dart';
 import '../../widgets/matrix.dart';
 
 enum ActiveFilter { allChats, unread, groups, messages, tag }
@@ -64,14 +51,8 @@ extension LocalizedActiveFilter on ActiveFilter {
 class ChatList extends StatefulWidget {
   final String? activeChat;
   final String? activeSpace;
-  final bool displayNavigationRail;
 
-  const ChatList({
-    super.key,
-    required this.activeChat,
-    this.activeSpace,
-    this.displayNavigationRail = false,
-  });
+  const ChatList({super.key, required this.activeChat, this.activeSpace});
 
   @override
   ChatListController createState() => ChatListController();
@@ -79,12 +60,6 @@ class ChatList extends StatefulWidget {
 
 class ChatListController extends State<ChatList>
     with TickerProviderStateMixin, RouteAware {
-  StreamSubscription? _intentDataStreamSubscription;
-
-  StreamSubscription? _intentFileStreamSubscription;
-
-  StreamSubscription? _callEventSubscription;
-
   late ActiveFilter activeFilter;
   String? activeTag;
 
@@ -95,11 +70,6 @@ class ChatListController extends State<ChatList>
   Future<void> setActiveSpace(String spaceId) async {
     await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
     if (!mounted) return;
-    if (!FluffyThemes.isColumnMode(context) &&
-        !AppSettings.displayNavigationRail.value) {
-      await AppSettings.displayNavigationRail.setItem(true);
-    }
-
     setState(() {
       _activeSpaceId = spaceId;
     });
@@ -108,34 +78,6 @@ class ChatListController extends State<ChatList>
   void clearActiveSpace() => setState(() {
     _activeSpaceId = null;
   });
-
-  Future<void> _onCallEvent(CallEvent? event) async {
-    switch (event) {
-      case CallEventActionCallAccept():
-        _joinCallWith(event.callKitParams);
-        break;
-      case CallEventActionCallEnded():
-        final roomId = event.callKitParams.extra?.tryGet<String>('roomId');
-        if (roomId != null &&
-            Matrix.of(context).activeCallRoomId.value == roomId) {
-          Matrix.of(context).activeCallRoomId.value = null;
-        }
-        break;
-      case CallEventActionCallIncoming() || CallEventActionCallStart()
-          when PlatformInfos.isIOS:
-        // To have audio session correctly configured on iOS:
-        lk.AudioManager.instance.setEngineAvailability(.none);
-        break;
-      case CallEventActionCallToggleAudioSession() when PlatformInfos.isIOS:
-        // To have audio session correctly configured on iOS:
-        await lk.AudioManager.instance.setEngineAvailability(
-          event.isActive ? .defaultAvailability : .none,
-        );
-        break;
-      default:
-        break;
-    }
-  }
 
   Future<void> onChatTap(Room room) async {
     if (room.membership == Membership.leave) {
@@ -283,14 +225,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void openNavrail() {
-    setState(() {
-      AppSettings.displayNavigationRail.setItem(
-        !AppSettings.displayNavigationRail.value,
-      );
-    });
-  }
-
   void startSearch() {
     setState(() {
       isSearchMode = true;
@@ -319,7 +253,7 @@ class ChatListController extends State<ChatList>
 
   Stream<Client> get clientStream => _clientStream.stream;
 
-  void addAccountAction() => context.go('/rooms/settings/account');
+  void addAccountAction() => context.go('/settings/addaccount');
 
   void _onScroll() {
     final newScrolledToTop = scrollController.position.pixels <= 0;
@@ -334,69 +268,7 @@ class ChatListController extends State<ChatList>
     context.push('/rooms/$spaceId/details');
   }
 
-  // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces =>
-      Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
-
   String? get activeChat => widget.activeChat;
-
-  void _processIncomingSharedMedia(List<SharedMediaFile> files) {
-    files.removeWhere(
-      (file) =>
-          file.path.startsWith(AppConfig.deepLinkPrefix) ||
-          Uri.tryParse(file.path)?.scheme == 'matrix',
-    );
-    if (files.isEmpty) return;
-
-    showScaffoldDialog(
-      context: context,
-      builder: (context) => ShareScaffoldDialog(
-        items: files.map((file) {
-          if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
-            return TextShareItem(file.path);
-          }
-          return FileShareItem(
-            XFile(
-              file.path.replaceFirst('file://', ''),
-              mimeType: file.mimeType,
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  void _initReceiveSharingIntent() {
-    if (!PlatformInfos.isMobile) return;
-
-    // For sharing images coming from outside the app while the app is in the memory
-    _intentFileStreamSubscription = ReceiveSharingIntent.instance
-        .getMediaStream()
-        .listen(_processIncomingSharedMedia, onError: print);
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance.getInitialMedia().then(
-      _processIncomingSharedMedia,
-    );
-
-    if (PlatformInfos.isAndroid) {
-      final shortcuts = FlutterShortcuts();
-      shortcuts.initialize().then(
-        (_) => shortcuts.listenAction((action) {
-          if (!mounted) return;
-          UrlLauncher(context, action).launchUrl();
-        }),
-      );
-    }
-  }
-
-  void _joinCallWith(CallKitParams params) {
-    final roomId = params.extra?.tryGet<String>('roomId');
-    final clientName = params.extra?.tryGet<String>('clientName');
-    if (roomId != null) {
-      context.go('/rooms/$roomId?client=$clientName&action=call');
-    }
-  }
 
   StreamSubscription? _onRoomTagUpdate;
 
@@ -409,27 +281,19 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  StreamSubscription<Client>? _activeClientSubscription;
+
   @override
   void initState() {
-    _initReceiveSharingIntent();
+    _activeClientSubscription = Matrix.of(context).onActiveClientChanged.listen(
+      (_) => setState(() {
+        activeFilter = ActiveFilter.allChats;
+        _activeSpaceId = null;
+      }),
+    );
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
-    if (PlatformInfos.isMobile) {
-      _callEventSubscription = FlutterCallkitIncoming.onEvent.listen(
-        _onCallEvent,
-      );
-      // To have audio session correctly configured on iOS:
-      lk.AudioManager.instance.setAudioSessionManagementMode(
-        lk.AudioSessionManagementMode.externalCallSystem,
-      );
-      FlutterCallkitIncoming.activeCalls().then((calls) {
-        final params = calls.firstOrNull;
-        if (params == null) return;
-        _joinCallWith(params);
-      });
-    }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.activeSpace != null) {
         setActiveSpace(widget.activeSpace!);
@@ -483,10 +347,8 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    _intentDataStreamSubscription?.cancel();
-    _intentFileStreamSubscription?.cancel();
-    _callEventSubscription?.cancel();
     _onRoomTagUpdate?.cancel();
+    _activeClientSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     searchController.dispose();
     searchFocusNode.dispose();
@@ -773,7 +635,7 @@ class ChatListController extends State<ChatList>
         final inviteEvent = await room.requestUser(room.client.userID!);
         if (!mounted) return;
         context.go(
-          '/rooms/settings/security/ignorelist',
+          '/settings/security/ignorelist',
           extra: inviteEvent?.senderId,
         );
       case ChatContextAction.leave:
@@ -954,7 +816,7 @@ class ChatListController extends State<ChatList>
           action: SnackBarAction(
             onPressed: () {
               controller.close();
-              router.go('/rooms/settings/devices');
+              router.go('/settings/devices');
             },
             textColor: theme.colorScheme.onErrorContainer,
             label: L10n.of(context).settings,

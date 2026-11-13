@@ -2436,7 +2436,6 @@
     "pleaseWaitUntilInvited": "Please wait now, until someone from the room invites you.",
     "commandHint_logout": "Logout your current device",
     "commandHint_logoutall": "Logout all active devices",
-    "displayNavigationRail": "Show navigation rail on mobile",
     "customReaction": "Custom reaction",
     "moreEvents": "More events",
     "showMore": "Show more",
@@ -2879,5 +2878,13 @@
     "backupFileTooLarge": "This backup file is too large.",
     "backupFileInvalid": "This file is not a valid backup.",
     "databaseNotEncrypted": "Your local data is not encrypted",
-    "databaseNotEncryptedDescription": "Secure storage is unavailable on this device, so messages and keys stored by the app are not encrypted on disk."
+    "databaseNotEncryptedDescription": "Secure storage is unavailable on this device, so messages and keys stored by the app are not encrypted on disk.",
+    "calls": "Calls",
+    "profile": "Profile",
+    "ongoingGroupCalls": "Ongoing group calls",
+    "noOngoingGroupCalls": "No group calls are running right now.",
+    "groupCallsNotSupported": "Your server isn't set up for group calls. One-to-one calls still work.",
+    "myQrCode": "My QR code",
+    "accounts": "Accounts",
+    "mainNavigation": "Main navigation"
 }

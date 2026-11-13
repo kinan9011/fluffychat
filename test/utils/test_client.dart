@@ -20,10 +20,12 @@ const pickledOlmAccount =
 
 class _FakeNotifications extends FlutterLocalNotificationsPlatform {}
 
+/// More than one test client needs its own database and its own name.
 Future<Client> prepareTestClient({
   bool loggedIn = false,
   Uri? homeserver,
   String id = 'FluffyChat Widget Test',
+  String? clientName,
 }) async {
   await setUpVodozemac();
   SharedPreferences.setMockInitialValues({});
@@ -32,7 +34,7 @@ Future<Client> prepareTestClient({
 
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
   final client = Client(
-    'FluffyChat Widget Tests',
+    clientName ?? 'FluffyChat Widget Tests',
     httpClient: FakeMatrixApi(),
     verificationMethods: {
       KeyVerificationMethod.numbers,
@@ -42,8 +44,11 @@ Future<Client> prepareTestClient({
       'im.ponies.room_emotes', // we want emotes to work properly
     },
     database: await MatrixSdkDatabase.init(
-      'test',
-      database: await databaseFactoryFfi.openDatabase(':memory:'),
+      clientName ?? 'test',
+      database: await databaseFactoryFfi.openDatabase(
+        ':memory:',
+        options: OpenDatabaseOptions(singleInstance: clientName == null),
+      ),
       sqfliteFactory: databaseFactoryFfi,
     ),
     supportedLoginTypes: {

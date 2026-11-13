@@ -32,10 +32,13 @@ class SettingsController extends State<Settings> {
   Future<Profile>? profileFuture;
   bool profileUpdated = false;
 
-  void updateProfile() => setState(() {
-    profileUpdated = true;
-    profileFuture = null;
-  });
+  void updateProfile() {
+    setState(() {
+      profileUpdated = true;
+      profileFuture = null;
+    });
+    Matrix.of(context).notifyOwnProfileChanged();
+  }
 
   Future<void> setDisplaynameAction() async {
     final l10n = L10n.of(context);
@@ -124,28 +127,51 @@ class SettingsController extends State<Settings> {
     }
   }
 
+  StreamSubscription<Client>? _activeClientSubscription;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
+    _activeClientSubscription = Matrix.of(context).onActiveClientChanged.listen(
+      (_) {
+        setState(() {
+          profileFuture = null;
+          cryptoIdentityConnected = null;
+        });
+        checkBootstrap();
+      },
+    );
 
     super.initState();
   }
 
-  Future<void> checkBootstrap() async {
-    final client = Matrix.of(context).client;
-    if (!client.encryptionEnabled) return;
-    if (!client.isLogged()) return;
+  @override
+  void dispose() {
+    _activeClientSubscription?.cancel();
+    super.dispose();
+  }
+
+  static const defaultLoadCryptoIdentityConnected =
+      _loadCryptoIdentityConnected;
+
+  @visibleForTesting
+  static Future<bool?> Function(Client client) loadCryptoIdentityConnected =
+      defaultLoadCryptoIdentityConnected;
+
+  static Future<bool?> _loadCryptoIdentityConnected(Client client) async {
+    if (!client.encryptionEnabled || !client.isLogged()) return null;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
-    if (client.prevBatch == null) {
-      await client.onSync.stream.first;
-    }
-
+    if (client.prevBatch == null) await client.onSync.stream.first;
     final state = await client.getCryptoIdentityState();
-    if (!mounted) return;
-    setState(() {
-      cryptoIdentityConnected = state.initialized && state.connected;
-    });
+    return state.initialized && state.connected;
+  }
+
+  Future<void> checkBootstrap() async {
+    final client = Matrix.of(context).client;
+    final connected = await loadCryptoIdentityConnected(client);
+    if (!mounted || !identical(Matrix.of(context).client, client)) return;
+    setState(() => cryptoIdentityConnected = connected);
   }
 
   bool? cryptoIdentityConnected;

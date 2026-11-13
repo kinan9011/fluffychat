@@ -81,7 +81,7 @@ class SettingsPasswordView extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextButton(
                   child: Text(L10n.of(context).passwordRecoverySettings),
-                  onPressed: () => context.go('/rooms/settings/security/3pid'),
+                  onPressed: () => context.go('/settings/security/3pid'),
                 ),
               ],
             ),
