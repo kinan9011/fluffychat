@@ -3,9 +3,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// No consumer until the shell redesign (W03) adopts it.
-// ignore_for_file: unused-code, unused-files
-
 import 'dart:ui';
 
 import 'package:fluffychat/config/app_tokens.dart';

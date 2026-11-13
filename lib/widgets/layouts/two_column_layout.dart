@@ -7,33 +7,35 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:material_ui/material_ui.dart';
 
 class TwoColumnLayout extends StatelessWidget {
+  final Widget? rail;
   final Widget mainView;
   final Widget sideView;
-  final bool hasNavigationRail;
 
   const TwoColumnLayout({
     super.key,
     required this.mainView,
     required this.sideView,
-    this.hasNavigationRail = true,
+    this.rail,
   });
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final divider = Container(
+      width: 1.0,
+      color: Theme.of(context).dividerColor,
+    );
     return ScaffoldMessenger(
       child: Scaffold(
         body: Row(
           children: [
+            if (rail != null) ...[rail!, divider],
             Container(
               clipBehavior: Clip.antiAlias,
               decoration: const BoxDecoration(),
-              width:
-                  FluffyThemes.columnWidth +
-                  (hasNavigationRail ? FluffyThemes.navRailWidth : 0),
+              width: FluffyThemes.listColumnWidth,
               child: mainView,
             ),
-            Container(width: 1.0, color: theme.dividerColor),
+            divider,
             Expanded(child: ClipRRect(child: sideView)),
           ],
         ),

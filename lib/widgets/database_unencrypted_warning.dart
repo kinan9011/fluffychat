@@ -59,7 +59,7 @@ void showDatabaseUnencryptedBanner(BuildContext context) {
         TextButton(
           onPressed: () {
             scaffoldMessenger.hideCurrentMaterialBanner();
-            router.go('/rooms/settings/security');
+            router.go('/settings/security');
           },
           child: Text(l10n.security),
         ),

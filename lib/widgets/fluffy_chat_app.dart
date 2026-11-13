@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
@@ -47,38 +46,7 @@ class FluffyChatApp extends StatelessWidget {
   static final GoRouter router = GoRouter(
     routes: AppRoutes.routes,
     debugLogDiagnostics: kDebugMode,
-    redirect: (context, state) {
-      // Workaround for content sharings passed to go router:
-      if ({
-        'content',
-        'sharemedia-im.fluffychat.app',
-      }.contains(state.uri.scheme)) {
-        Logs().d('Ignore content sharing handling in go router', state.uri);
-        return '/';
-      }
-
-      if (state.uri.scheme == 'matrix' && state.uri.pathSegments.length >= 2) {
-        final type = state.uri.pathSegments.first;
-        final id = state.uri.pathSegments[1];
-        switch (type) {
-          case 'roomid':
-            final roomId = '!$id';
-            return '/rooms/$roomId';
-          case 'r':
-            final alias = '#$id';
-            return '/rooms/newprivatechat#$alias';
-          case 'u':
-            final userId = '@$id';
-            return '/rooms/newprivatechat#$userId';
-        }
-      }
-
-      // Pass deep links to app:
-      if (state.uri.toString().startsWith(AppConfig.deepLinkPrefix)) {
-        return '/rooms/newprivatechat#${state.uri}';
-      }
-      return null;
-    },
+    redirect: AppRoutes.globalRedirect,
   );
 
   @override

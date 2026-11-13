@@ -20,7 +20,7 @@
   "swipeRightToLeftToReply": true,
   "sendOnEnter": false,
   "showPresences": true,
-  "displayNavigationRail": false,
+  "callsEnabled": true,
   "experimentalVoip": false,
   "displayChatDetailsColumn": false,
   "colorSchemeSeedInt": 4283835834,

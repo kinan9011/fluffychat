@@ -33,11 +33,10 @@ extension LocalNotificationsExtension on MatrixState {
       showDialog<bool>(
         context: context,
         builder: (_) => IncomingCallDialog(event: event),
-      ).then((joinCall) {
-        if (joinCall != true) return;
+      ).then((accepted) {
+        if (accepted != true) return;
         if (!context.mounted) return;
-        setActiveClient(event.room.client);
-        FluffyChatApp.router.go('/rooms/${event.room.id}?action=call');
+        joinCall(event.room.client, event.room.id);
       });
     }
 

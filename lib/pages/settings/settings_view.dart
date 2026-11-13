@@ -34,9 +34,7 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(L10n.of(context).settings),
-        leading: Center(
-          child: BackButton(onPressed: () => context.go('/rooms')),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: ListTileTheme(
         iconColor: theme.colorScheme.onSurface,
@@ -198,40 +196,40 @@ class SettingsView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.format_paint_outlined),
               title: Text(L10n.of(context).changeTheme),
-              tileColor: activeRoute.startsWith('/rooms/settings/style')
+              tileColor: activeRoute.startsWith('/settings/style')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
-              onTap: () => context.go('/rooms/settings/style'),
+              onTap: () => context.go('/settings/style'),
             ),
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
               title: Text(L10n.of(context).notifications),
-              tileColor: activeRoute.startsWith('/rooms/settings/notifications')
+              tileColor: activeRoute.startsWith('/settings/notifications')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
-              onTap: () => context.go('/rooms/settings/notifications'),
+              onTap: () => context.go('/settings/notifications'),
             ),
             ListTile(
               leading: const Icon(Icons.devices_outlined),
               title: Text(L10n.of(context).devices),
-              onTap: () => context.go('/rooms/settings/devices'),
-              tileColor: activeRoute.startsWith('/rooms/settings/devices')
+              onTap: () => context.go('/settings/devices'),
+              tileColor: activeRoute.startsWith('/settings/devices')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
             ),
             ListTile(
               leading: const Icon(Icons.forum_outlined),
               title: Text(L10n.of(context).chat),
-              onTap: () => context.go('/rooms/settings/chat'),
-              tileColor: activeRoute.startsWith('/rooms/settings/chat')
+              onTap: () => context.go('/settings/chat'),
+              tileColor: activeRoute.startsWith('/settings/chat')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
             ),
             ListTile(
               leading: const Icon(Icons.shield_outlined),
               title: Text(L10n.of(context).security),
-              onTap: () => context.go('/rooms/settings/security'),
-              tileColor: activeRoute.startsWith('/rooms/settings/security')
+              onTap: () => context.go('/settings/security'),
+              tileColor: activeRoute.startsWith('/settings/security')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
             ),
@@ -243,8 +241,8 @@ class SettingsView extends StatelessWidget {
                   Matrix.of(context).client.userID?.domain ?? 'homeserver',
                 ),
               ),
-              onTap: () => context.go('/rooms/settings/homeserver'),
-              tileColor: activeRoute.startsWith('/rooms/settings/homeserver')
+              onTap: () => context.go('/settings/homeserver'),
+              tileColor: activeRoute.startsWith('/settings/homeserver')
                   ? theme.colorScheme.surfaceContainerHigh
                   : null,
             ),

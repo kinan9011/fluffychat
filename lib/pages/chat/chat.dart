@@ -263,7 +263,7 @@ class ChatController extends State<ChatPageWithRoom>
           room.client.userID!,
         );
         context.go(
-          '/rooms/settings/security/ignorelist',
+          '/settings/security/ignorelist',
           extra: inviteEvent?.senderId,
         );
         return;
@@ -749,7 +749,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void setActiveClient(Client c) => setState(() {
-    Matrix.of(context).setActiveClient(c);
+    Matrix.of(context).setActiveClient(c, resetTabs: false);
   });
 
   Future<void> send() async {
@@ -1724,7 +1724,7 @@ class ChatController extends State<ChatPageWithRoom>
                     !displayChatDetailsColumn
                 ? const SizedBox(height: double.infinity, width: 0)
                 : Container(
-                    width: FluffyThemes.columnWidth,
+                    width: FluffyThemes.detailsPanelWidth,
                     clipBehavior: Clip.hardEdge,
                     decoration: BoxDecoration(
                       border: Border(

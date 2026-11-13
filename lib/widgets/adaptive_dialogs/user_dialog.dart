@@ -208,7 +208,7 @@ class UserDialog extends StatelessWidget {
                             final router = GoRouter.of(context);
                             Navigator.of(context).pop();
                             router.go(
-                              '/rooms/settings/security/ignorelist',
+                              '/settings/security/ignorelist',
                               extra: profile.userId,
                             );
                           },

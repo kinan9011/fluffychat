@@ -59,3 +59,36 @@ class UnreadBubble extends StatelessWidget {
     );
   }
 }
+
+class SpaceUnreadBubble extends StatelessWidget {
+  final Room space;
+  const SpaceUnreadBubble({required this.space, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final childIds = {for (final child in space.spaceChildren) ?child.roomId};
+    final unreadCount = space.client.rooms
+        .where((room) => childIds.contains(room.id) && room.isUnreadOrInvited)
+        .length;
+    if (unreadCount == 0) return const SizedBox.shrink();
+    return Container(
+      constraints: const BoxConstraints(minWidth: 20),
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$unreadCount',
+        style: TextStyle(
+          color: theme.colorScheme.onPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}

@@ -147,7 +147,7 @@ class SettingsChatView extends StatelessWidget {
               ListTile(
                 title: Text(L10n.of(context).customEmojisAndStickers),
                 subtitle: Text(L10n.of(context).customEmojisAndStickersBody),
-                onTap: () => context.go('/rooms/settings/chat/emotes'),
+                onTap: () => context.go('/settings/chat/emotes'),
                 trailing: const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Icon(Icons.chevron_right_outlined),

@@ -51,7 +51,7 @@ extension on FluffyChatTester {
 
     // Reset passphrase
     await tapOn(Key('accounts_and_settings_buttons'));
-    await tapOn('Settings');
+    await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'Settings'));
     await tapOn('Chat backup');
     await tapOn('Reset recovery key');
     await enterText(TextField, passphrase1, index: 0);
