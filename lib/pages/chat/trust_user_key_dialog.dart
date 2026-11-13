@@ -71,6 +71,7 @@ Future<bool> showTrustUserInRoomDialog(BuildContext context, Room room) async {
                     children: [
                       Avatar(
                         name: user.calcDisplayname(),
+                        colorSeed: user.id,
                         mxContent: user.avatarUrl,
                         size: 14,
                       ),

@@ -129,6 +129,7 @@ class ClientChooserButton extends StatelessWidget {
                         Avatar(
                           mxContent: snapshot.data?.avatarUrl,
                           name: displayname,
+                          colorSeed: client.userID,
                           size: 32,
                         ),
                         const SizedBox(width: 12),
@@ -187,6 +188,7 @@ class ClientChooserButton extends StatelessWidget {
           icon: Avatar(
             mxContent: snapshot.data?.avatarUrl,
             name: snapshot.data?.displayName ?? client?.userID?.localpart,
+            colorSeed: client?.userID,
             size: 32,
           ),
         ),

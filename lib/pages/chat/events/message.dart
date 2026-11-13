@@ -356,14 +356,9 @@ class Message extends StatelessWidget {
                                               fontWeight: FontWeight.bold,
                                               color: event.room.isDirectChat
                                                   ? Colors.transparent
-                                                  : (theme.brightness ==
-                                                            Brightness.light
-                                                        ? displayname
-                                                              .colorScheme
-                                                              .primary
-                                                        : displayname
-                                                              .colorScheme
-                                                              .primaryContainer),
+                                                  : event.senderId.nameColor(
+                                                      theme.brightness,
+                                                    ),
                                               fontSize: 11,
                                               shadows: event.room.isDirectChat
                                                   ? null

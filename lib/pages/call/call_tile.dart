@@ -69,6 +69,7 @@ class CallTile extends StatelessWidget {
                         size: 64,
                         mxContent: user.avatarUrl,
                         name: user.calcDisplayname(),
+                        colorSeed: user.id,
                       ),
                     ),
               Positioned.fill(

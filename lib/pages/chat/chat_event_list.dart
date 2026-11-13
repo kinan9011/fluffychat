@@ -63,6 +63,7 @@ class ChatEventList extends StatelessWidget {
               Avatar(
                 mxContent: roomAvatar,
                 name: room.getLocalizedDisplayname(),
+                colorSeed: room.avatarColorSeed,
                 size: Avatar.defaultSize * 2.5,
                 onTap: roomAvatar != null
                     ? () => showDialog(

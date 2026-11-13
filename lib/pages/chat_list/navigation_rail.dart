@@ -103,6 +103,7 @@ class SpacesNavigationRail extends StatelessWidget {
                           icon: Avatar(
                             mxContent: allSpaces[i].avatar,
                             name: displayname,
+                            colorSeed: allSpaces[i].id,
                             //size: 36,
                             shapeBorder: RoundedSuperellipseBorder(
                               side: BorderSide(

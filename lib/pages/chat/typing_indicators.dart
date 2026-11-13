@@ -65,6 +65,7 @@ class TypingIndicators extends StatelessWidget {
                           size: avatarSize,
                           mxContent: typingUsers.first.avatarUrl,
                           name: typingUsers.first.calcDisplayname(),
+                          colorSeed: typingUsers.first.id,
                         ),
                       if (typingUsers.length == 2)
                         Padding(
@@ -77,6 +78,9 @@ class TypingIndicators extends StatelessWidget {
                             name: typingUsers.length == 2
                                 ? typingUsers.last.calcDisplayname()
                                 : '+${typingUsers.length - 1}',
+                            colorSeed: typingUsers.length == 2
+                                ? typingUsers.last.id
+                                : null,
                           ),
                         ),
                     ],

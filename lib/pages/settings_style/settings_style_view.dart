@@ -97,18 +97,18 @@ class SettingsStyleView extends StatelessWidget {
                   ),
                   itemCount: colors.length,
                   itemBuilder: (context, i) {
-                    final color = colors[i];
+                    final color =
+                        colors[i] ?? systemColor ?? AppConfig.chatColor;
                     return Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Tooltip(
-                        message: color == null
-                            ? L10n.of(context).systemTheme
-                            : '#${color.hexValue.toRadixString(16).toUpperCase()}',
+                        message:
+                            '#${color.hexValue.toRadixString(16).toUpperCase()}',
                         child: InkWell(
                           borderRadius: BorderRadius.circular(colorPickerSize),
                           onTap: () => controller.setChatColor(color),
                           child: Material(
-                            color: color ?? systemColor,
+                            color: color,
                             elevation: 6,
                             borderRadius: BorderRadius.circular(
                               colorPickerSize,
@@ -116,7 +116,10 @@ class SettingsStyleView extends StatelessWidget {
                             child: SizedBox(
                               width: colorPickerSize,
                               height: colorPickerSize,
-                              child: controller.currentColor == color
+                              child:
+                                  (controller.currentColor ??
+                                          AppConfig.chatColor) ==
+                                      color
                                   ? Center(
                                       child: Icon(
                                         Icons.check,

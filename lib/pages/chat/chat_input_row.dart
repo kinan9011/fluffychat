@@ -427,6 +427,7 @@ class _ChatAccountPicker extends StatelessWidget {
                         name:
                             snapshot.data?.displayName ??
                             client.userID!.localpart,
+                        colorSeed: client.userID,
                         size: 20,
                       ),
                       title: Text(snapshot.data?.displayName ?? client.userID!),
@@ -441,6 +442,7 @@ class _ChatAccountPicker extends StatelessWidget {
             name:
                 snapshot.data?.displayName ??
                 Matrix.of(context).client.userID!.localpart,
+            colorSeed: Matrix.of(context).client.userID,
             size: 20,
           ),
         ),
