@@ -3,13 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
 
-const goldenSeedColor = Color(0xFF5625BA);
+const goldenSeedColor = AppConfig.chatColor;
 
 /// Light, dark and one RTL variant. Every new component gets these.
 const goldenVariants = <({String suffix, Brightness brightness, bool rtl})>[

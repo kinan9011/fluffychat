@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/app_tokens.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/oklch.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -40,26 +43,85 @@ abstract class FluffyThemes {
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
 
+  /// [seed] is a user-picked colour; only its hue is used, lightness and
+  /// chroma come from [AppTokens]. Without it, deployer config applies:
+  /// `accentHue`, then the legacy `colorSchemeSeedInt` (web config.json, MDM)
+  /// when changed from its default, then hue 268.
+  static double _accentHue(Color? seed) {
+    final picked = seed == null ? null : _hueOf(seed);
+    if (picked != null) return picked;
+    // `value` already includes deployer config (it replaces the default), so
+    // compare with the compiled-in defaults, not with `defaultValue`.
+    final hue = AppSettings.accentHue.value;
+    if (hue != defaultAccentHue.toInt()) return hue.toDouble();
+    final legacy = AppSettings.colorSchemeSeedInt.value;
+    if (legacy == defaultColorSchemeSeed) return hue.toDouble();
+    return _hueOf(Color(legacy)) ?? hue.toDouble();
+  }
+
+  /// Rounded so that a swatch stored as 8-bit sRGB maps back to the exact hue
+  /// (268, not 267.93); greys have no hue.
+  static double? _hueOf(Color color) {
+    final lch = oklchOf(color);
+    return lch.c < 0.03 ? null : lch.h.roundToDouble();
+  }
+
   static ThemeData buildTheme(
     BuildContext context,
     Brightness brightness, [
     Color? seed,
   ]) {
-    final colorScheme = ColorScheme.fromSeed(
-      brightness: brightness,
-      seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),
-      dynamicSchemeVariant: DynamicSchemeVariant.rainbow,
-    );
+    final hue = _accentHue(seed);
+    final isDark = brightness == Brightness.dark;
+    final tokens = isDark
+        ? AppTokens.dark(hue: hue)
+        : AppTokens.light(hue: hue);
+    final colorScheme =
+        ColorScheme.fromSeed(
+          brightness: brightness,
+          seedColor: tokens.acc,
+          dynamicSchemeVariant: DynamicSchemeVariant.rainbow,
+        ).copyWith(
+          primary: tokens.acc,
+          onPrimary: tokens.onacc,
+          primaryContainer: tokens.accs,
+          onPrimaryContainer: tokens.fg,
+          surface: tokens.surf,
+          onSurface: tokens.fg,
+          onSurfaceVariant: tokens.mut,
+          outline: tokens.mut,
+          outlineVariant: tokens.line,
+          error: tokens.red,
+          onError: isDark ? tokens.bg : Colors.white,
+          surfaceContainerLowest: tokens.bg,
+          surfaceContainerLow: tokens.surf,
+          surfaceContainer: tokens.surf2,
+          surfaceContainerHigh: tokens.surf,
+          surfaceContainerHighest: tokens.line,
+        );
     final isColumnMode = FluffyThemes.isColumnMode(context);
-    final dividerColor = brightness == Brightness.dark
-        ? colorScheme.surfaceContainerHighest
-        : colorScheme.surfaceContainer;
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      dividerColor: dividerColor,
+      extensions: [tokens],
+      fontFamily: _fontFamily,
+      textTheme: _textTheme(brightness, tokens),
+      scaffoldBackgroundColor: tokens.bg,
+      dividerColor: tokens.line,
+      bottomSheetTheme: const BottomSheetThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.sheet),
+          ),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+      ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
           iconColor: colorScheme.onSurface,
@@ -74,7 +136,7 @@ abstract class FluffyThemes {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
         ),
-        contentPadding: const EdgeInsets.all(12),
+        contentPadding: const EdgeInsets.all(AppSpacing.l),
       ),
       chipTheme: ChipThemeData(
         showCheckmark: false,
@@ -125,12 +187,71 @@ abstract class FluffyThemes {
           backgroundColor: colorScheme.secondaryContainer,
           foregroundColor: colorScheme.onSecondaryContainer,
           elevation: 0,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           textStyle: const TextStyle(fontSize: 16),
         ),
       ),
     );
   }
+}
+
+const _fontFamily = 'Figtree';
+
+TextTheme _textTheme(Brightness brightness, AppTokens tokens) {
+  final base =
+      (brightness == Brightness.dark
+              ? Typography.material2021().white
+              : Typography.material2021().black)
+          .apply(
+            fontFamily: _fontFamily,
+            bodyColor: tokens.fg,
+            displayColor: tokens.fg,
+          );
+  return base.copyWith(
+    headlineMedium: base.headlineMedium!.copyWith(
+      fontSize: 26,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.52,
+    ),
+    headlineSmall: base.headlineSmall!.copyWith(
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+    ),
+    titleLarge: base.titleLarge!.copyWith(
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+    ),
+    titleMedium: base.titleMedium!.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+    bodyLarge: base.bodyLarge!.copyWith(
+      fontSize: 15.5,
+      fontWeight: FontWeight.w400,
+      height: 1.35,
+    ),
+    bodyMedium: base.bodyMedium!.copyWith(
+      fontSize: 14.5,
+      fontWeight: FontWeight.w400,
+    ),
+    bodySmall: base.bodySmall!.copyWith(
+      fontSize: 12.5,
+      fontWeight: FontWeight.w400,
+    ),
+    labelLarge: base.labelLarge!.copyWith(
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+    ),
+    labelMedium: base.labelMedium!.copyWith(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.48,
+    ),
+    labelSmall: base.labelSmall!.copyWith(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+    ),
+  );
 }
 
 extension on Brightness {

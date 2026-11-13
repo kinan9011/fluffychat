@@ -72,6 +72,7 @@ class SettingsView extends StatelessWidget {
                         Avatar(
                           mxContent: avatar,
                           name: displayname,
+                          colorSeed: mxid,
                           size: Avatar.defaultSize * 2.5,
                           animated: true,
                           onTap: avatar != null

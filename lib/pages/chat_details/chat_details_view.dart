@@ -124,6 +124,7 @@ class ChatDetailsView extends StatelessWidget {
                                 child: Avatar(
                                   mxContent: room.avatar,
                                   name: displayname,
+                                  colorSeed: room.avatarColorSeed,
                                   size: Avatar.defaultSize * 2.5,
                                   animated: true,
                                   onTap: roomAvatar != null

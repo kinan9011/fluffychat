@@ -157,6 +157,7 @@ class PollWidget extends StatelessWidget {
                                       name:
                                           user?.calcDisplayname() ??
                                           userId.localpart,
+                                      colorSeed: userId,
                                       size: 12,
                                     ),
                                   );

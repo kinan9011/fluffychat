@@ -179,6 +179,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             Avatar(
               mxContent: user?.avatarUrl,
               name: displayName,
+              colorSeed: user?.id,
               size: Avatar.defaultSize * 2,
             ),
             const SizedBox(height: 16),

@@ -552,6 +552,7 @@ class ChatListController extends State<ChatList>
                   mxContent: space.avatar,
                   size: Avatar.defaultSize / 2,
                   name: space.getLocalizedDisplayname(),
+                  colorSeed: space.id,
                 ),
                 const SizedBox(width: 12),
                 Text(

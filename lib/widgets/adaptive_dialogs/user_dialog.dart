@@ -79,6 +79,7 @@ class UserDialog extends StatelessWidget {
                   Avatar(
                     mxContent: avatar,
                     name: displayname,
+                    colorSeed: profile.userId,
                     size: Avatar.defaultSize * 1.5,
                     animated: true,
                     onTap: avatar != null

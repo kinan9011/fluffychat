@@ -192,7 +192,7 @@ class SettingsSecurityView extends StatelessWidget {
                       leading: const Icon(Icons.verified_user_outlined),
                       subtitle: SelectableText(
                         publicMasterKey.beautified,
-                        style: const TextStyle(fontFamily: 'RobotoMono'),
+                        style: const TextStyle(fontFamily: 'JetBrainsMono'),
                       ),
                     ),
                   ListTile(
@@ -200,7 +200,7 @@ class SettingsSecurityView extends StatelessWidget {
                     leading: const Icon(Icons.mobile_friendly_outlined),
                     subtitle: SelectableText(
                       Matrix.of(context).client.fingerprintKey.beautified,
-                      style: const TextStyle(fontFamily: 'RobotoMono'),
+                      style: const TextStyle(fontFamily: 'JetBrainsMono'),
                     ),
                   ),
                   if (capabilities?.mChangePassword?.enabled != false ||

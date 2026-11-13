@@ -147,6 +147,7 @@ class ChatListItem extends StatelessWidget {
                                   )
                                 : null,
                             mxContent: room.avatar,
+                            colorSeed: room.avatarColorSeed,
                             size: space != null
                                 ? Avatar.defaultSize * 0.75
                                 : Avatar.defaultSize,

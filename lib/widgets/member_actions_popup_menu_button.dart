@@ -51,7 +51,12 @@ Future<void> showMemberActionsPopupMenu({
         child: Row(
           spacing: 12.0,
           children: [
-            Avatar(name: displayname, size: 30, mxContent: user.avatarUrl),
+            Avatar(
+              name: displayname,
+              size: 30,
+              mxContent: user.avatarUrl,
+              colorSeed: user.id,
+            ),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 200),
               child: Text(

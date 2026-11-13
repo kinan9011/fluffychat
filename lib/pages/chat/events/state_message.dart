@@ -66,6 +66,7 @@ class StateMessage extends StatelessWidget {
                                     name: event.senderFromMemoryOrFallback
                                         .calcDisplayname(),
                                     size: 14,
+                                    colorSeed: event.senderId,
                                     mxContent: event
                                         .senderFromMemoryOrFallback
                                         .avatarUrl,

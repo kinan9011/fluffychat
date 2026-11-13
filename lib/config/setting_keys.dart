@@ -15,6 +15,8 @@ import 'package:matrix/matrix.dart' show ShareKeysWith;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const defaultColorSchemeSeed = 0xFF5625BA;
+
 enum AppSettings<T> {
   textMessageMaxLength<int>('textMessageMaxLength', 16384),
 
@@ -62,7 +64,12 @@ enum AppSettings<T> {
   applicationName<String>('chat.fluffy.application_name', 'FluffyChat'),
   defaultHomeserver<String>('chat.fluffy.default_homeserver', 'matrix.org'),
   // colorSchemeSeed stored as ARGB int
-  colorSchemeSeedInt<int>('chat.fluffy.color_scheme_seed', 0xFF5625BA),
+  colorSchemeSeedInt<int>(
+    'chat.fluffy.color_scheme_seed',
+    defaultColorSchemeSeed,
+  ),
+  accentHue<int>('chat.fluffy.accent_hue', 268),
+  reduceTransparency<bool>('chat.fluffy.reduce_transparency', false),
   emojiSuggestionLocale<String>('emoji_suggestion_locale', ''),
   enableSoftLogout<bool>('chat.fluffy.enable_soft_logout', true),
   enableMatrixNativeOIDC<bool>('chat.fluffy.enable_matrix_native_oidc', true),
@@ -229,6 +236,8 @@ const webAllowedSettings = <AppSettings<Object?>>{
   AppSettings.presetHomeserver,
   AppSettings.welcomeText,
   AppSettings.colorSchemeSeedInt,
+  AppSettings.accentHue,
+  AppSettings.reduceTransparency,
   AppSettings.enableMatrixNativeOIDC,
   AppSettings.enableSoftLogout,
   AppSettings.checkForUpdates,

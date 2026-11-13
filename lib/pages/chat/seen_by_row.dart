@@ -64,6 +64,7 @@ class SeenByRow extends StatelessWidget {
                       (user) => Avatar(
                         mxContent: user.avatarUrl,
                         name: user.calcDisplayname(),
+                        colorSeed: user.id,
                         size: 16,
                       ),
                     ),

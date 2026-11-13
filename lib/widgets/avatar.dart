@@ -25,6 +25,10 @@ class Avatar extends StatelessWidget {
   final Color? textColor;
   final bool animated;
 
+  /// Matrix ID the fallback colour is derived from. Defaults to
+  /// [presenceUserId], then to [name] (which changes when someone renames).
+  final String? colorSeed;
+
   const Avatar({
     this.mxContent,
     this.name,
@@ -39,6 +43,7 @@ class Avatar extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.animated = false,
+    this.colorSeed,
     super.key,
   });
 
@@ -55,6 +60,8 @@ class Avatar extends StatelessWidget {
     final theme = Theme.of(context);
 
     final fallbackLetters = _calcFallbackLetters();
+    final avatarColor =
+        (colorSeed ?? this.presenceUserId ?? name ?? '').avatarColor;
 
     final noPic =
         mxContent == null ||
@@ -93,19 +100,15 @@ class Avatar extends StatelessWidget {
               placeholder: (_) => noPic
                   ? Container(
                       decoration: BoxDecoration(
-                        color:
-                            backgroundColor ??
-                            fallbackLetters.colorScheme.primaryContainer,
+                        color: backgroundColor ?? avatarColor,
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         fallbackLetters,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'RobotoMono',
-                          color:
-                              textColor ??
-                              fallbackLetters.colorScheme.onPrimaryContainer,
+                          fontFamily: 'JetBrainsMono',
+                          color: textColor ?? Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: (size / 2.5).roundToDouble(),
                         ),
@@ -171,4 +174,9 @@ class Avatar extends StatelessWidget {
       child: GestureDetector(onTap: onTap, child: container),
     );
   }
+}
+
+extension RoomAvatarColorSeed on Room {
+  /// A DM looks like its partner everywhere, so it takes the partner's colour.
+  String get avatarColorSeed => directChatMatrixID ?? id;
 }

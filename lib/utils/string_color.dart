@@ -3,23 +3,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:fluffychat/utils/oklch.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension StringColor on String {
-  static final _colorSchemeCache = <String, ColorScheme>{};
+  static const _maxHashedLength = 1024;
 
-  ColorScheme get colorScheme =>
-      _colorSchemeCache[this] ??= ColorScheme.fromSeed(
-        seedColor: _getColorLight(0.3),
-        dynamicSchemeVariant: DynamicSchemeVariant.rainbow,
-      );
-
-  Color _getColorLight(double light) {
-    var number = 0.0;
-    for (var i = 0; i < length; i++) {
-      number += codeUnitAt(i);
+  /// Same value on every platform: integer-only rolling hash (djb2 with a
+  /// prime modulus keeps every product below 2^53, so web matches the VM) over
+  /// the UTF-8 bytes of at most [_maxHashedLength] characters of untrusted
+  /// input.
+  double get colorHue {
+    var hash = 5381;
+    for (final byte in utf8.encode(
+      substring(0, math.min(length, _maxHashedLength)),
+    )) {
+      hash = (hash * 33 + byte) % 4294967291;
     }
-    number = (number % 12) * 25.5;
-    return HSLColor.fromAHSL(0.75, number, 1, light).toColor();
+    return (hash % 360).toDouble();
   }
+
+  Color get avatarColor => oklchColor(0.62, 0.12, colorHue);
+
+  Color nameColor(Brightness brightness) =>
+      oklchColor(brightness == Brightness.dark ? 0.76 : 0.52, 0.14, colorHue);
 }
