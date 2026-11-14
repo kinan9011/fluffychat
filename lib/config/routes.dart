@@ -48,6 +48,8 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
+final _matrixUriId = RegExp(r'^[^/?#%\\\s\x00-\x1f\x7f]{1,255}$');
+
 abstract class AppRoutes {
   static bool _matrixIsLoggedIn(BuildContext context) =>
       Matrix.of(context).widget.clients.any((client) => client.isLogged());
@@ -86,16 +88,25 @@ abstract class AppRoutes {
     if (state.uri.scheme == 'matrix' && state.uri.pathSegments.length >= 2) {
       final type = state.uri.pathSegments.first;
       final id = state.uri.pathSegments[1];
+      final isRoomOrUser = type == 'r' || type == 'u';
+      if ({'roomid', 'r', 'u'}.contains(type) &&
+          (!_matrixUriId.hasMatch(id) || (isRoomOrUser && !id.contains(':')))) {
+        Logs().w('Ignored malformed matrix: link');
+        return '/rooms';
+      }
       switch (type) {
         case 'roomid':
-          final roomId = '!$id';
-          return '/rooms/$roomId';
+          return '/${Uri(pathSegments: ['rooms', '!$id'])}';
         case 'r':
-          final alias = '#$id';
-          return '/rooms/newprivatechat#$alias';
+          return Uri(
+            path: '/rooms/newprivatechat',
+            fragment: '#$id',
+          ).toString();
         case 'u':
-          final userId = '@$id';
-          return '/rooms/newprivatechat#$userId';
+          return Uri(
+            path: '/rooms/newprivatechat',
+            fragment: '@$id',
+          ).toString();
       }
     }
 

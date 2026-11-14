@@ -6,12 +6,12 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/intro/flows/restore_backup_flow.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class IntroPage extends StatelessWidget {
   final bool isLoading, hasPresetHomeserver;
@@ -63,7 +63,7 @@ class IntroPage extends StatelessWidget {
                 ),
               ),
               PopupMenuItem(
-                onTap: () => launchUrlString(AppSettings.privacyPolicy.value),
+                onTap: () => launchWebUrl(AppSettings.privacyPolicy.value),
                 child: Row(
                   mainAxisSize: .min,
                   spacing: 12,

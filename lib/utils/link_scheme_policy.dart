@@ -26,12 +26,32 @@ const _blockedSchemes = {
   'res',
   'ie',
   'microsoft-edge',
+  'itms-services',
+  'hcp',
+  'mk',
+  'mhtml',
+  'jnlp',
 };
+
+const _mailtoQueryKeys = {'subject', 'body', 'cc', 'bcc', 'to'};
+
+bool _isPlainMailto(Uri uri) {
+  try {
+    return uri.queryParametersAll.keys.every(
+      (k) => _mailtoQueryKeys.contains(k.toLowerCase()),
+    );
+  } catch (_) {
+    return false;
+  }
+}
 
 LinkSchemeAction linkSchemeAction(Uri uri) {
   final scheme = uri.scheme.toLowerCase();
   if (scheme == 'http' || scheme == 'https') return LinkSchemeAction.web;
   if (scheme == 'geo') return LinkSchemeAction.geo;
+  if (scheme == 'mailto' && !_isPlainMailto(uri)) {
+    return LinkSchemeAction.confirm;
+  }
   if (_launchSchemes.contains(scheme)) return LinkSchemeAction.launch;
   // A single letter is a Windows drive (C:\x.exe), never a real URL scheme.
   if (scheme.length <= 1 ||

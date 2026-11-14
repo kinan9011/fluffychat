@@ -9,7 +9,9 @@ import 'dart:math';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,84 +24,157 @@ const iosOptions = IOSOptions(
   accessibility: .first_unlock,
 );
 
-bool _unencryptedThisSession = false;
+/// The system key store failed for a database that already exists. The key
+/// and the database must stay untouched until the user decides what to do.
+class DatabaseKeyUnavailableException implements Exception {
+  final String clientName;
+  final Object error;
 
-/// Also true when persisting the flag failed, so the notice is never lost.
-bool get isDatabaseUnencrypted =>
-    _unencryptedThisSession || AppSettings.databaseUnencrypted.value;
+  const DatabaseKeyUnavailableException(this.clientName, this.error);
+
+  @override
+  String toString() => 'DatabaseKeyUnavailableException';
+}
+
+@visibleForTesting
+final unencryptedClientsThisSession = <String>{};
+
+/// Also true when persisting the state failed, so the notice is never lost.
+bool get isDatabaseUnencrypted {
+  if (unencryptedClientsThisSession.isNotEmpty) return true;
+  final persisted = AppSettings.databaseUnencryptedClients.value;
+  if (persisted.isEmpty) return false;
+  try {
+    final current =
+        AppSettings.store.getStringList(ClientManager.clientNamespace) ?? [];
+    return persisted.any(current.contains);
+  } catch (_) {
+    return false;
+  }
+}
 
 typedef MarkDatabaseEncryption =
-    Future<void> Function({required bool isEncrypted});
+    Future<void> Function(String clientName, {required bool isEncrypted});
 
-Future<String?> getDatabaseCipher({
+/// The web database is IndexedDB, which this app cannot encrypt.
+void markWebDatabaseUnencrypted(String clientName) =>
+    unencryptedClientsThisSession.add(clientName);
+
+Future<void> deleteDatabaseKey() async {
+  try {
+    await createSecureStorage(
+      iOptions: iosOptions,
+    ).delete(key: _passwordStorageKey, iOptions: iosOptions);
+  } catch (e, s) {
+    Logs().w('Unable to delete database key', e, s);
+  }
+}
+
+Future<DatabaseFileState> _stateOrEncrypted(
+  Future<DatabaseFileState> Function() databaseState,
+) async {
+  try {
+    return await databaseState();
+  } catch (e, s) {
+    Logs().w('Unable to check the existing database', e, s);
+    return DatabaseFileState.encrypted;
+  }
+}
+
+/// Never deletes the key or the database. If the key cannot be read, a
+/// plaintext or missing database is opened unencrypted as before; an
+/// encrypted database that cannot be unlocked throws
+/// [DatabaseKeyUnavailableException] so that the user decides.
+Future<String?> getDatabaseCipher(
+  String clientName, {
+  required Future<DatabaseFileState> Function() databaseState,
   @visibleForTesting
   MarkDatabaseEncryption markEncryption = markDatabaseEncryption,
 }) async {
   String? password;
 
   try {
-    password = await FlutterSecureStorage(
+    final storage = createSecureStorage(iOptions: iosOptions);
+    password = await storage.read(
+      key: _passwordStorageKey,
       iOptions: iosOptions,
-    ).read(key: _passwordStorageKey, iOptions: iosOptions);
+    );
     if (password != null) {
-      await _markEncryption(markEncryption, isEncrypted: true);
+      await _markEncryption(markEncryption, clientName, isEncrypted: true);
       return password;
     }
 
     if (PlatformInfos.isIOS) {
-      final legacyPassword = await FlutterSecureStorage().read(
-        key: _passwordStorageKey,
-      );
+      final legacyStorage = createSecureStorage();
+      final legacyPassword = await legacyStorage.read(key: _passwordStorageKey);
       if (legacyPassword != null) {
         Logs().i('Migrate database key location on iOS...');
-        await FlutterSecureStorage().delete(key: _passwordStorageKey);
-        await FlutterSecureStorage(iOptions: iosOptions).write(
+        await legacyStorage.delete(key: _passwordStorageKey);
+        await storage.write(
           key: _passwordStorageKey,
           value: legacyPassword,
           iOptions: iosOptions,
         );
-        await _markEncryption(markEncryption, isEncrypted: true);
+        await _markEncryption(markEncryption, clientName, isEncrypted: true);
         return legacyPassword;
       }
+    }
+
+    final state = await _stateOrEncrypted(databaseState);
+    if (state == DatabaseFileState.encrypted) {
+      throw DatabaseKeyUnavailableException(clientName, 'missing key');
     }
 
     final rng = Random.secure();
     final list = Uint8List(32);
     list.setAll(0, Iterable.generate(list.length, (i) => rng.nextInt(256)));
     final newPassword = base64UrlEncode(list);
-    await FlutterSecureStorage(
+    await storage.write(
+      key: _passwordStorageKey,
+      value: newPassword,
       iOptions: iosOptions,
-    ).write(key: _passwordStorageKey, value: newPassword, iOptions: iosOptions);
+    );
     // workaround for if we just wrote to the key and it still doesn't exist
-    password = await FlutterSecureStorage(
+    password = await storage.read(
+      key: _passwordStorageKey,
       iOptions: iosOptions,
-    ).read(key: _passwordStorageKey, iOptions: iosOptions);
+    );
     if (password == null) throw MissingPluginException();
-    await _markEncryption(markEncryption, isEncrypted: true);
+    await _markEncryption(markEncryption, clientName, isEncrypted: true);
     return password;
   } on MissingPluginException catch (e) {
-    FlutterSecureStorage(
+    createSecureStorage(
       iOptions: iosOptions,
     ).delete(key: _passwordStorageKey, iOptions: iosOptions).catchError((_) {});
     Logs().w('Database encryption is not supported on this platform', e);
-    await _markEncryption(markEncryption, isEncrypted: false);
+    await _markEncryption(markEncryption, clientName, isEncrypted: false);
     _sendNoEncryptionWarning(e);
+  } on DatabaseKeyUnavailableException {
+    rethrow;
   } catch (e, s) {
-    FlutterSecureStorage(
-      iOptions: iosOptions,
-    ).delete(key: _passwordStorageKey, iOptions: iosOptions).catchError((_) {});
-    Logs().w('Unable to init database encryption', e, s);
-    await _markEncryption(markEncryption, isEncrypted: false);
+    Logs().w('Unable to read database key', e, s);
+    final state = await _stateOrEncrypted(databaseState);
+    if (state == DatabaseFileState.encrypted) {
+      throw DatabaseKeyUnavailableException(clientName, e);
+    }
+    await _markEncryption(markEncryption, clientName, isEncrypted: false);
     _sendNoEncryptionWarning(e);
   }
   return null;
 }
 
-Future<void> markDatabaseEncryption({required bool isEncrypted}) async {
+Future<void> markDatabaseEncryption(
+  String clientName, {
+  required bool isEncrypted,
+}) async {
+  final names = AppSettings.databaseUnencryptedClients.value;
   if (isEncrypted) {
-    if (AppSettings.databaseUnencrypted.value) {
-      await AppSettings.databaseUnencrypted.setItem(false);
+    if (names.contains(clientName)) {
+      await AppSettings.databaseUnencryptedClients.setItem(
+        names.where((name) => name != clientName).toList(),
+      );
     }
+    if (AppSettings.databaseUnencryptedClients.value.isNotEmpty) return;
     if (AppSettings.noEncryptionWarningShown.value) {
       await AppSettings.noEncryptionWarningShown.setItem(false);
     }
@@ -108,20 +183,23 @@ Future<void> markDatabaseEncryption({required bool isEncrypted}) async {
     }
     return;
   }
-  if (AppSettings.databaseUnencrypted.value) return;
-  await AppSettings.databaseUnencrypted.setItem(true);
+  if (names.contains(clientName)) return;
+  await AppSettings.databaseUnencryptedClients.setItem([...names, clientName]);
   await AppSettings.databaseUnencryptedNoticeDismissed.setItem(false);
 }
 
 /// Bookkeeping for the UI must never throw into the key handling above: an
-/// exception there would reach the catch blocks that delete the database key.
+/// exception there would reach the catch blocks that handle the database key.
 Future<void> _markEncryption(
-  MarkDatabaseEncryption mark, {
+  MarkDatabaseEncryption mark,
+  String clientName, {
   required bool isEncrypted,
 }) async {
-  _unencryptedThisSession = !isEncrypted;
+  isEncrypted
+      ? unencryptedClientsThisSession.remove(clientName)
+      : unencryptedClientsThisSession.add(clientName);
   try {
-    await mark(isEncrypted: isEncrypted);
+    await mark(clientName, isEncrypted: isEncrypted);
   } catch (e, s) {
     Logs().e('Unable to store database encryption state', e, s);
   }

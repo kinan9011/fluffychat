@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
@@ -17,7 +18,6 @@ import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/universal_html.dart' as html;
-import 'package:url_launcher/url_launcher.dart';
 
 class ErrorReporter {
   final BuildContext? context;
@@ -101,33 +101,36 @@ class ErrorReporter {
                           .toString(),
                     );
               if (existingIssueUrl != null) {
-                launchUrl(existingIssueUrl);
+                launchWebUrl(existingIssueUrl.toString());
                 return;
               }
-              launchUrl(
-                AppConfig.newIssueUrl.resolveUri(
-                  Uri(
-                    queryParameters: {
-                      'template': 'bug_report.yml',
-                      'title':
-                          '[Error ${stackTrace.hashCode}] ${message ?? error}',
-                      'bug-description': error.toString(),
-                      'stacktrace': stackTrace?.toString(),
-                      'app-version': await PlatformInfos.getVersion(),
-                      'platform-info': kIsWeb
-                          ? html.window.navigator.userAgent
-                          : switch (defaultTargetPlatform) {
-                              TargetPlatform.android => 'Android',
-                              TargetPlatform.fuchsia => 'Other',
-                              TargetPlatform.iOS => 'iOS',
-                              TargetPlatform.linux => 'Linux',
-                              TargetPlatform.macOS => 'macOS (Self-compiled)',
-                              TargetPlatform.windows =>
-                                'Windows (Self-compiled)',
-                            },
-                    },
-                  ),
-                ),
+              launchWebUrl(
+                AppConfig.newIssueUrl
+                    .resolveUri(
+                      Uri(
+                        queryParameters: {
+                          'template': 'bug_report.yml',
+                          'title':
+                              '[Error ${stackTrace.hashCode}] ${message ?? error}',
+                          'bug-description': error.toString(),
+                          'stacktrace': stackTrace?.toString(),
+                          'app-version': await PlatformInfos.getVersion(),
+                          'platform-info': kIsWeb
+                              ? html.window.navigator.userAgent
+                              : switch (defaultTargetPlatform) {
+                                  TargetPlatform.android => 'Android',
+                                  TargetPlatform.fuchsia => 'Other',
+                                  TargetPlatform.iOS => 'iOS',
+                                  TargetPlatform.linux => 'Linux',
+                                  TargetPlatform.macOS =>
+                                    'macOS (Self-compiled)',
+                                  TargetPlatform.windows =>
+                                    'Windows (Self-compiled)',
+                                },
+                        },
+                      ),
+                    )
+                    .toString(),
                 mode: LaunchMode.externalApplication,
               );
             },

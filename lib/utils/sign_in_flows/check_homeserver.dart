@@ -6,6 +6,7 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/sign_in_flows/oidc_login.dart';
@@ -16,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 Future<void> connectToHomeserverFlow(
   PublicHomeserverData homeserverData,
@@ -61,7 +61,7 @@ Future<void> connectToHomeserverFlow(
       await ssoLoginFlow(client, context, signUp, loginFlows);
     } else {
       if (signUp && regLink != null) {
-        await launchUrlString(regLink);
+        await launchWebUrl(regLink);
       }
       if (!context.mounted) return;
       final pathSegments = List.of(

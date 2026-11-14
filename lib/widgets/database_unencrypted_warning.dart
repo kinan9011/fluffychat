@@ -6,11 +6,29 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+@visibleForTesting
+String databaseUnencryptedDescription(
+  L10n l10n, {
+  bool isWeb = kIsWeb,
+  bool? isLinux,
+}) {
+  if (isWeb) return l10n.databaseNotEncryptedWeb;
+  final hint = (isLinux ?? PlatformInfos.isLinux)
+      ? l10n.databaseNotEncryptedKeyringHint
+      : l10n.databaseNotEncryptedRestartHint;
+  return '${l10n.databaseNotEncryptedDescription} $hint';
+}
+
 class DatabaseUnencryptedWarningTile extends StatelessWidget {
-  const DatabaseUnencryptedWarningTile({super.key});
+  @visibleForTesting
+  final bool? isLinux;
+
+  const DatabaseUnencryptedWarningTile({super.key, this.isLinux});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +40,7 @@ class DatabaseUnencryptedWarningTile extends StatelessWidget {
       iconColor: colorScheme.onErrorContainer,
       leading: const Icon(Icons.lock_open_outlined),
       title: Text(l10n.databaseNotEncrypted),
-      subtitle: Text(l10n.databaseNotEncryptedDescription),
+      subtitle: Text(databaseUnencryptedDescription(l10n, isLinux: isLinux)),
     );
   }
 }

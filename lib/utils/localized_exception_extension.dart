@@ -10,6 +10,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/archive_guard.dart';
 import 'package:fluffychat/utils/backup_dump_validator.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
+import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:material_ui/material_ui.dart';
@@ -55,6 +56,9 @@ extension LocalizedExceptionExtension on Object {
       return (this as InvalidBackupException).tooLarge
           ? L10n.of(context).backupFileTooLarge
           : L10n.of(context).backupFileInvalid;
+    }
+    if (this is UnsafeAuthUrlException) {
+      return L10n.of(context).unsafeSignInUrl;
     }
     if (this is OtherPartyCanNotReceiveMessages) {
       return L10n.of(context).otherPartyNotLoggedIn;

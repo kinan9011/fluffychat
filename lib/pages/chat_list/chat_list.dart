@@ -17,6 +17,7 @@ import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/database_quarantine_banner.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/services.dart';
@@ -306,6 +307,7 @@ class ChatListController extends State<ChatList>
         UpdateNotifier.showUpdateDialog(context);
         UpdateNotifier.showUpdateAvailableBanner(context);
         showDatabaseUnencryptedBanner(context);
+        showDatabaseQuarantineBanner(context);
       }
 
       // Workaround for system UI overlay style not applied on app start

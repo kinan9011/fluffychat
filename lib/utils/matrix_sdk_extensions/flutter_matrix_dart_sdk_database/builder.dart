@@ -3,13 +3,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:matrix/encryption.dart' show cacheTypes;
 import 'package:matrix/matrix.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,35 +21,80 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'cipher.dart';
+import 'database_file_state.dart';
+import 'database_open_error.dart';
+import 'database_quarantine.dart';
+import 'database_quarantine_notice.dart';
 
-Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(String clientName) async {
+Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(
+  String clientName, {
+  @visibleForTesting
+  Future<DatabaseApi> Function(String clientName) construct =
+      _constructDatabase,
+  @visibleForTesting
+  Future<void> Function(String clientName) quarantine = _quarantineDatabaseFile,
+  @visibleForTesting
+  Future<void> Function(String clientName) markQuarantined =
+      markDatabaseQuarantined,
+}) async {
   try {
-    return await _constructDatabase(clientName);
+    return await construct(clientName);
+  } on DatabaseKeyUnavailableException {
+    rethrow;
+  } on DatabaseOpenFailedException {
+    rethrow;
   } catch (e, s) {
-    Logs().wtf('Unable to construct database!', e, s);
+    // Deny by default: only a proven corruption moves the file; anything
+    // else (full disk, lock contention, I/O error, wrong key...) leaves it
+    // untouched and goes to the Retry / Reset page.
+    if (classifyDatabaseOpenError(e) != DatabaseOpenFailure.corrupt) {
+      Logs().w('Unable to open the database, leaving it untouched', e, s);
+      throw DatabaseOpenFailedException(clientName, e);
+    }
+    Logs().wtf('The database is damaged!', e, s);
 
     try {
       // Send error notification:
       final l10n = await lookupL10n(PlatformDispatcher.instance.locale);
-      // We expect that the database cannot be open on iOS 2.8.0 due to that
-      // the team ID has changed and te app can no longer access the database
-      // key in the iOS keychain. This should be removed from 2.9.0 on.
       if (!PlatformInfos.isIOS) {
-        ClientManager.sendInitNotification(l10n.initAppError, e.toString());
+        ClientManager.sendInitNotification(
+          l10n.initAppError,
+          e.toString(),
+        ).catchError(
+          (Object e, StackTrace s) =>
+              Logs().e('Unable to send error notification', e, s),
+        );
       }
     } catch (e, s) {
       Logs().e('Unable to send error notification', e, s);
     }
 
-    // Delete database file:
-    if (!kIsWeb) {
-      final dbFile = File(await _getDatabasePath(clientName));
-      if (await dbFile.exists()) await dbFile.delete();
+    try {
+      await quarantine(clientName);
+    } catch (e, s) {
+      Logs().w('Unable to move the damaged database aside', e, s);
+      throw DatabaseOpenFailedException(clientName, e);
+    }
+    try {
+      await markQuarantined(clientName);
+    } catch (e, s) {
+      Logs().w('Unable to store the quarantine notice', e, s);
     }
 
-    // Try again
-    return await _constructDatabase(clientName);
+    try {
+      return await construct(clientName);
+    } on DatabaseKeyUnavailableException {
+      rethrow;
+    } catch (e) {
+      throw DatabaseOpenFailedException(clientName, e);
+    }
   }
+}
+
+/// Not on the web: there the database is IndexedDB, which is left as it is.
+Future<void> _quarantineDatabaseFile(String clientName) async {
+  if (kIsWeb) return;
+  await quarantineDatabase(await _getDatabasePath(clientName));
 }
 
 Future<Directory?> getFileStorageLocation() async {
@@ -76,12 +124,9 @@ Future<Directory?> getFileStorageLocation() async {
 Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
   if (kIsWeb) {
     html.window.navigator.storage?.persist();
+    markWebDatabaseUnencrypted(clientName);
     return await MatrixSdkDatabase.init(clientName);
   }
-
-  final cipher = await getDatabaseCipher();
-
-  final fileStorageLocation = await getFileStorageLocation();
 
   final path = await _getDatabasePath(clientName);
 
@@ -93,6 +138,13 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
 
   // migrate from potential previous SQLite database path to current one
   await _migrateLegacyLocation(path, clientName);
+
+  final cipher = await getDatabaseCipher(
+    clientName,
+    databaseState: () => databaseFileState(File(path)),
+  );
+
+  final fileStorageLocation = await getFileStorageLocation();
 
   // in case we got a cipher, we use the encryption helper
   // to manage SQLite encryption
@@ -110,18 +162,14 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
         helper?.applyPragmaKey(db, ensureIncrementalAutoVacuum: true),
   );
 
-  late final Database database;
-  try {
-    database = await factory.openDatabase(path, options: openDatabaseOptions);
-  } catch (e, s) {
-    Logs().wtf('Unable to open database! Delete file and try again...', e, s);
-    await File(path).delete();
-    database = await openDatabase(path, options: openDatabaseOptions);
-  }
+  final database = await factory.openDatabase(
+    path,
+    options: openDatabaseOptions,
+  );
 
   final secureStorage = cipher == null
       ? null
-      : FlutterSecureStorage(iOptions: iosOptions);
+      : createSecureStorage(iOptions: iosOptions);
 
   return await MatrixSdkDatabase.init(
     clientName,
@@ -137,6 +185,76 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
             delete: (key) => secureStorage.delete(key: key),
           ),
   );
+}
+
+/// What the SDK and the app keep in the secure storage for one account: the
+/// session (tokens, device key pickle), cached cross-signing secrets, the
+/// session backup and the stored recovery key.
+Future<void> _deleteAccountSecrets(String clientName) async {
+  final sdkStorage = createSecureStorage(iOptions: iosOptions);
+  final appStorage = createSecureStorage();
+  final keys = <String>[
+    'client_data_$clientName',
+    for (final type in cacheTypes) 'ssss_cache_${clientName}_$type',
+  ];
+  try {
+    final clientData = await sdkStorage.read(key: 'client_data_$clientName');
+    final userId = clientData == null
+        ? null
+        : (jsonDecode(clientData) as Map)['user_id'];
+    if (userId is String) {
+      await appStorage.delete(key: 'ssss_recovery_key_$userId');
+    }
+  } catch (e, s) {
+    Logs().w('Unable to look up the stored recovery key', e, s);
+  }
+  for (final key in keys) {
+    try {
+      await sdkStorage.delete(key: key);
+    } catch (e, s) {
+      Logs().w('Unable to delete a stored secret', e, s);
+    }
+  }
+  try {
+    await InitWithRestoreExtension.deleteSessionBackup(clientName);
+  } catch (e, s) {
+    Logs().w('Unable to delete the session backup', e, s);
+  }
+}
+
+/// Deletes everything the app stored for its accounts on this device: the
+/// shared database key, every database with its SQLite side files and
+/// quarantined copies, the sessions and cached secrets in the secure storage,
+/// and the decrypted media cache. The app lock settings stay.
+Future<void> resetLocalDatabases(
+  Iterable<String> clientNames, {
+  @visibleForTesting
+  Future<String> Function(String clientName) databasePath = _getDatabasePath,
+  @visibleForTesting
+  Future<Directory?> Function() fileStorage = getFileStorageLocation,
+}) async {
+  await deleteDatabaseKey();
+  for (final clientName in clientNames) {
+    await _deleteAccountSecrets(clientName);
+    try {
+      final path = await databasePath(clientName);
+      for (final suffix in ['', '-wal', '-shm', '-journal']) {
+        final file = File('$path$suffix');
+        if (await file.exists()) await file.delete();
+      }
+      await deleteQuarantinedDatabases(path);
+    } catch (e, s) {
+      Logs().w('Unable to delete local database', e, s);
+    }
+  }
+  try {
+    final cache = await fileStorage();
+    if (cache != null && await cache.exists()) {
+      await cache.delete(recursive: true);
+    }
+  } catch (e, s) {
+    Logs().w('Unable to delete the media cache', e, s);
+  }
 }
 
 Future<String> _getDatabaseDirectory() async {

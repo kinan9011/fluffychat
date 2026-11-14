@@ -222,6 +222,130 @@ void main() {
       expectRejected(bytes, ArchiveGuardError.tooManyEntries);
     });
 
+    test('rejects a directory whose entry count is lower than its records', () {
+      final bytes = zipOf({
+        'a.png': [1],
+        'b.png': [2],
+      });
+      final data = ByteData.sublistView(bytes);
+      final eocd = bytes.length - 22;
+      expect(data.getUint32(eocd, Endian.little), 0x06054b50);
+      data.setUint16(eocd + 8, 1, Endian.little);
+      data.setUint16(eocd + 10, 1, Endian.little);
+      expectRejected(bytes, ArchiveGuardError.invalid);
+    });
+
+    test('rejects a directory size that does not match its records', () {
+      final bytes = zipOf({
+        'a.png': [1],
+        'b.png': [2],
+      });
+      final data = ByteData.sublistView(bytes);
+      final eocd = bytes.length - 22;
+      final size = data.getUint32(eocd + 12, Endian.little);
+      data.setUint32(eocd + 12, size - 1, Endian.little);
+      expectRejected(bytes, ArchiveGuardError.invalid);
+    });
+
+    test('rejects a zip64 end of central directory locator', () {
+      final original = zipOf({
+        'a.png': [1],
+      });
+      final eocd = original.length - 22;
+      final source = ByteData.sublistView(original);
+      final directoryBytes = source.getUint32(eocd + 12, Endian.little);
+      final directoryOffset = source.getUint32(eocd + 16, Endian.little);
+
+      final zip64 = ByteData(76);
+      zip64.setUint32(0, 0x06064b50, Endian.little);
+      zip64.setUint64(4, 44, Endian.little);
+      zip64.setUint16(12, 45, Endian.little);
+      zip64.setUint16(14, 45, Endian.little);
+      zip64.setUint64(24, 1, Endian.little);
+      zip64.setUint64(32, 1, Endian.little);
+      zip64.setUint64(40, directoryBytes, Endian.little);
+      zip64.setUint64(48, directoryOffset, Endian.little);
+      zip64.setUint32(56, 0x07064b50, Endian.little);
+      zip64.setUint64(64, eocd, Endian.little);
+      zip64.setUint32(72, 1, Endian.little);
+
+      final bytes = Uint8List.fromList([
+        ...original.sublist(0, eocd),
+        ...zip64.buffer.asUint8List(),
+        ...original.sublist(eocd),
+      ]);
+      expectRejected(bytes, ArchiveGuardError.invalid);
+    });
+
+    group('checkZipCentralDirectory (the guard alone, before the decoder)', () {
+      void expectInvalid(Uint8List bytes) => expect(
+        () => checkZipCentralDirectory(bytes, ArchiveLimits.emotes),
+        throwsA(
+          isA<ArchiveGuardException>().having(
+            (e) => e.error,
+            'error',
+            ArchiveGuardError.invalid,
+          ),
+        ),
+      );
+
+      Uint8List twoEntries() => zipOf({
+        'a.png': [1],
+        'b.png': [2],
+      });
+
+      test('accepts a normal archive', () {
+        checkZipCentralDirectory(twoEntries(), ArchiveLimits.emotes);
+      });
+
+      test('rejects a count lower than the number of records', () {
+        final bytes = twoEntries();
+        final data = ByteData.sublistView(bytes);
+        final eocd = bytes.length - 22;
+        data.setUint16(eocd + 10, 1, Endian.little);
+        expectInvalid(bytes);
+      });
+
+      test('rejects a directory size that cuts a record', () {
+        final bytes = twoEntries();
+        final data = ByteData.sublistView(bytes);
+        final eocd = bytes.length - 22;
+        final size = data.getUint32(eocd + 12, Endian.little);
+        data.setUint32(eocd + 12, size - 1, Endian.little);
+        expectInvalid(bytes);
+      });
+
+      test('rejects a directory size beyond the end record', () {
+        final bytes = twoEntries();
+        final data = ByteData.sublistView(bytes);
+        final eocd = bytes.length - 22;
+        final size = data.getUint32(eocd + 12, Endian.little);
+        data.setUint32(eocd + 12, size + 4, Endian.little);
+        expectInvalid(bytes);
+      });
+
+      for (final offset in [20, 42]) {
+        test('rejects a zip64 marker at record offset $offset', () {
+          final bytes = twoEntries();
+          final data = ByteData.sublistView(bytes);
+          final eocd = bytes.length - 22;
+          final directory = data.getUint32(eocd + 16, Endian.little);
+          data.setUint32(directory + offset, 0xFFFFFFFF, Endian.little);
+          expectInvalid(bytes);
+        });
+      }
+
+      for (final field in [12, 16]) {
+        test('rejects a zip64 marker in the end record at $field', () {
+          final bytes = twoEntries();
+          final data = ByteData.sublistView(bytes);
+          final eocd = bytes.length - 22;
+          data.setUint32(eocd + field, 0xFFFFFFFF, Endian.little);
+          expectInvalid(bytes);
+        });
+      }
+    });
+
     test('rejects symlink entries', () {
       final bytes = zipOf({'link.png': List.filled(10, 0x41)});
       final data = ByteData.sublistView(bytes);

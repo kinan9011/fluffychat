@@ -11,7 +11,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
 class SessionBackup {
@@ -59,7 +59,7 @@ class SessionBackup {
 extension InitWithRestoreExtension on Client {
   static Future<void> deleteSessionBackup(String clientName) async {
     final storage = PlatformInfos.isMobile || PlatformInfos.isLinux
-        ? const FlutterSecureStorage()
+        ? createSecureStorage()
         : null;
     await storage?.delete(
       key: '${AppSettings.applicationName.value}_session_backup_$clientName',
@@ -70,7 +70,7 @@ extension InitWithRestoreExtension on Client {
     final storageKey =
         '${AppSettings.applicationName.value}_session_backup_$clientName';
     final storage = PlatformInfos.isMobile || PlatformInfos.isLinux
-        ? const FlutterSecureStorage()
+        ? createSecureStorage()
         : null;
 
     try {

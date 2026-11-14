@@ -14,7 +14,7 @@ void main() {
     await expectGoldenVariants(
       tester,
       'database_unencrypted_warning_tile',
-      const DatabaseUnencryptedWarningTile(),
+      const DatabaseUnencryptedWarningTile(isLinux: true),
       size: const Size(400, 160),
     );
   });

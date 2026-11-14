@@ -68,6 +68,84 @@ void main() {
     expect(launched, isEmpty);
   });
 
+  testWidgets('an empty url shows a snackbar instead of throwing', (
+    tester,
+  ) async {
+    final context = await pumpHost(tester);
+    for (final url in ['', '   ']) {
+      await UrlLauncher(context, url).launchUrl();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(
+        find.text(L10n.of(context).cantOpenUri(url)),
+        findsOneWidget,
+        reason: 'url "$url"',
+      );
+      ScaffoldMessenger.of(context).clearSnackBars();
+      await tester.pump();
+    }
+    expect(launched, isEmpty);
+  });
+
+  test('displayUrl escapes invisible and bidi characters', () {
+    expect(displayUrl('foo:bar\u202Ebaz'), 'foo:bar<U+202E>baz');
+    expect(displayUrl('x:a\u200Bb'), 'x:a<U+200B>b');
+    expect(displayUrl('x:a\u0007b'), 'x:a<U+0007>b');
+    expect(displayUrl('https://example.org/a'), 'https://example.org/a');
+  });
+
+  test('displayUrl escapes further invisible and tag characters', () {
+    for (final entry in {
+      '\u2028': '2028',
+      '\u2029': '2029',
+      '\u034F': '034F',
+      '\u115F': '115F',
+      '\u1160': '1160',
+      '\u17B4': '17B4',
+      '\u17B5': '17B5',
+      '\u180B': '180B',
+      '\u180D': '180D',
+      '\u3164': '3164',
+      '\uFE00': 'FE00',
+      '\uFE0F': 'FE0F',
+      '\uFFA0': 'FFA0',
+      '\uFFF9': 'FFF9',
+      '\uFFFB': 'FFFB',
+      '\u{E0041}': 'E0041',
+      '\u{E007F}': 'E007F',
+    }.entries) {
+      expect(
+        displayUrl('x:a${entry.key}b'),
+        'x:a<U+${entry.value.padLeft(4, '0')}>b',
+        reason: entry.value,
+      );
+    }
+  });
+
+  test('displayUrl shows the punycode host that will actually open', () {
+    final shown = displayUrl('https://exa\u202Eelpmaxe.com/p');
+    expect(shown, contains('xn--'));
+    expect(shown, isNot(contains('\u202E')));
+  });
+
+  testWidgets('the confirm dialog shows the punycode url, not the raw one', (
+    tester,
+  ) async {
+    final context = await pumpHost(tester);
+    final future = UrlLauncher(
+      context,
+      'https://exa\u202Eelpmaxe.com',
+      'click',
+    ).launchUrl();
+    await tester.pumpAndSettle();
+    expect(find.textContaining('xn--'), findsOneWidget);
+    expect(find.textContaining('\u202E'), findsNothing);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await future;
+    expect(launched, isEmpty);
+  });
+
   testWidgets('the blocked link snackbar shortens very long urls', (
     tester,
   ) async {

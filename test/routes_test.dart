@@ -201,6 +201,23 @@ void main() {
       );
     });
 
+    routeTest('malformed matrix: links cannot inject a path or query', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      for (final link in [
+        'matrix:roomid/x%2F..%2F..%2Fsettings%2Fsecurity',
+        'matrix:roomid/abc:example.org%3Faction%3Dcall',
+        'matrix:u/alice:example.org%23x',
+        'matrix:r/noserver',
+        'matrix:roomid/${'a' * 300}',
+      ]) {
+        final result = await goTo(tester, link);
+        expect(result, '/rooms', reason: link);
+        expect(result, isNot(contains('action=call')), reason: link);
+      }
+    });
+
     routeTest('content sharing is ignored', (tester) async {
       await pumpApp(tester);
       expect(await goTo(tester, 'content://media/external/1'), '/rooms');

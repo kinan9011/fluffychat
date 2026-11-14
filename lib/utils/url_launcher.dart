@@ -22,6 +22,71 @@ import 'platform_infos.dart';
 
 const _maxSnackBarUrlLength = 200;
 
+const _invisibleRuneRanges = <(int, int)>[
+  (0x0000, 0x001F),
+  (0x007F, 0x009F),
+  (0x00AD, 0x00AD),
+  (0x034F, 0x034F),
+  (0x061C, 0x061C),
+  (0x115F, 0x1160),
+  (0x17B4, 0x17B5),
+  (0x180B, 0x180E),
+  (0x200B, 0x200F),
+  (0x2028, 0x202E),
+  (0x2060, 0x2069),
+  (0x3164, 0x3164),
+  (0xFE00, 0xFE0F),
+  (0xFEFF, 0xFEFF),
+  (0xFFA0, 0xFFA0),
+  (0xFFF9, 0xFFFB),
+  (0xE0000, 0xE007F),
+];
+
+String punycodeHost(String host) {
+  try {
+    return host
+        .split('.')
+        .map((hostPartEncoded) {
+          final hostPart = Uri.decodeComponent(hostPartEncoded);
+          final hostPartPunycode = punycodeEncode(hostPart);
+          return hostPartPunycode != '$hostPart-'
+              ? 'xn--$hostPartPunycode'
+              : hostPart;
+        })
+        .join('.');
+  } catch (_) {
+    return host;
+  }
+}
+
+/// The URL as it is shown to the user before opening it: web hosts are
+/// punycode-encoded like the launched URL, invisible and bidi runes are made
+/// visible.
+@visibleForTesting
+String displayUrl(String url) {
+  final uri = Uri.tryParse(url);
+  final text =
+      uri != null &&
+          linkSchemeAction(uri) == LinkSchemeAction.web &&
+          uri.host.isNotEmpty
+      ? uri.replace(host: punycodeHost(uri.host)).toString()
+      : url;
+  final buffer = StringBuffer();
+  for (final rune in text.runes) {
+    final invisible = _invisibleRuneRanges.any(
+      (r) => rune >= r.$1 && rune <= r.$2,
+    );
+    if (invisible) {
+      buffer.write(
+        '<U+${rune.toRadixString(16).toUpperCase().padLeft(4, '0')}>',
+      );
+      continue;
+    }
+    buffer.writeCharCode(rune);
+  }
+  return buffer.toString();
+}
+
 String _shortened(String url) => url.length <= _maxSnackBarUrlLength
     ? url
     : '${url.substring(0, _maxSnackBarUrlLength)}…';
@@ -41,6 +106,12 @@ class UrlLauncher {
   Future<void> launchUrl() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    if (url == null || url!.trim().isEmpty) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.cantOpenUri(displayUrl(url ?? '')))),
+      );
+      return;
+    }
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -51,7 +122,7 @@ class UrlLauncher {
     if (uri == null) {
       // we can't open this thing
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(l10n.cantOpenUri(url!))),
+        SnackBar(content: Text(l10n.cantOpenUri(displayUrl(url!)))),
       );
       return;
     }
@@ -60,7 +131,9 @@ class UrlLauncher {
 
     if (action == LinkSchemeAction.block) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(l10n.linkSchemeBlocked(_shortened(url!)))),
+        SnackBar(
+          content: Text(l10n.linkSchemeBlocked(_shortened(displayUrl(url!)))),
+        ),
       );
       return;
     }
@@ -69,7 +142,7 @@ class UrlLauncher {
       final consent = await showOkCancelAlertDialog(
         context: context,
         title: l10n.openLinkInOtherAppTitle,
-        message: l10n.openLinkInOtherAppMessage(url!),
+        message: l10n.openLinkInOtherAppMessage(displayUrl(url!)),
         okLabel: l10n.open,
         cancelLabel: l10n.cancel,
       );
@@ -84,7 +157,7 @@ class UrlLauncher {
       final consent = await showOkCancelAlertDialog(
         context: context,
         title: l10n.openLinkInBrowser,
-        message: url,
+        message: displayUrl(url!),
         okLabel: l10n.open,
         cancelLabel: l10n.cancel,
       );
@@ -131,23 +204,14 @@ class UrlLauncher {
     }
     if (uri.host.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(l10n.cantOpenUri(url!))),
+        SnackBar(content: Text(l10n.cantOpenUri(displayUrl(url!)))),
       );
       return;
     }
     // okay, we have either an http or an https URI.
     // As some platforms have issues with opening unicode URLs, we are going to help
     // them out by punycode-encoding them for them ourself.
-    final newHost = uri.host
-        .split('.')
-        .map((hostPartEncoded) {
-          final hostPart = Uri.decodeComponent(hostPartEncoded);
-          final hostPartPunycode = punycodeEncode(hostPart);
-          return hostPartPunycode != '$hostPart-'
-              ? 'xn--$hostPartPunycode'
-              : hostPart;
-        })
-        .join('.');
+    final newHost = punycodeHost(uri.host);
     // Force LaunchMode.externalApplication, otherwise url_launcher will default
     // to opening links in a webview on mobile platforms.
     launchUrlString(
