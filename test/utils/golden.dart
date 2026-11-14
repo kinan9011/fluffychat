@@ -3,24 +3,41 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const goldenSeedColor = AppConfig.chatColor;
+/// Light, dark and one RTL variant (Arabic locale). Every new component gets
+/// these. The test font set has no Arabic glyphs, so Arabic text renders as
+/// boxes: layout direction and l10n strings are covered, glyph shapes are not.
+const goldenVariants =
+    <({String suffix, Brightness brightness, bool rtl, Locale locale})>[
+      (
+        suffix: 'light',
+        brightness: Brightness.light,
+        rtl: false,
+        locale: Locale('en'),
+      ),
+      (
+        suffix: 'dark',
+        brightness: Brightness.dark,
+        rtl: false,
+        locale: Locale('en'),
+      ),
+      (
+        suffix: 'rtl',
+        brightness: Brightness.light,
+        rtl: true,
+        locale: Locale('ar'),
+      ),
+    ];
 
-/// Light, dark and one RTL variant. Every new component gets these.
-const goldenVariants = <({String suffix, Brightness brightness, bool rtl})>[
-  (suffix: 'light', brightness: Brightness.light, rtl: false),
-  (suffix: 'dark', brightness: Brightness.dark, rtl: false),
-  (suffix: 'rtl', brightness: Brightness.light, rtl: true),
-];
-
-/// Pumps [child] inside the app theme and localizations, without needing
-/// network, shared preferences or a Matrix client.
+/// Pumps [child] inside the app theme (default accent hue) and localizations,
+/// without needing network or a Matrix client.
 Future<void> pumpGoldenWidget(
   WidgetTester tester,
   Widget child, {
@@ -29,6 +46,9 @@ Future<void> pumpGoldenWidget(
   Locale locale = const Locale('en'),
   Size size = const Size(400, 300),
 }) async {
+  SharedPreferences.setMockInitialValues({});
+  await AppSettings.init(loadWebConfigFile: false);
+  await AppSettings.store.remove(AppSettings.accentHue.key);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -38,7 +58,7 @@ Future<void> pumpGoldenWidget(
       builder: (context) => MaterialApp(
         debugShowCheckedModeBanner: false,
         locale: locale,
-        theme: FluffyThemes.buildTheme(context, brightness, goldenSeedColor),
+        theme: FluffyThemes.buildTheme(context, brightness),
         localizationsDelegates: [
           ...L10n.localizationsDelegates,
           ...GlobalMaterialLocalizations.delegates,
@@ -71,6 +91,7 @@ Future<void> expectGoldenVariants(
       child,
       brightness: variant.brightness,
       rtl: variant.rtl,
+      locale: variant.locale,
       size: size,
     );
     await expectLater(

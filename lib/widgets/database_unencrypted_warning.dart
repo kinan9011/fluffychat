@@ -7,6 +7,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/shell_banner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -45,43 +46,37 @@ class DatabaseUnencryptedWarningTile extends StatelessWidget {
   }
 }
 
-void showDatabaseUnencryptedBanner(BuildContext context) {
-  if (!isDatabaseUnencrypted ||
-      AppSettings.databaseUnencryptedNoticeDismissed.value) {
-    return;
-  }
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
-  final router = GoRouter.of(context);
-  final l10n = L10n.of(context);
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  scaffoldMessenger.showMaterialBanner(
-    MaterialBanner(
-      backgroundColor: colorScheme.errorContainer,
-      contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onErrorContainer,
-      ),
-      leading: Icon(
-        Icons.lock_open_outlined,
-        color: colorScheme.onErrorContainer,
-      ),
-      content: Text(l10n.databaseNotEncrypted),
-      actions: [
+class DatabaseUnencryptedBanner extends StatelessWidget {
+  final Widget child;
+
+  const DatabaseUnencryptedBanner({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    return ShellBanner(
+      isVisible: () =>
+          isDatabaseUnencrypted &&
+          !AppSettings.databaseUnencryptedNoticeDismissed.value,
+      icon: Icons.lock_open_outlined,
+      message: l10n.databaseNotEncrypted,
+      actions: (hide) => [
         TextButton(
           onPressed: () {
             AppSettings.databaseUnencryptedNoticeDismissed.setItem(true);
-            scaffoldMessenger.hideCurrentMaterialBanner();
+            hide();
           },
           child: Text(l10n.close),
         ),
         TextButton(
           onPressed: () {
-            scaffoldMessenger.hideCurrentMaterialBanner();
-            router.go('/settings/security');
+            hide();
+            GoRouter.of(context).go('/settings/security');
           },
           child: Text(l10n.security),
         ),
       ],
-    ),
-  );
+      child: child,
+    );
+  }
 }

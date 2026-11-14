@@ -22,7 +22,7 @@ Future<void> restoreBackupFlow(BuildContext context) async {
     future: () => importBackupFile(file, (dump) async {
       final client = await matrix.getLoginClient();
       final imported = await client.database.importDump(dump);
-      if (!imported) throw const InvalidBackupException();
+      if (!imported) throw const BackupRestoreFailedException();
       await client.init(
         waitForFirstSync: false,
         waitUntilLoadCompletedLoaded: false,

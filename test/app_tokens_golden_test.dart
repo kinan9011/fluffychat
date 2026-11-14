@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
@@ -82,6 +83,8 @@ class _TokenSheet extends StatelessWidget {
                     Text('Screen title', style: text.titleLarge),
                     Text('Anna Becker', style: text.titleMedium),
                     Text('Message body text 15.5', style: text.bodyLarge),
+                    Text(L10n.of(context).chats, style: text.bodyLarge),
+                    Text('مرحبًا، هذه رسالة تجريبية', style: text.bodyLarge),
                     Text(
                       '@anna:example.org',
                       style: const TextStyle(
@@ -136,7 +139,7 @@ void main() {
       tester,
       'app_tokens_sheet',
       const _TokenSheet(),
-      size: const Size(400, 420),
+      size: const Size(400, 480),
     );
   });
 }

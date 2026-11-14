@@ -46,8 +46,9 @@ void main() {
   });
 
   group('colours', () {
-    test('avatar colour is oklch(0.62 0.12 hue)', () {
-      expect('@alice:example.org'.avatarColor, oklchColor(0.62, 0.12, 191));
+    test('avatar colour is oklch(0.55 0.12 hue)', () {
+      expect('@alice:example.org'.avatarColor, oklchColor(0.55, 0.12, 191));
+      expect(avatarColorForHue(191), oklchColor(0.55, 0.12, 191));
     });
 
     test('name colour uses L 0.52 (light) and 0.76 (dark) at chroma 0.14', () {
@@ -61,12 +62,11 @@ void main() {
       );
     });
 
-    test('white avatar initials stay legible as large text (>= 3:1)', () {
+    test('white avatar initials stay legible as body text (>= 4.5:1)', () {
       for (var hue = 0; hue < 360; hue++) {
-        final avatar = oklchColor(0.62, 0.12, hue.toDouble());
         expect(
-          wcagContrast(Colors.white, avatar),
-          greaterThanOrEqualTo(3),
+          wcagContrast(Colors.white, avatarColorForHue(hue.toDouble())),
+          greaterThanOrEqualTo(4.5),
           reason: 'hue $hue',
         );
       }

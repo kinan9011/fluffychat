@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/utils/oklch.dart';
+import 'package:fluffychat/utils/string_color.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -44,12 +45,12 @@ void main() {
       expectColor(t.warn, 0xFFBE7100, 'warn');
       expectColor(t.warnS, 0xFFFFECCD, 'warnS');
       expectColor(t.red, 0xFFD03739, 'red');
-      expectColor(t.mbad, 0xFF9C9EA5, 'mbad');
+      expectColor(t.mbad, 0xFF72747B, 'mbad');
       expectColor(t.chip, 0x802F3C4A, 'chip');
       expectColor(t.shadow, 0x17141432, 'shadow');
       expectColor(t.outS, 0xFF4463C7, 'outS');
       expectColor(t.outFg, 0xFFFFFFFF, 'outFg');
-      expectColor(t.outMut, 0xC7FFFFFF, 'outMut');
+      expectColor(t.outMut, 0xE6FFFFFF, 'outMut');
       expectColor(t.out, 0xFFDAE4FF, 'out');
       expectColor(t.inBubble, 0xFFFFFFFF, 'in');
       expectGradient(t.wallG, [0xFFBBECEE, 0xFFC3DEFB, 0xFFDACCF7]);
@@ -78,7 +79,7 @@ void main() {
       expectColor(t.shadow, 0x66000000, 'shadow');
       expectColor(t.outS, 0xFF3F5BB8, 'outS');
       expectColor(t.outFg, 0xFFFFFFFF, 'outFg');
-      expectColor(t.outMut, 0xB8FFFFFF, 'outMut');
+      expectColor(t.outMut, 0xE0FFFFFF, 'outMut');
       expectColor(t.out, 0xFF293B74, 'out');
       expectColor(t.inBubble, 0xFF1F212A, 'in');
       expectGradient(t.wallG, [0xFF023538, 0xFF0A2036, 0xFF1F1332]);
@@ -225,47 +226,85 @@ void main() {
     }
   });
 
-  group('DESIGN values below 4.5:1 (informational floors, see W01-IMPL)', () {
-    // These are spec values, not derivation defects. The floors pin today's
-    // measured ratio so a regression is visible; raise them when the design
-    // owner changes the token.
+  group('DESIGN 13 pairs fixed in W02A (decision log 13)', () {
+    for (final dark in [false, true]) {
+      test('${dark ? 'dark' : 'light'}: white on mbad is >= 4.5:1', () {
+        final t = dark ? AppTokens.dark() : AppTokens.light();
+        expect(wcagContrast(Colors.white, t.mbad), greaterThanOrEqualTo(4.5));
+      });
+
+      test(
+        '${dark ? 'dark' : 'light'}: outMut on outS is >= 4.5:1 for every hue',
+        () {
+          for (var hue = 0; hue < 360; hue++) {
+            final t = dark
+                ? AppTokens.dark(hue: hue.toDouble())
+                : AppTokens.light(hue: hue.toDouble());
+            expect(
+              wcagContrast(t.outMut, t.outS),
+              greaterThanOrEqualTo(4.5),
+              reason: 'hue $hue',
+            );
+          }
+        },
+      );
+    }
+
+    test('white initials on the avatar fill are >= 4.5:1 for every hue', () {
+      for (var hue = 0; hue < 360; hue++) {
+        expect(
+          wcagContrast(Colors.white, avatarColorForHue(hue.toDouble())),
+          greaterThanOrEqualTo(4.5),
+          reason: 'hue $hue',
+        );
+      }
+    });
+  });
+
+  group('DESIGN 13 non-text pairs (decision log 15): >= 3:1', () {
+    // Status colours are used for icons, dots and borders, never for body
+    // text on these backgrounds. Text on red uses onRed.
     test('light', () {
       final t = AppTokens.light();
-      expect(
-        wcagContrast(t.outMut, t.outS),
-        greaterThan(3.95),
-        reason: 'outMut on outS',
-      );
-      expect(
-        wcagContrast(Colors.white, t.mbad),
-        greaterThan(2.6),
-        reason: 'white on mbad',
-      );
-      expect(
-        wcagContrast(t.warn, t.warnS),
-        greaterThan(3.2),
-        reason: 'warn on warnS',
-      );
-      expect(wcagContrast(t.ok, t.bg), greaterThan(4.1), reason: 'ok on bg');
-      expect(
-        wcagContrast(t.warn, t.bg),
-        greaterThan(3.55),
-        reason: 'warn on bg',
-      );
+      expect(wcagContrast(t.warn, t.warnS), greaterThanOrEqualTo(3));
+      expect(wcagContrast(t.ok, t.bg), greaterThanOrEqualTo(3));
+      expect(wcagContrast(t.warn, t.bg), greaterThanOrEqualTo(3));
     });
 
-    test('dark', () {
+    test('dark: text on red uses the dark onRed colour', () {
       final t = AppTokens.dark();
-      expect(
-        wcagContrast(t.outMut, t.outS),
-        greaterThan(4.0),
-        reason: 'outMut on outS',
-      );
-      expect(
-        wcagContrast(Colors.white, t.red),
-        greaterThan(2.8),
-        reason: 'white on red',
-      );
+      expect(t.onRed, oklchColor(0.18, 0.03, 25));
+      expect(wcagContrast(t.onRed, t.red), greaterThanOrEqualTo(4.5));
+    });
+  });
+
+  group('onRed (text on --red)', () {
+    test('is >= 4.5:1 on red in both themes for every hue', () {
+      for (var hue = 0; hue < 360; hue++) {
+        for (final t in [
+          AppTokens.light(hue: hue.toDouble()),
+          AppTokens.dark(hue: hue.toDouble()),
+        ]) {
+          expect(
+            wcagContrast(t.onRed, t.red),
+            greaterThanOrEqualTo(4.5),
+            reason: 'hue $hue',
+          );
+        }
+      }
+    });
+
+    test('light stays white, dark is dark', () {
+      expect(AppTokens.light().onRed, Colors.white);
+      expect(AppTokens.dark().onRed.computeLuminance(), lessThan(0.05));
+    });
+
+    test('copyWith and lerp carry it', () {
+      final light = AppTokens.light();
+      final dark = AppTokens.dark();
+      expect(light.copyWith(onRed: Colors.black).onRed, Colors.black);
+      expect(light.copyWith(onRed: Colors.black), isNot(light));
+      expect(light.lerp(dark, 1).onRed, dark.onRed);
     });
   });
 

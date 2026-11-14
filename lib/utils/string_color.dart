@@ -9,6 +9,8 @@ import 'dart:math' as math;
 import 'package:fluffychat/utils/oklch.dart';
 import 'package:material_ui/material_ui.dart';
 
+Color avatarColorForHue(double hue) => oklchColor(0.55, 0.12, hue);
+
 extension StringColor on String {
   static const _maxHashedLength = 1024;
 
@@ -26,7 +28,7 @@ extension StringColor on String {
     return (hash % 360).toDouble();
   }
 
-  Color get avatarColor => oklchColor(0.62, 0.12, colorHue);
+  Color get avatarColor => avatarColorForHue(colorHue);
 
   Color nameColor(Brightness brightness) =>
       oklchColor(brightness == Brightness.dark ? 0.76 : 0.52, 0.14, colorHue);

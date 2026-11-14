@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:convert';
+import 'dart:ui' show Color;
 
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -116,6 +118,10 @@ enum AppSettings<T> {
 
   static Map<String, Object?>? _platformConfiguration;
 
+  bool get hasPlatformValue => _platformConfiguration?[name] is T;
+
+  static const legacyPrimaryColorKey = 'primary_color';
+
   T get defaultValue {
     final platformConfig = _platformConfiguration?[name];
     if (platformConfig is T) return platformConfig;
@@ -134,6 +140,20 @@ enum AppSettings<T> {
       await AppSettings.store.remove(setting.key);
     }
     await init(loadWebConfigFile: loadWebConfigFile);
+  }
+
+  @visibleForTesting
+  static Future<void> migrateLegacyAccent(SharedPreferences store) async {
+    final legacy = [legacyPrimaryColorKey, colorSchemeSeedInt.key]
+        .map((key) => Result(() => store.getInt(key)).asValue?.value)
+        .nonNulls
+        .firstOrNull;
+    if (legacy != null && !store.containsKey(accentHue.key)) {
+      final hue = accentHueOf(Color(legacy));
+      if (hue != null) await store.setInt(accentHue.key, hue.toInt());
+    }
+    await store.remove(legacyPrimaryColorKey);
+    await store.remove(colorSchemeSeedInt.key);
   }
 
   static Future<SharedPreferences> init({bool loadWebConfigFile = true}) async {
@@ -164,6 +184,7 @@ enum AppSettings<T> {
       );
     }
     await store.remove('chat.fluffy.database_unencrypted');
+    await migrateLegacyAccent(store);
 
     // Load configuration from config.json file or MDM:
     if (PlatformInfos.isMobile) {
