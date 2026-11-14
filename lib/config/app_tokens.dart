@@ -152,7 +152,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
   static Color _lightAccent(double hue, Color tint) {
     var lightness = 0.53;
     var color = oklchColor(lightness, 0.16, hue);
-    while (lightness > 0.4 && wcagContrast(color, tint) < 4.5) {
+    while (lightness > 0.4 && wcagContrast8(color, tint) < 4.5) {
       lightness -= 0.005;
       color = oklchColor(lightness, 0.16, hue);
     }
@@ -168,9 +168,26 @@ class AppTokens extends ThemeExtension<AppTokens> {
         stops: const [0, 0.5, 1],
       );
 
+  static Color swatch(double hue) => oklchColor(0.58, 0.15, normalizeHue(hue));
+
+  static Color overlay([double alpha = 0.32]) => Color.fromRGBO(
+    10,
+    10,
+    25,
+    alpha.isFinite ? alpha.clamp(0.18, 0.35) : 0.32,
+  );
+
+  static double nameLightness(Brightness brightness) =>
+      brightness == Brightness.dark ? 0.76 : 0.52;
+
   static AppTokens of(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.extension<AppTokens>() ??
+    final tokens = theme.extension<AppTokens>();
+    assert(
+      tokens != null,
+      'AppTokens missing: build ThemeData with FluffyThemes.buildTheme',
+    );
+    return tokens ??
         (theme.brightness == Brightness.dark
             ? AppTokens.dark()
             : AppTokens.light());

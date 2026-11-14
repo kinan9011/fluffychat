@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/account_hooks.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
@@ -140,10 +141,33 @@ class MatrixState extends State<Matrix> {
   final List<StreamSubscription> startupSubscriptions = [];
   bool _startupHooksDone = false;
 
+  static const defaultAccountHooks = runAccountHooks;
+
+  @visibleForTesting
+  static Future<void> Function(MatrixState, Client, BuildContext) accountHooks =
+      defaultAccountHooks;
+
+  BuildContext get _hookContext =>
+      FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+      context;
+
+  final Set<String> _hookedClients = {};
+
+  Future<void> _runAccountHooks(Client client) async {
+    if (!_hookedClients.add(client.clientName)) return;
+    try {
+      await accountHooks(this, client, _hookContext);
+    } catch (e, s) {
+      Logs().w('[AccountHooks] failed', e, s);
+    }
+  }
+
   void runStartupHooksOnce() {
     if (_startupHooksDone) return;
     _startupHooksDone = true;
     startupHooks(this);
+    final active = activeClientOrNull;
+    if (active != null) unawaited(_runAccountHooks(active));
   }
 
   void joinCall(Client client, String roomId) {
@@ -158,6 +182,7 @@ class MatrixState extends State<Matrix> {
   void _removeClient(Client c) {
     final before = activeClientOrNull;
     widget.clients.remove(c);
+    _hookedClients.remove(c.clientName);
     _updateAccountCount();
     serverCapabilities.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;
@@ -220,6 +245,7 @@ class MatrixState extends State<Matrix> {
     serverCapabilities.load(client, force: true);
     _updateAccountCount();
     setActiveClient(client, resetTabs: false);
+    unawaited(_runAccountHooks(client));
   }
 
   Future<Client> getLoginClient() async {

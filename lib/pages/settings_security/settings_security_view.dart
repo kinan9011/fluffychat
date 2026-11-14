@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
@@ -191,7 +192,8 @@ class SettingsSecurityView extends StatelessWidget {
                       leading: const Icon(Icons.verified_user_outlined),
                       subtitle: SelectableText(
                         publicMasterKey.beautified,
-                        style: const TextStyle(fontFamily: 'JetBrainsMono'),
+                        textDirection: TextDirection.ltr,
+                        style: AppTypography.mono,
                       ),
                     ),
                   ListTile(
@@ -199,7 +201,8 @@ class SettingsSecurityView extends StatelessWidget {
                     leading: const Icon(Icons.mobile_friendly_outlined),
                     subtitle: SelectableText(
                       Matrix.of(context).client.fingerprintKey.beautified,
-                      style: const TextStyle(fontFamily: 'JetBrainsMono'),
+                      textDirection: TextDirection.ltr,
+                      style: AppTypography.mono,
                     ),
                   ),
                   if (capabilities?.mChangePassword?.enabled != false ||

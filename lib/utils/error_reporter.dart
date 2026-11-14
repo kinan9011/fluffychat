@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
@@ -77,10 +78,7 @@ class ErrorReporter {
           height: 256,
           width: 256,
           child: SingleChildScrollView(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 14, fontFamily: 'JetBrainsMono'),
-            ),
+            child: Text(text, style: AppTypography.mono.copyWith(fontSize: 14)),
           ),
         ),
         actions: [

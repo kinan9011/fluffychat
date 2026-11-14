@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/account_config.dart';
@@ -24,8 +25,24 @@ class SettingsStyle extends StatefulWidget {
 }
 
 class SettingsStyleController extends State<SettingsStyle> {
-  void setChatColor(Color color) =>
-      ThemeController.of(context).setAccentHue(accentHueOf(color)?.toInt());
+  static List<Color> accentSwatches(Color? system) => [
+    ?system,
+    AppConfig.chatColor,
+    ...Colors.primaries,
+  ].where((color) => accentHueOf(color) != null).toList();
+
+  static int? checkedSwatch(List<Color> swatches, int currentHue) {
+    final index = swatches.indexWhere(
+      (color) => accentHueOf(color)?.toInt() == currentHue,
+    );
+    return index < 0 ? null : index;
+  }
+
+  void setChatColor(Color color) {
+    final hue = accentHueOf(color);
+    if (hue == null) return;
+    ThemeController.of(context).setAccentHue(hue.toInt());
+  }
 
   Future<void> setWallpaper() async {
     final client = Matrix.of(context).client;

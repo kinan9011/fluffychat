@@ -99,6 +99,18 @@ void main() {
     expect(find.byType(MaterialBanner), findsOneWidget);
   });
 
+  testWidgets('close button semantics name the notice (n4)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await markUnencrypted();
+    await pumpApp(tester);
+    final l10n = L10n.of(tester.element(find.byType(MaterialBanner)));
+    final label = tester
+        .getSemantics(find.widgetWithText(TextButton, 'Close'))
+        .label;
+    expect(label, l10n.closeNotice(l10n.databaseNotEncrypted));
+    handle.dispose();
+  });
+
   testWidgets('close dismisses the banner and remembers it', (tester) async {
     await markUnencrypted();
     await pumpApp(tester);

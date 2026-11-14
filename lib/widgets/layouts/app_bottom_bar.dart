@@ -10,6 +10,7 @@ import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AppBottomBar extends StatelessWidget {
@@ -24,12 +25,14 @@ class AppBottomBar extends StatelessWidget {
   final AppTab selected;
   final ValueChanged<AppTab> onSelect;
   final Widget profileAvatar;
+  final int chatsBadge;
 
   const AppBottomBar({
     required this.tabs,
     required this.selected,
     required this.onSelect,
     required this.profileAvatar,
+    this.chatsBadge = 0,
     super.key,
   });
 
@@ -85,6 +88,7 @@ class AppBottomBar extends StatelessWidget {
                             selected: tab == selected,
                             onTap: () => onSelect(tab),
                             profileAvatar: profileAvatar,
+                            badge: tab == AppTab.chats ? chatsBadge : 0,
                           ),
                         ),
                     ],
@@ -104,24 +108,27 @@ class _BarItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final Widget profileAvatar;
+  final int badge;
 
   const _BarItem({
     required this.tab,
     required this.selected,
     required this.onTap,
     required this.profileAvatar,
+    required this.badge,
   });
 
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
-    final label = tab.label(L10n.of(context));
+    final l10n = L10n.of(context);
+    final label = tab.label(l10n);
     final color = selected ? tokens.acc : tokens.fg;
     final icon = tab.icon;
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
+      label: ChatsBadge.semanticsLabel(tab, badge, l10n),
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
@@ -134,15 +141,18 @@ class _BarItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 3,
             children: [
-              SizedBox.square(
-                dimension: 25,
-                child: icon == null
-                    ? profileAvatar
-                    : Icon(
-                        selected ? tab.activeIcon : icon,
-                        size: 25,
-                        color: color,
-                      ),
+              ChatsBadge(
+                count: badge,
+                child: SizedBox.square(
+                  dimension: 25,
+                  child: icon == null
+                      ? profileAvatar
+                      : Icon(
+                          selected ? tab.activeIcon : icon,
+                          size: 25,
+                          color: color,
+                        ),
+                ),
               ),
               Text(
                 label,

@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
@@ -22,6 +23,8 @@ GoRouter _router(
   StreamController<Object?> accountChanges,
   StreamController<Object?> clientChanges, {
   VoidCallback? onFirstShown,
+  Stream<int>? chatsUnread,
+  void Function()? onLeftColumnBuilt,
 }) {
   GoRoute tab(String path, {List<RouteBase> routes = const []}) => GoRoute(
     path: path,
@@ -38,9 +41,13 @@ GoRouter _router(
           accountSwitched: accountChanges.stream,
           activeClientChanged: clientChanges.stream,
           onFirstShown: onFirstShown,
+          chatsUnread: chatsUnread ?? const Stream<int>.empty(),
           profileAvatar: (size) =>
               SizedBox.square(key: ValueKey('avatar_$size'), dimension: size),
-          leftColumn: (context, tab) => Text('LEFT ${tab.name}'),
+          leftColumn: (context, tab) {
+            onLeftColumnBuilt?.call();
+            return Text('LEFT ${tab.name}');
+          },
         ),
         branches: [
           StatefulShellBranch(
@@ -92,10 +99,13 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp.router(
-        routerConfig: router,
-        localizationsDelegates: L10n.localizationsDelegates,
-        supportedLocales: L10n.supportedLocales,
+      Builder(
+        builder: (context) => MaterialApp.router(
+          routerConfig: router,
+          theme: FluffyThemes.buildTheme(context, Brightness.light),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -373,5 +383,68 @@ void main() {
         size: const Size(350, 120),
       );
     });
+  });
+
+  group('chats badge in every shell mode', () {
+    Future<void> pumpBadge(WidgetTester tester, double width, int count) async {
+      router.dispose();
+      router = _router(
+        accountChanges,
+        clientChanges,
+        chatsUnread: Stream.value(count),
+      );
+      await pumpShell(tester, width);
+    }
+
+    testWidgets('a new count rebuilds the badge, not the shell', (
+      tester,
+    ) async {
+      final counts = StreamController<int>();
+      addTearDown(counts.close);
+      var builds = 0;
+      router.dispose();
+      router = _router(
+        accountChanges,
+        clientChanges,
+        chatsUnread: counts.stream,
+        onLeftColumnBuilt: () => builds++,
+      );
+      await pumpShell(tester, 700);
+      final before = builds;
+      expect(before, greaterThan(0));
+      counts.add(4);
+      await tester.pumpAndSettle();
+      expect(find.text('4'), findsOneWidget);
+      counts.add(5);
+      await tester.pumpAndSettle();
+      expect(find.text('5'), findsOneWidget);
+      expect(builds, before, reason: 'only the badge hosts may rebuild');
+    });
+
+    for (final (width, host) in [
+      (400.0, 'bar'),
+      (700.0, 'strip'),
+      (1000.0, 'rail'),
+    ]) {
+      testWidgets('$width px: the $host shows the unread chat count', (
+        tester,
+      ) async {
+        await pumpBadge(tester, width, 3);
+        expect(find.text('3'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (w) => w is Semantics && w.properties.label == 'Chats, 3 unread',
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('$width px: no badge at zero, 99+ above 99', (tester) async {
+        await pumpBadge(tester, width, 0);
+        expect(find.text('0'), findsNothing);
+        await pumpBadge(tester, width, 150);
+        expect(find.text('99+'), findsOneWidget);
+      });
+    }
   });
 }

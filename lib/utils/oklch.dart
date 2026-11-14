@@ -125,3 +125,14 @@ double wcagContrast(Color foreground, Color background) {
   final b = _luminance(background);
   return (math.max(a, b) + 0.05) / (math.min(a, b) + 0.05);
 }
+
+/// The colour as painted: every channel rounded to 8 bits.
+Color rgb8(Color c) => Color.fromARGB(
+  (c.a * 255).round(),
+  (c.r * 255).round(),
+  (c.g * 255).round(),
+  (c.b * 255).round(),
+);
+
+double wcagContrast8(Color foreground, Color background) =>
+    wcagContrast(rgb8(foreground), rgb8(background));

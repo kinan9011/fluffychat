@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/pages/calls/calls_page.dart';
 import 'package:fluffychat/pages/profile/profile_page.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
@@ -11,6 +12,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +26,10 @@ void main() {
     client = await prepareTestClient();
     client.backgroundSync = false;
   });
+
+  setUp(() => MatrixState.accountHooks = (_, _, _) async {});
+
+  tearDown(() => MatrixState.accountHooks = MatrixState.defaultAccountHooks);
 
   Future<void> pumpApp(WidgetTester tester, String location) async {
     tester.view.physicalSize = const Size(400, 800);
@@ -61,6 +67,44 @@ void main() {
         await tester.pump(const Duration(seconds: 35));
       });
 
+  // ponytail: keep first, the Arabic l10n library only loads when no other
+  // test in the process pumped an app before it (flaky blank page otherwise).
+  group('golden', () {
+    for (final (page, location) in [
+      (CallsPage, '/calls'),
+      (ProfilePage, '/profile'),
+    ]) {
+      pageTest('$page light, dark and RTL', (tester) async {
+        for (final variant in [
+          (suffix: 'light', dark: false, locale: const Locale('en')),
+          (suffix: 'dark', dark: true, locale: const Locale('en')),
+          (suffix: 'rtl', dark: false, locale: const Locale('ar')),
+        ]) {
+          tester.platformDispatcher.platformBrightnessTestValue = variant.dark
+              ? Brightness.dark
+              : Brightness.light;
+          tester.platformDispatcher.localesTestValue = [variant.locale];
+          addTearDown(() {
+            tester.platformDispatcher.clearPlatformBrightnessTestValue();
+            tester.platformDispatcher.clearLocalesTestValue();
+          });
+          await pumpApp(tester, location);
+          await settleRequests(tester);
+          await tester.pumpAndSettle();
+          await tester.loadAssets();
+          await tester.pump();
+          await expectLater(
+            find.byType(page),
+            matchesGoldenFile(
+              'goldens/shell_${location.substring(1)}_${variant.suffix}.png',
+            ),
+          );
+          await tester.pumpWidget(const SizedBox());
+        }
+      });
+    }
+  });
+
   group('Calls tab', () {
     pageTest('shows the empty state and the group call section', (
       tester,
@@ -92,7 +136,10 @@ void main() {
     pageTest('shows the own MXID and the logged in accounts', (tester) async {
       await pumpApp(tester, '/profile');
       expect(find.byType(ProfilePage), findsOneWidget);
-      expect(find.text('@test:fakeServer.notExisting'), findsWidgets);
+      expect(
+        find.text(AppTypography.ltr('@test:fakeServer.notExisting')),
+        findsNWidgets(2),
+      );
       expect(find.text('Accounts'), findsOneWidget);
       expect(find.text('Add account'), findsOneWidget);
       expect(find.text('My QR code'), findsOneWidget);
@@ -123,36 +170,5 @@ void main() {
         expect('${event.exception}', isNot(contains('@test:fakeServer')));
       }
     });
-  });
-
-  group('golden', () {
-    for (final (page, location) in [
-      (CallsPage, '/calls'),
-      (ProfilePage, '/profile'),
-    ]) {
-      for (final variant in [
-        (suffix: 'light', dark: false),
-        (suffix: 'dark', dark: true),
-      ]) {
-        pageTest('$page ${variant.suffix}', (tester) async {
-          tester.platformDispatcher.platformBrightnessTestValue = variant.dark
-              ? Brightness.dark
-              : Brightness.light;
-          addTearDown(() {
-            tester.platformDispatcher.clearPlatformBrightnessTestValue();
-          });
-          await pumpApp(tester, location);
-          await settleRequests(tester);
-          await tester.loadAssets();
-          await tester.pump();
-          await expectLater(
-            find.byType(page),
-            matchesGoldenFile(
-              'goldens/shell_${location.substring(1)}_${variant.suffix}.png',
-            ),
-          );
-        });
-      }
-    }
   });
 }

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/app_tokens.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/string_color.dart';
@@ -86,11 +87,8 @@ class _TokenSheet extends StatelessWidget {
                     Text(L10n.of(context).chats, style: text.bodyLarge),
                     Text('مرحبًا، هذه رسالة تجريبية', style: text.bodyLarge),
                     Text(
-                      '@anna:example.org',
-                      style: const TextStyle(
-                        fontFamily: 'JetBrainsMono',
-                        fontSize: 13,
-                      ),
+                      AppTypography.ltr('@anna:example.org'),
+                      style: AppTypography.mono.copyWith(fontSize: 13),
                     ),
                     Row(
                       children: [

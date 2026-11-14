@@ -5,14 +5,13 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
-import 'package:fluffychat/utils/error_reporter.dart';
+import 'package:fluffychat/utils/chat_list/folder_ref.dart';
+import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/show_update_snackbar.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -28,24 +27,7 @@ import '../../../utils/account_bundles.dart';
 import '../../config/setting_keys.dart';
 import '../../widgets/matrix.dart';
 
-enum ActiveFilter { allChats, unread, groups, messages, tag }
-
-extension LocalizedActiveFilter on ActiveFilter {
-  String toLocalizedString(BuildContext context) {
-    switch (this) {
-      case ActiveFilter.allChats:
-        return L10n.of(context).all;
-      case ActiveFilter.messages:
-        return L10n.of(context).messages;
-      case ActiveFilter.unread:
-        return L10n.of(context).unread;
-      case ActiveFilter.groups:
-        return L10n.of(context).groups;
-      case ActiveFilter.tag:
-        throw 'Tags should not directly be displayed!';
-    }
-  }
-}
+enum SpaceTabAction { overview, settings }
 
 class ChatList extends StatefulWidget {
   final String? activeChat;
@@ -59,24 +41,91 @@ class ChatList extends StatefulWidget {
 
 class ChatListController extends State<ChatList>
     with TickerProviderStateMixin, RouteAware {
-  late ActiveFilter activeFilter;
-  String? activeTag;
+  late ChatListScope scope;
 
-  String? _activeSpaceId;
+  String? get activeTag =>
+      scope.folder.kind == FolderKind.tag ? scope.folder.value : null;
 
-  String? get activeSpaceId => _activeSpaceId;
+  String? _overviewSpaceId;
 
-  Future<void> setActiveSpace(String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+  String? get overviewSpaceId => _overviewSpaceId;
+
+  static final _roomId = RegExp(r'^![^:\s]{1,255}:[^\s]{1,255}$');
+
+  Future<void> openSpaceOverview(String spaceId) async {
+    final space = Matrix.of(context).client.getRoomById(spaceId);
+    if (space == null || !space.isJoinedSpace) return;
+    await space.postLoad();
     if (!mounted) return;
     setState(() {
-      _activeSpaceId = spaceId;
+      _overviewSpaceId = spaceId;
     });
   }
 
-  void clearActiveSpace() => setState(() {
-    _activeSpaceId = null;
+  void closeSpaceOverview() => setState(() {
+    _overviewSpaceId = null;
   });
+
+  void selectTab(ChatListScope newScope) {
+    setState(() {
+      scope = newScope;
+    });
+    AppSettings.chatFilter.setItem(newScope.folder.storageKey);
+  }
+
+  void resetScope() => setState(() => scope = const ChatListScope());
+
+  Future<void> spaceTabAction(String spaceId) async {
+    final l10n = L10n.of(context);
+    final action = await showModalActionPopup<SpaceTabAction>(
+      context: context,
+      actions: [
+        AdaptiveModalAction(
+          value: SpaceTabAction.overview,
+          label: l10n.spaceOverview,
+        ),
+        AdaptiveModalAction(
+          value: SpaceTabAction.settings,
+          label: l10n.settings,
+        ),
+      ],
+    );
+    if (!mounted) return;
+    switch (action) {
+      case SpaceTabAction.overview:
+        await openSpaceOverview(spaceId);
+      case SpaceTabAction.settings:
+        await editSpace(context, spaceId);
+      case null:
+    }
+  }
+
+  void selectSpace(String? spaceId) => setState(
+    () => scope = ChatListScope(spaceId: spaceId, folder: scope.folder),
+  );
+
+  void openSpaceFromLink(String raw) {
+    if (!_roomId.hasMatch(raw)) return;
+    final client = Matrix.of(context).client;
+    final space = client.getRoomById(raw);
+    if (space == null || !space.isJoinedSpace) return;
+    final topLevel = SpaceTabsModel.build(
+      client.rooms,
+      nameOf: (room) => room.id,
+    ).tabs.any((tab) => tab.spaceId == raw);
+    if (!topLevel) {
+      openSpaceOverview(raw);
+      return;
+    }
+    switch (SpaceNavigationMode.fromSetting(
+      AppSettings.spaceNavigation.value,
+    )) {
+      case SpaceNavigationMode.tabs:
+        selectTab(ChatListScope(spaceId: raw));
+      case SpaceNavigationMode.switcher:
+        selectSpace(raw);
+    }
+  }
 
   Future<void> onChatTap(Room room) async {
     if (room.membership == Membership.leave) {
@@ -84,32 +133,13 @@ class ChatListController extends State<ChatList>
       return;
     }
 
-    if (room.membership == .join && room.isSpace) {
-      setActiveSpace(room.id);
+    if (room.isJoinedSpace) {
+      openSpaceOverview(room.id);
       return;
     }
 
     context.go('/rooms/${room.id}');
   }
-
-  bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
-    switch (activeFilter) {
-      case ActiveFilter.allChats:
-        return (room) => true;
-      case ActiveFilter.messages:
-        return (room) => !room.isSpace && room.isDirectChat;
-      case ActiveFilter.groups:
-        return (room) => !room.isSpace && !room.isDirectChat;
-      case ActiveFilter.unread:
-        return (room) => room.isUnreadOrInvited;
-      case ActiveFilter.tag:
-        return (room) => room.tags.keys.contains(activeTag);
-    }
-  }
-
-  List<Room> get filteredRooms => Matrix.of(
-    context,
-  ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -262,21 +292,19 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> editSpace(BuildContext context, String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    await Matrix.of(context).client.getRoomById(spaceId)?.postLoad();
     if (!context.mounted) return;
     context.push('/rooms/$spaceId/details');
   }
 
   String? get activeChat => widget.activeChat;
 
-  StreamSubscription? _onRoomTagUpdate;
-
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.activeSpace != null &&
         widget.activeSpace != oldWidget.activeSpace) {
-      setActiveSpace(widget.activeSpace!);
+      openSpaceFromLink(widget.activeSpace!);
     }
   }
 
@@ -284,26 +312,26 @@ class ChatListController extends State<ChatList>
 
   @override
   void initState() {
+    scope = ChatListScope(
+      folder: FolderRef.parse(AppSettings.chatFilter.value),
+    );
+
     _activeClientSubscription = Matrix.of(context).onActiveClientChanged.listen(
       (_) => setState(() {
-        activeFilter = ActiveFilter.allChats;
-        _activeSpaceId = null;
+        scope = const ChatListScope();
+        _overviewSpaceId = null;
       }),
     );
 
     scrollController.addListener(_onScroll);
-    _waitForFirstSync();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.activeSpace != null) {
-        setActiveSpace(widget.activeSpace!);
+        openSpaceFromLink(widget.activeSpace!);
       }
       if (mounted) {
         searchServer = Matrix.of(
           context,
         ).store.getString(_serverStoreNamespace);
-        Matrix.of(context).backgroundPush?.setupPush(context);
-        UpdateNotifier.showUpdateDialog(context);
-        UpdateNotifier.showUpdateAvailableBanner(context);
       }
 
       // Workaround for system UI overlay style not applied on app start
@@ -312,40 +340,11 @@ class ChatListController extends State<ChatList>
       );
     });
 
-    _updateRoomTags();
-    _onRoomTagUpdate = Matrix.of(context).client.onSync.stream
-        .where(
-          (syncUpdate) =>
-              syncUpdate.rooms?.join?.values.any(
-                (roomUpdate) =>
-                    roomUpdate.accountData?.any(
-                      (accountData) => accountData.type == 'm.tag',
-                    ) ??
-                    false,
-              ) ??
-              false,
-        )
-        .listen(_updateRoomTags);
-
-    if (roomTags.containsKey(AppSettings.chatFilter.value)) {
-      activeFilter = ActiveFilter.tag;
-      activeTag = AppSettings.chatFilter.value;
-    } else {
-      activeFilter =
-          ActiveFilter.values.singleWhereOrNull(
-            (filter) => AppSettings.chatFilter.value == filter.name,
-          ) ??
-          ActiveFilter.allChats;
-    }
-
-    _processPushHelperCrashReport();
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _onRoomTagUpdate?.cancel();
     _activeClientSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     searchController.dispose();
@@ -354,18 +353,6 @@ class ChatListController extends State<ChatList>
     scrolledToTop.dispose();
     _clientStream.close();
     super.dispose();
-  }
-
-  void _processPushHelperCrashReport() {
-    if (AppSettings.autoSendErrorReports.value != true) return;
-    final store = Matrix.of(context).store;
-    final report = store.getStringList(AppConfig.pushHelperCrashReportKey);
-    if (report == null) return;
-    store.remove(AppConfig.pushHelperCrashReportKey);
-    ErrorReporter(
-      context,
-      'Push Helper has been crashed',
-    ).onErrorCallback(report.first, StackTrace.fromString(report.last));
   }
 
   Future<void> chatContextAction(
@@ -605,7 +592,7 @@ class ChatListController extends State<ChatList>
 
     switch (action) {
       case ChatContextAction.goToSpace:
-        setActiveSpace(space!.id);
+        openSpaceOverview(space!.id);
         return;
       case ChatContextAction.favorite:
         await showFutureLoadingDialog(
@@ -725,21 +712,14 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  Map<String, int> roomTags = {};
-
-  void _updateRoomTags([_]) {
-    roomTags.clear();
+  Map<String, int> get roomTags {
+    final tags = <String, int>{};
     for (final room in Matrix.of(context).client.rooms) {
       for (final tag in room.tags.keys) {
-        if (tag.startsWith('u.')) roomTags[tag] = (roomTags[tag] ?? 0) + 1;
+        if (tag.startsWith('u.')) tags[tag] = (tags[tag] ?? 0) + 1;
       }
     }
-    setState(() {
-      if (activeTag != null && !roomTags.keys.contains(activeTag)) {
-        activeTag = null;
-        activeFilter = ActiveFilter.allChats;
-      }
-    });
+    return tags;
   }
 
   Future<void> setStatus() async {
@@ -772,76 +752,11 @@ class ChatListController extends State<ChatList>
     );
   }
 
-  bool waitForFirstSync = false;
-
-  Future<void> _waitForFirstSync() async {
-    final router = GoRouter.of(context);
-    final client = Matrix.of(context).client;
-    await client.roomsLoading;
-    await client.accountDataLoading;
-    await client.userDeviceKeysLoading;
-    if (client.prevBatch == null) {
-      await client.onSyncStatus.stream.firstWhere(
-        (status) => status.status == SyncStatus.finished,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        waitForFirstSync = true;
-      });
-    }
-    if (!mounted) return;
-    setState(() {
-      waitForFirstSync = true;
-    });
-
-    if (client.userDeviceKeys[client.userID!]?.deviceKeys.values.any(
-          (device) => !device.verified && !device.blocked,
-        ) ??
-        false) {
-      late final ScaffoldFeatureController controller;
-      final theme = Theme.of(context);
-      controller = ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 15),
-          showCloseIcon: true,
-          backgroundColor: theme.colorScheme.errorContainer,
-          closeIconColor: theme.colorScheme.onErrorContainer,
-          content: Text(
-            L10n.of(context).oneOfYourDevicesIsNotVerified,
-            style: TextStyle(color: theme.colorScheme.onErrorContainer),
-          ),
-          action: SnackBarAction(
-            onPressed: () {
-              controller.close();
-              router.go('/settings/devices');
-            },
-            textColor: theme.colorScheme.onErrorContainer,
-            label: L10n.of(context).settings,
-          ),
-        ),
-      );
-    }
-  }
-
-  void setActiveFilter(ActiveFilter filter, String? tag) {
-    if (filter == ActiveFilter.tag && tag == null) {
-      throw ('Must set a tag when setting filter to tags!');
-    }
-    setState(() {
-      activeTag = tag;
-      activeFilter = filter;
-    });
-    AppSettings.chatFilter.setItem(
-      filter == ActiveFilter.tag ? tag! : filter.name,
-    );
-  }
-
   void setActiveClient(Client client) {
     context.go('/rooms');
     setState(() {
-      activeFilter = ActiveFilter.allChats;
-      _activeSpaceId = null;
+      scope = const ChatListScope();
+      _overviewSpaceId = null;
       Matrix.of(context).setActiveClient(client);
     });
     _clientStream.add(client);
@@ -850,7 +765,8 @@ class ChatListController extends State<ChatList>
   void setActiveBundle(String bundle) {
     context.go('/rooms');
     setState(() {
-      _activeSpaceId = null;
+      scope = const ChatListScope();
+      _overviewSpaceId = null;
       Matrix.of(context).activeBundle = bundle;
       if (!Matrix.of(
         context,

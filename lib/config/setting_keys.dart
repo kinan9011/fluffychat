@@ -98,6 +98,9 @@ enum AppSettings<T> {
   webNotificationSound<bool>('chat.fluffy.web_notification_sound', true),
   chatFilter<String>('chat.fluffy.chat_filter', 'allChats'),
   hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false),
+  spaceNavigation<String>('chat.fluffy.space_navigation', 'tabs'),
+  showFoldersAfterSpaces<bool>('chat.fluffy.show_folders_after_spaces', true),
+  showTabUnreadCounts<bool>('chat.fluffy.show_tab_unread_counts', true),
   showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true),
   doubleTapToReact<bool>('chat.fluffy.double_tap_to_react', false),
   doubleTapReaction<String>('chat.fluffy.double_tap_reaction', '❤️'),
@@ -115,6 +118,15 @@ enum AppSettings<T> {
 
   static SharedPreferences get store => _store!;
   static SharedPreferences? _store;
+
+  static final _revisions = <AppSettings<Object?>, ValueNotifier<int>>{};
+
+  ValueListenable<int> get listenable =>
+      _revisions.putIfAbsent(this, () => ValueNotifier(0));
+
+  void _notifyChanged() => _revisions[this]?.value++;
+
+  void notifyRemoved() => _notifyChanged();
 
   static Map<String, Object?>? _platformConfiguration;
 
@@ -140,6 +152,9 @@ enum AppSettings<T> {
       await AppSettings.store.remove(setting.key);
     }
     await init(loadWebConfigFile: loadWebConfigFile);
+    for (final setting in AppSettings.values) {
+      setting._notifyChanged();
+    }
   }
 
   @visibleForTesting
@@ -239,6 +254,9 @@ const webDeniedSettings = <AppSettings<Object?>>{
   AppSettings.pushNotificationsGatewayUrl,
   AppSettings.pushNotificationsPusherFormat,
   AppSettings.fallbackLiveKitInstance,
+  AppSettings.spaceNavigation,
+  AppSettings.showFoldersAfterSpaces,
+  AppSettings.showTabUnreadCounts,
 };
 
 bool _isHttpsUrl(Object? value) =>
@@ -343,7 +361,10 @@ extension AppSettingsBoolNExtension on AppSettings<bool?> {
     return value.asValue?.value;
   }
 
-  Future<void> setItem(bool value) => AppSettings.store.setBool(key, value);
+  Future<void> setItem(bool value) async {
+    await AppSettings.store.setBool(key, value);
+    _notifyChanged();
+  }
 }
 
 extension AppSettingsBoolExtension on AppSettings<bool> {
@@ -360,7 +381,10 @@ extension AppSettingsBoolExtension on AppSettings<bool> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(bool value) => AppSettings.store.setBool(key, value);
+  Future<void> setItem(bool value) async {
+    await AppSettings.store.setBool(key, value);
+    _notifyChanged();
+  }
 }
 
 extension AppSettingsStringExtension on AppSettings<String> {
@@ -377,7 +401,10 @@ extension AppSettingsStringExtension on AppSettings<String> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(String value) => AppSettings.store.setString(key, value);
+  Future<void> setItem(String value) async {
+    await AppSettings.store.setString(key, value);
+    _notifyChanged();
+  }
 }
 
 extension AppSettingsIntExtension on AppSettings<int> {
@@ -394,7 +421,10 @@ extension AppSettingsIntExtension on AppSettings<int> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(int value) => AppSettings.store.setInt(key, value);
+  Future<void> setItem(int value) async {
+    await AppSettings.store.setInt(key, value);
+    _notifyChanged();
+  }
 }
 
 extension AppSettingsDoubleExtension on AppSettings<double> {
@@ -411,7 +441,10 @@ extension AppSettingsDoubleExtension on AppSettings<double> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(double value) => AppSettings.store.setDouble(key, value);
+  Future<void> setItem(double value) async {
+    await AppSettings.store.setDouble(key, value);
+    _notifyChanged();
+  }
 }
 
 extension AppSettingsStringListExtension on AppSettings<List<String>> {
@@ -428,6 +461,8 @@ extension AppSettingsStringListExtension on AppSettings<List<String>> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(List<String> value) =>
-      AppSettings.store.setStringList(key, value);
+  Future<void> setItem(List<String> value) async {
+    await AppSettings.store.setStringList(key, value);
+    _notifyChanged();
+  }
 }

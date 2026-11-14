@@ -7,6 +7,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,7 @@ Widget _bar({
   required List<AppTab> tabs,
   AppTab selected = AppTab.chats,
   ValueChanged<AppTab>? onSelect,
+  int chatsBadge = 0,
 }) => Stack(
   children: [
     Positioned.fill(
@@ -40,6 +42,7 @@ Widget _bar({
         tabs: tabs,
         selected: selected,
         onSelect: onSelect ?? (_) {},
+        chatsBadge: chatsBadge,
         profileAvatar: const CircleAvatar(
           radius: 12.5,
           backgroundColor: Colors.orange,
@@ -146,6 +149,65 @@ void main() {
         );
       }
       handle.dispose();
+    });
+
+    group('chats badge', () {
+      Finder inChats(Finder finder) => find.descendant(
+        of: find.ancestor(
+          of: find.text('Chats'),
+          matching: find.byType(InkWell),
+        ),
+        matching: finder,
+      );
+
+      testWidgets('shows the count inside the Chats slot only', (tester) async {
+        await pumpGoldenWidget(
+          tester,
+          _bar(tabs: all, chatsBadge: 3),
+          size: _size,
+        );
+        expect(inChats(find.text('3')), findsOneWidget);
+        expect(find.text('3'), findsOneWidget);
+      });
+
+      testWidgets('is hidden at zero and capped at 99+', (tester) async {
+        await pumpGoldenWidget(tester, _bar(tabs: all), size: _size);
+        expect(find.text('0'), findsNothing);
+        expect(find.byType(ChatsBadge), findsNWidgets(4));
+        await pumpGoldenWidget(
+          tester,
+          _bar(tabs: all, chatsBadge: 150),
+          size: _size,
+        );
+        expect(find.text('99+'), findsOneWidget);
+        expect(find.text('150'), findsNothing);
+      });
+
+      testWidgets('the Chats slot is announced with its unread count', (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        await pumpGoldenWidget(
+          tester,
+          _bar(tabs: all, chatsBadge: 3),
+          size: _size,
+        );
+        expect(
+          find.bySemanticsLabel(RegExp(r'^Chats, 3 unread$')),
+          findsOneWidget,
+        );
+        expect(find.bySemanticsLabel(RegExp(r'^Calls$')), findsOneWidget);
+        handle.dispose();
+      });
+
+      testWidgets('golden: badge in light, dark and RTL', (tester) async {
+        await expectGoldenVariants(
+          tester,
+          'app_bottom_bar_badge',
+          _bar(tabs: all, chatsBadge: 12),
+          size: _size,
+        );
+      });
     });
 
     testWidgets('uses glass, solid when transparency is reduced', (

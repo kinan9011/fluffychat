@@ -24,21 +24,19 @@ class TwoColumnLayout extends StatelessWidget {
       width: 1.0,
       color: Theme.of(context).dividerColor,
     );
-    return ScaffoldMessenger(
-      child: Scaffold(
-        body: Row(
-          children: [
-            if (rail != null) ...[rail!, divider],
-            Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(),
-              width: FluffyThemes.listColumnWidth,
-              child: mainView,
-            ),
-            divider,
-            Expanded(child: ClipRRect(child: sideView)),
-          ],
-        ),
+    return Scaffold(
+      body: Row(
+        children: [
+          if (rail != null) ...[rail!, divider],
+          Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(),
+            width: FluffyThemes.listColumnWidth,
+            child: mainView,
+          ),
+          divider,
+          Expanded(child: ClipRRect(child: sideView)),
+        ],
       ),
     );
   }

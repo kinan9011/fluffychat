@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/utils/oklch.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -31,5 +32,5 @@ extension StringColor on String {
   Color get avatarColor => avatarColorForHue(colorHue);
 
   Color nameColor(Brightness brightness) =>
-      oklchColor(brightness == Brightness.dark ? 0.76 : 0.52, 0.14, colorHue);
+      oklchColor(AppTokens.nameLightness(brightness), 0.14, colorHue);
 }

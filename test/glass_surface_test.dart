@@ -9,6 +9,7 @@ import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,10 +23,12 @@ Future<void> pumpGlass(
   bool solid = false,
   Brightness brightness = Brightness.light,
   TextDirection direction = TextDirection.ltr,
+  bool grouped = false,
 }) {
   final tokens = brightness == Brightness.dark
       ? AppTokens.dark()
       : AppTokens.light();
+  Widget wrap(Widget child) => grouped ? BackdropGroup(child: child) : child;
   return tester.pumpWidget(
     MediaQuery(
       data: MediaQueryData(highContrast: highContrast),
@@ -33,12 +36,14 @@ Future<void> pumpGlass(
         textDirection: direction,
         child: Theme(
           data: ThemeData(brightness: brightness, extensions: [tokens]),
-          child: GlassSurface(
-            solid: solid,
-            blur: blur,
-            shadows: shadows,
-            borderRadius: radius,
-            child: const Text('hello'),
+          child: wrap(
+            GlassSurface(
+              solid: solid,
+              blur: blur,
+              shadows: shadows,
+              borderRadius: radius,
+              child: const Text('hello'),
+            ),
           ),
         ),
       ),
@@ -86,6 +91,51 @@ void main() {
     await pumpGlass(tester, brightness: Brightness.dark);
     expect(find.byType(BackdropFilter), findsNothing);
     expect(surfaceColor(tester), AppTokens.dark().surf);
+  });
+
+  testWidgets('reduceTransparency toggled after pump rebuilds the surface', (
+    tester,
+  ) async {
+    await pumpGlass(tester);
+    expect(find.byType(BackdropFilter), findsOneWidget);
+    await AppSettings.reduceTransparency.setItem(true);
+    await tester.pump();
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(surfaceColor(tester), AppTokens.light().surf);
+    await AppSettings.reduceTransparency.setItem(false);
+    await tester.pump();
+    expect(find.byType(BackdropFilter), findsOneWidget);
+  });
+
+  test('clampBlur keeps sigma finite and within 0..40', () {
+    expect(GlassSurface.clampBlur(double.nan), 20);
+    expect(GlassSurface.clampBlur(double.infinity), 20);
+    expect(GlassSurface.clampBlur(-5), 0);
+    expect(GlassSurface.clampBlur(100), 40);
+    expect(GlassSurface.clampBlur(24), 24);
+  });
+
+  testWidgets('absurd blur is clamped in the filter', (tester) async {
+    await pumpGlass(tester, blur: 1000);
+    final filter = tester
+        .widget<BackdropFilter>(find.byType(BackdropFilter))
+        .filter;
+    expect(
+      filter,
+      ImageFilter.compose(
+        outer: const ColorFilter.matrix(GlassSurface.saturateMatrix),
+        inner: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+      ),
+    );
+  });
+
+  testWidgets('shares the backdrop key of a BackdropGroup', (tester) async {
+    RenderBackdropFilter render() =>
+        tester.renderObject<RenderBackdropFilter>(find.byType(BackdropFilter));
+    await pumpGlass(tester);
+    expect(render().backdropKey, isNull);
+    await pumpGlass(tester, grouped: true);
+    expect(render().backdropKey, isNotNull);
   });
 
   testWidgets('solid parameter forces the fallback', (tester) async {

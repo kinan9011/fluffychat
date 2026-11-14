@@ -66,7 +66,10 @@ class DatabaseUnencryptedBanner extends StatelessWidget {
             AppSettings.databaseUnencryptedNoticeDismissed.setItem(true);
             hide();
           },
-          child: Text(l10n.close),
+          child: Text(
+            l10n.close,
+            semanticsLabel: l10n.closeNotice(l10n.databaseNotEncrypted),
+          ),
         ),
         TextButton(
           onPressed: () {

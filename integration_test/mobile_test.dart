@@ -9,6 +9,7 @@ import 'package:integration_test/integration_test.dart';
 import 'flows/auth_flows.dart';
 import 'flows/basic_messaging.dart';
 import 'flows/chat_flows.dart';
+import 'flows/chat_list_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/shell_navigation.dart';
@@ -20,6 +21,7 @@ void main() {
     testWidgets('Login and logout flow', loginAndChatBackup);
     testWidgets('Basic Messaging', basicMessaging);
     testWidgets('Shell navigation', shellNavigation);
+    testWidgets('Chat list tabs', chatListTabs);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

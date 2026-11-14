@@ -44,8 +44,17 @@ class GlassSurface extends StatelessWidget {
     0, 0, 0, 1, 0, //
   ];
 
+  @visibleForTesting
+  static double clampBlur(double value) =>
+      value.isFinite ? value.clamp(0.0, 40.0) : 20.0;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: AppSettings.reduceTransparency.listenable,
+    builder: _buildSurface,
+  );
+
+  Widget _buildSurface(BuildContext context, Widget? _) {
     final tokens = AppTokens.of(context);
     // Flutter has no "reduce transparency" platform flag, so we follow the
     // closest OS signal (increased contrast) plus our own setting.
@@ -53,6 +62,11 @@ class GlassSurface extends StatelessWidget {
         solid ||
         MediaQuery.highContrastOf(context) ||
         AppSettings.reduceTransparency.value;
+    final sigma = clampBlur(blur);
+    final filter = ImageFilter.compose(
+      outer: const ColorFilter.matrix(saturateMatrix),
+      inner: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+    );
     final surface = DecoratedBox(
       key: surfaceKey,
       decoration: BoxDecoration(
@@ -79,15 +93,11 @@ class GlassSurface extends StatelessWidget {
         ),
         ClipRRect(
           borderRadius: radius,
-          child: opaque
-              ? surface
-              : BackdropFilter(
-                  filter: ImageFilter.compose(
-                    outer: const ColorFilter.matrix(saturateMatrix),
-                    inner: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                  ),
-                  child: surface,
-                ),
+          child: switch ((opaque, BackdropGroup.of(context))) {
+            (true, _) => surface,
+            (false, null) => BackdropFilter(filter: filter, child: surface),
+            _ => BackdropFilter.grouped(filter: filter, child: surface),
+          },
         ),
       ],
     );

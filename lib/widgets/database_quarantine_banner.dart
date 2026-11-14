@@ -26,7 +26,10 @@ class DatabaseQuarantineBanner extends StatelessWidget {
             dismissDatabaseQuarantineNotice();
             hide();
           },
-          child: Text(l10n.close),
+          child: Text(
+            l10n.close,
+            semanticsLabel: l10n.closeNotice(l10n.databaseQuarantined),
+          ),
         ),
       ],
       child: child,

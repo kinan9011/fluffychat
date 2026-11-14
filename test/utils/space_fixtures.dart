@@ -5,12 +5,14 @@
 
 import 'package:matrix/matrix.dart';
 
-Room testSpace(Client client, List<String> children) {
-  final space = Room(
-    id: '!space:example.org',
-    client: client,
-    membership: Membership.join,
-  );
+Room testSpace(
+  Client client,
+  List<String> children, {
+  String id = '!space:example.org',
+  Membership membership = Membership.join,
+  String? name,
+}) {
+  final space = Room(id: id, client: client, membership: membership);
   space.setState(
     Event(
       type: EventTypes.RoomCreate,
@@ -22,6 +24,19 @@ Room testSpace(Client client, List<String> children) {
       originServerTs: DateTime(2030),
     ),
   );
+  if (name != null) {
+    space.setState(
+      Event(
+        type: EventTypes.RoomName,
+        stateKey: '',
+        content: {'name': name},
+        room: space,
+        eventId: '\$name',
+        senderId: '@admin:example.org',
+        originServerTs: DateTime(2030),
+      ),
+    );
+  }
   for (final child in children) {
     space.setState(
       Event(
@@ -45,9 +60,19 @@ Room testSpaceChild(
   String id, {
   int unread = 0,
   Membership? membership,
+  List<String> tags = const [],
 }) => Room(
   id: id,
   client: client,
   membership: membership ?? Membership.join,
   notificationCount: unread,
+  roomAccountData: {
+    if (tags.isNotEmpty)
+      'm.tag': BasicEvent(
+        type: 'm.tag',
+        content: {
+          'tags': {for (final tag in tags) tag: <String, Object?>{}},
+        },
+      ),
+  },
 );

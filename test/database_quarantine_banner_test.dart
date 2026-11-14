@@ -88,6 +88,18 @@ void main() {
     expect(text, contains('key backup'));
   });
 
+  testWidgets('close button semantics name the notice (n4)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await markDatabaseQuarantined('a');
+    await pumpHost(tester);
+    final l10n = L10n.of(tester.element(find.byType(MaterialBanner)));
+    final label = tester
+        .getSemantics(find.widgetWithText(TextButton, 'Close'))
+        .label;
+    expect(label, l10n.closeNotice(l10n.databaseQuarantined));
+    handle.dispose();
+  });
+
   testWidgets('closing dismisses it for good', (tester) async {
     await markDatabaseQuarantined('a');
     await pumpHost(tester);

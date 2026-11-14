@@ -7,6 +7,8 @@ import 'dart:async';
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/chat_list/unread_counts.dart';
+import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
@@ -15,6 +17,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class AppShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -27,6 +30,7 @@ class AppShell extends StatefulWidget {
   final Widget Function(BuildContext context, AppTab tab) leftColumn;
   final Widget Function(double size) profileAvatar;
   final int accountCount;
+  final Stream<int>? chatsUnread;
 
   const AppShell({
     required this.navigationShell,
@@ -34,6 +38,7 @@ class AppShell extends StatefulWidget {
     required this.leftColumn,
     this.profileAvatar = _ownAvatar,
     this.accountCount = 1,
+    this.chatsUnread,
     this.accountSwitched,
     this.activeClientChanged,
     this.onFirstShown,
@@ -49,6 +54,26 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   StreamSubscription<Object?>? _accountSubscription;
   StreamSubscription<Object?>? _clientSubscription;
+  final ValueNotifier<int> _chatsUnread = ValueNotifier(0);
+  StreamSubscription<int>? _unreadSubscription;
+
+  void _watchUnread() {
+    _unreadSubscription?.cancel();
+    final injected = widget.chatsUnread;
+    if (injected != null) {
+      _unreadSubscription = injected.listen((count) {
+        _chatsUnread.value = count;
+      });
+      return;
+    }
+    final client = Matrix.of(context).client;
+    _chatsUnread.value = unreadChatCount(client.rooms);
+    _unreadSubscription = client.onSync.stream
+        .where((sync) => sync.hasRoomUpdate)
+        .rateLimit(const Duration(seconds: 1))
+        .map((_) => unreadChatCount(client.rooms))
+        .listen((count) => _chatsUnread.value = count);
+  }
 
   AppTab get _selected => AppTab.values[widget.navigationShell.currentIndex];
 
@@ -60,13 +85,17 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    _watchUnread();
     _accountSubscription =
         (widget.accountSwitched ?? Matrix.of(context).onAccountSwitched).listen(
           (_) => _resetTabs(keepCurrent: false),
         );
     _clientSubscription =
         (widget.activeClientChanged ?? Matrix.of(context).onActiveClientChanged)
-            .listen((_) => _resetTabs(keepCurrent: true));
+            .listen((_) {
+              if (widget.chatsUnread == null) _watchUnread();
+              _resetTabs(keepCurrent: true);
+            });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) widget.onFirstShown?.call();
     });
@@ -109,6 +138,8 @@ class _AppShellState extends State<AppShell> {
   void dispose() {
     _accountSubscription?.cancel();
     _clientSubscription?.cancel();
+    _unreadSubscription?.cancel();
+    _chatsUnread.dispose();
     super.dispose();
   }
 
@@ -135,32 +166,44 @@ class _AppShellState extends State<AppShell> {
                     showBar:
                         AppTab.isRoot(widget.location) &&
                         mq.viewInsets.bottom == 0,
-                    bar: AppBottomBar(
-                      tabs: tabs,
-                      selected: _selected,
-                      onSelect: _select,
-                      profileAvatar: widget.profileAvatar(25),
+                    bar: _ChatsUnread(
+                      count: _chatsUnread,
+                      builder: (badge) => AppBottomBar(
+                        tabs: tabs,
+                        selected: selected,
+                        onSelect: _select,
+                        profileAvatar: widget.profileAvatar(25),
+                        chatsBadge: badge,
+                      ),
                     ),
                   )
                 : TwoColumnLayout(
                     rail: mode.hasRail
-                        ? AppNavRail(
-                            tabs: tabs,
-                            selected: _selected,
-                            onSelect: _select,
-                            profileAvatar: widget.profileAvatar(42),
-                            accountCount: widget.accountCount,
+                        ? _ChatsUnread(
+                            count: _chatsUnread,
+                            builder: (badge) => AppNavRail(
+                              tabs: tabs,
+                              selected: selected,
+                              onSelect: _select,
+                              profileAvatar: widget.profileAvatar(42),
+                              accountCount: widget.accountCount,
+                              chatsBadge: badge,
+                            ),
                           )
                         : null,
                     mainView: _LeftColumns(
-                      selected: _selected,
+                      selected: selected,
                       builder: widget.leftColumn,
                       header: mode == ShellMode.twoPane
-                          ? AppTabStrip(
-                              tabs: tabs,
-                              selected: _selected,
-                              onSelect: _select,
-                              profileAvatar: widget.profileAvatar(26),
+                          ? _ChatsUnread(
+                              count: _chatsUnread,
+                              builder: (badge) => AppTabStrip(
+                                tabs: tabs,
+                                selected: selected,
+                                onSelect: _select,
+                                profileAvatar: widget.profileAvatar(26),
+                                chatsBadge: badge,
+                              ),
                             )
                           : null,
                     ),
@@ -173,10 +216,24 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
+/// Only the widgets that show the badge rebuild when the count changes.
+class _ChatsUnread extends StatelessWidget {
+  final ValueNotifier<int> count;
+  final Widget Function(int badge) builder;
+
+  const _ChatsUnread({required this.count, required this.builder});
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<int>(
+    valueListenable: count,
+    builder: (context, badge, _) => builder(badge),
+  );
+}
+
 class _MobileShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   final bool showBar;
-  final AppBottomBar bar;
+  final Widget bar;
 
   const _MobileShell({
     required this.navigationShell,
@@ -191,44 +248,46 @@ class _MobileShell extends StatelessWidget {
     final duration = mq.disableAnimations
         ? Duration.zero
         : FluffyThemes.animationDuration;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: MediaQuery(
-            data: showBar
-                ? mq.copyWith(
-                    padding: mq.padding.copyWith(bottom: inset),
-                    viewPadding: mq.viewPadding.copyWith(bottom: inset),
-                  )
-                : mq,
-            child: navigationShell,
+    return BackdropGroup(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: MediaQuery(
+              data: showBar
+                  ? mq.copyWith(
+                      padding: mq.padding.copyWith(bottom: inset),
+                      viewPadding: mq.viewPadding.copyWith(bottom: inset),
+                    )
+                  : mq,
+              child: navigationShell,
+            ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: ExcludeSemantics(
-            excluding: !showBar,
-            child: ExcludeFocus(
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ExcludeSemantics(
               excluding: !showBar,
-              child: IgnorePointer(
-                ignoring: !showBar,
-                child: AnimatedSlide(
-                  duration: duration,
-                  curve: FluffyThemes.animationCurve,
-                  offset: showBar ? Offset.zero : const Offset(0, 1),
-                  child: AnimatedOpacity(
+              child: ExcludeFocus(
+                excluding: !showBar,
+                child: IgnorePointer(
+                  ignoring: !showBar,
+                  child: AnimatedSlide(
                     duration: duration,
-                    opacity: showBar ? 1 : 0,
-                    child: bar,
+                    curve: FluffyThemes.animationCurve,
+                    offset: showBar ? Offset.zero : const Offset(0, 1),
+                    child: AnimatedOpacity(
+                      duration: duration,
+                      opacity: showBar ? 1 : 0,
+                      child: bar,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

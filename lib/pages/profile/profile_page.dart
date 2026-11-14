@@ -28,10 +28,12 @@ class ProfileController extends State<ProfilePage> {
 
   bool get hasAccount => Matrix.of(context).activeClientOrNull != null;
 
-  void _reload() => profileFuture = client.getProfileFromUserId(
-    client.userID!,
-    maxCacheAge: Duration.zero,
-  );
+  void _reload() {
+    profileFuture = client.getProfileFromUserId(
+      client.userID!,
+      maxCacheAge: Duration.zero,
+    );
+  }
 
   @override
   void initState() {

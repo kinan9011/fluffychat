@@ -10,16 +10,19 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/calls/calls_page.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
+import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
+import 'package:fluffychat/utils/chat_list/unread_counts.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
 import 'package:fluffychat/widgets/layouts/app_shell.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +58,7 @@ void main() {
   tearDown(() async {
     AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
     MatrixState.startupHooks = MatrixState.defaultStartupHooks;
+    MatrixState.accountHooks = MatrixState.defaultAccountHooks;
     SettingsController.loadCryptoIdentityConnected =
         SettingsController.defaultLoadCryptoIdentityConnected;
     await AppSettings.callsEnabled.setItem(true);
@@ -121,10 +125,13 @@ void main() {
     var runs = 0;
     var chatListsAtRun = -1;
 
-    void countRuns() => MatrixState.startupHooks = (_) {
-      runs++;
-      chatListsAtRun = find.byType(ChatList).evaluate().length;
-    };
+    void countRuns() {
+      MatrixState.accountHooks = (_, _, _) async {};
+      MatrixState.startupHooks = (_) {
+        runs++;
+        chatListsAtRun = find.byType(ChatList).evaluate().length;
+      };
+    }
 
     setUp(() {
       runs = 0;
@@ -175,6 +182,116 @@ void main() {
       beforePump: countRuns,
       startAt: '/settings',
     );
+  });
+
+  group('account hooks (N4)', () {
+    final calls = <String>[];
+    var chatListsAtCall = -1;
+
+    void countHooks() =>
+        MatrixState.accountHooks = (matrix, client, context) async {
+          calls.add(client.clientName);
+          chatListsAtCall = find.byType(ChatList).evaluate().length;
+        };
+
+    setUp(() {
+      calls.clear();
+      chatListsAtCall = -1;
+    });
+
+    tearDown(() => MatrixState.accountHooks = MatrixState.defaultAccountHooks);
+
+    accountTest(
+      'run once for the active account without a built ChatList',
+      (tester, matrix) async {
+        await settle(tester);
+        expect(calls, [first.clientName]);
+        expect(chatListsAtCall, 0);
+        return matrix;
+      },
+      beforePump: countHooks,
+      startAt: '/settings',
+    );
+
+    accountTest('are not repeated when the chats tab is opened', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      await goTo(tester, '/rooms');
+      await settle(tester);
+      await goTo(tester, '/settings');
+      await settle(tester);
+      await goTo(tester, '/rooms');
+      await settle(tester);
+      expect(calls, [first.clientName]);
+      return matrix;
+    }, beforePump: countHooks);
+
+    accountTest('run for an account that logs in later', (
+      tester,
+      matrix,
+    ) async {
+      await AppSettings.callsEnabled.setItem(false);
+      await settle(tester);
+      matrix.addLoggedInClient(stranger);
+      await settle(tester);
+      expect(calls, [first.clientName, stranger.clientName]);
+      return matrix;
+    }, beforePump: countHooks);
+
+    accountTest('run once when the account is added again', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      matrix.addLoggedInClient(first);
+      await settle(tester);
+      expect(calls, [first.clientName]);
+      return matrix;
+    }, beforePump: countHooks);
+
+    accountTest(
+      'run once on the first login of a fresh install (L3)',
+      (tester, matrix) async {
+        await settle(tester);
+        expect(calls, isEmpty, reason: 'logged out: no shell, no hooks');
+        AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
+        matrix.addLoggedInClient(first);
+        await goTo(tester, '/rooms');
+        await settle(tester);
+        expect(find.byType(AppShell), findsOneWidget);
+        expect(calls, [first.clientName]);
+        return matrix;
+      },
+      beforePump: () {
+        countHooks();
+        AppRoutes.isLoggedIn = (_) => false;
+      },
+    );
+  });
+
+  group('logout snackbar in column mode', () {
+    for (final width in [400.0, 700.0, 1280.0]) {
+      accountTest(
+        'shows at $width px',
+        (tester, matrix) async {
+          await goTo(tester, '/profile');
+          await settle(tester);
+          second.onLoginStateChanged.add(LoginState.loggedOut);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+          expect(
+            find.text('One of your clients has been logged out'),
+            findsOne,
+          );
+          expect(tester.takeException(), isNull);
+          return matrix;
+        },
+        width: width,
+        beforePump: () => MatrixState.accountHooks = (_, _, _) async {},
+      );
+    }
   });
 
   group('MatrixState.setActiveClient', () {
@@ -250,13 +367,7 @@ void main() {
           final original = FlutterError.onError;
           final errors = <Object>[];
           FlutterError.onError = (details) => errors.add(details.exception);
-          // The "one account logged out" snackbar has no Scaffold to show in
-          // beneath the column layout's own ScaffoldMessenger (pre-existing).
-          if (width < 600) {
-            second.onLoginStateChanged.add(LoginState.loggedOut);
-          } else {
-            matrix.widget.clients.remove(second);
-          }
+          second.onLoginStateChanged.add(LoginState.loggedOut);
           first.onLoginStateChanged.add(LoginState.loggedOut);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 500));
@@ -492,6 +603,296 @@ void main() {
     });
   });
 
+  group('space tabs and ?spaceId= (W03-1)', () {
+    const spaceId = '!space:example.org';
+
+    void addSpace() => first.rooms.addAll([
+      testSpace(first, ['!a:x', '!b:x'], name: 'Alpha'),
+      testSpaceChild(first, '!a:x', unread: 1),
+      testSpaceChild(first, '!b:x'),
+      testSpaceChild(first, '!c:x'),
+    ]);
+
+    tearDown(() {
+      first.rooms.removeWhere(
+        (room) =>
+            room.id == spaceId ||
+            const ['!a:x', '!b:x', '!c:x'].contains(room.id),
+      );
+      second.rooms.removeWhere((room) => room.id == '!other:x');
+      first.rooms.removeWhere(
+        (room) => const ['!sub:x', '!bad id:x', '!tagged:x'].contains(room.id),
+      );
+      second.rooms.removeWhere((room) => room.id == '!tagged2:x');
+    });
+
+    Finder row(String id) => find.byKey(Key('chat_list_item_$id'));
+
+    bool tabSelected(WidgetTester tester, String label) => tester
+        .getSemantics(find.bySemanticsLabel(RegExp('^$label')).first)
+        .flagsCollection
+        .isSelected
+        .toString()
+        .endsWith('isTrue');
+
+    for (final width in [400.0, 1280.0]) {
+      accountTest(
+        'a space is a tab that filters the list at $width px',
+        (tester, matrix) async {
+          final handle = tester.ensureSemantics();
+          await goTo(tester, '/rooms');
+          await settle(tester);
+          expect(find.text('Alpha'), findsOneWidget);
+          expect(row('!c:x'), findsOneWidget);
+          expect(row(spaceId), findsNothing, reason: 'joined spaces are tabs');
+          await tester.tap(find.text('Alpha'));
+          await settle(tester);
+          expect(row('!a:x'), findsOneWidget);
+          expect(row('!b:x'), findsOneWidget);
+          expect(row('!c:x'), findsNothing);
+          handle.dispose();
+          return matrix;
+        },
+        width: width,
+        beforePump: addSpace,
+      );
+
+      accountTest(
+        '?spaceId= selects the space tab at $width px',
+        (tester, matrix) async {
+          final handle = tester.ensureSemantics();
+          await goTo(tester, '/rooms?spaceId=$spaceId');
+          await settle(tester);
+          expect(tabSelected(tester, 'Alpha'), isTrue);
+          expect(row('!a:x'), findsOneWidget);
+          expect(row('!c:x'), findsNothing);
+          handle.dispose();
+          return matrix;
+        },
+        width: width,
+        beforePump: addSpace,
+      );
+    }
+
+    for (final bad in ['!unknown:x', '%00bad', '!a:x', 'not-an-id']) {
+      accountTest('?spaceId=$bad falls back to All chats', (
+        tester,
+        matrix,
+      ) async {
+        await goTo(tester, '/rooms?spaceId=$bad');
+        await settle(tester);
+        expect(row('!c:x'), findsOneWidget);
+        expect(row('!a:x'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        return matrix;
+      }, beforePump: addSpace);
+    }
+
+    accountTest(
+      'the space overview has a Back button that leaves it',
+      (tester, matrix) async {
+        await goTo(tester, '/rooms?spaceId=!sub:x');
+        await settle(tester);
+        expect(find.byType(SpaceView), findsOneWidget);
+        expect(
+          find.text('Alpha'),
+          findsNothing,
+          reason: 'the tab bar is hidden',
+        );
+        await tester.tap(find.byTooltip('Back'));
+        await settle(tester);
+        expect(find.byType(SpaceView), findsNothing);
+        expect(
+          find.text('Alpha'),
+          findsOneWidget,
+          reason: 'the tab bar is back',
+        );
+        return matrix;
+      },
+      beforePump: () {
+        addSpace();
+        first.rooms.add(testSpace(first, ['!r:x'], id: '!sub:x', name: 'Sub'));
+        first.rooms
+            .firstWhere((r) => r.id == spaceId)
+            .setState(
+              Event(
+                type: EventTypes.SpaceChild,
+                stateKey: '!sub:x',
+                content: {
+                  'via': ['example.org'],
+                },
+                room: first.rooms.firstWhere((r) => r.id == spaceId),
+                eventId: '\$sub',
+                senderId: '@admin:example.org',
+                originServerTs: DateTime(2030),
+              ),
+            );
+      },
+    );
+
+    accountTest(
+      '?spaceId= with a malformed id of a joined space is ignored',
+      (tester, matrix) async {
+        await goTo(
+          tester,
+          '/rooms?spaceId=${Uri.encodeQueryComponent('!bad id:x')}',
+        );
+        await settle(tester);
+        expect(find.byType(SpaceView), findsNothing);
+        expect(row('!c:x'), findsOneWidget, reason: 'still All chats');
+        expect(row('!a:x'), findsOneWidget);
+        return matrix;
+      },
+      beforePump: () {
+        addSpace();
+        first.rooms.add(
+          testSpace(first, ['!z:x'], id: '!bad id:x', name: 'Bad'),
+        );
+      },
+    );
+
+    accountTest('a space tab shows its unread count', (tester, matrix) async {
+      await goTo(tester, '/rooms');
+      await settle(tester);
+      expect(
+        find.descendant(
+          of: find.ancestor(
+            of: find.text('Alpha'),
+            matching: find.byType(InkWell),
+          ),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      return matrix;
+    }, beforePump: addSpace);
+
+    accountTest(
+      'switching account shows All chats without the old tabs',
+      (tester, matrix) async {
+        await goTo(tester, '/rooms');
+        await settle(tester);
+        await tester.tap(find.text('Alpha'));
+        await settle(tester);
+        expect(row('!c:x'), findsNothing);
+        matrix.setActiveClient(second);
+        await settle(tester);
+        expect(find.text('Alpha'), findsNothing);
+        expect(row('!c:x'), findsNothing, reason: 'rooms of the first account');
+        expect(row('!other:x'), findsOneWidget, reason: 'All chats of second');
+        return matrix;
+      },
+      beforePump: () {
+        addSpace();
+        second.rooms.add(testSpaceChild(second, '!other:x'));
+      },
+    );
+
+    accountTest(
+      'tag tabs follow the active account (L4)',
+      (tester, matrix) async {
+        await goTo(tester, '/rooms');
+        await settle(tester);
+        expect(find.text('work'), findsOneWidget);
+        matrix.setActiveClient(second);
+        await settle(tester);
+        expect(find.text('work'), findsNothing, reason: 'tag of the first');
+        expect(find.text('play'), findsOneWidget, reason: 'tag of the second');
+        matrix.setActiveClient(first);
+        await settle(tester);
+        expect(find.text('play'), findsNothing);
+        expect(find.text('work'), findsOneWidget);
+        return matrix;
+      },
+      beforePump: () {
+        first.rooms.add(testSpaceChild(first, '!tagged:x', tags: ['u.work']));
+        second.rooms.add(
+          testSpaceChild(second, '!tagged2:x', tags: ['u.play']),
+        );
+      },
+    );
+
+    accountTest('the avatar in the top bar opens the profile', (
+      tester,
+      matrix,
+    ) async {
+      await goTo(tester, '/rooms');
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel('Open profile').first);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(location(), '/profile');
+      return matrix;
+    });
+  });
+
+  group('chats badge follows the active account (T20)', () {
+    List<Room> unread(Client client, int count, String prefix) => [
+      for (var i = 0; i < count; i++)
+        testSpaceChild(client, '!$prefix$i:x', unread: 1),
+    ];
+
+    tearDown(() {
+      first.rooms.removeWhere((room) => room.id.startsWith('!ba'));
+      second.rooms.removeWhere((room) => room.id.startsWith('!bb'));
+    });
+
+    accountTest(
+      'counts the unread chats of the active account only',
+      (tester, matrix) async {
+        await settle(tester);
+        final badge = find.descendant(
+          of: find.byType(AppBottomBar),
+          matching: find.byType(ChatsBadge),
+        );
+        final firstCount = unreadChatCount(first.rooms);
+        final secondCount = unreadChatCount(second.rooms);
+        expect(firstCount, isNot(secondCount));
+        expect(
+          find.descendant(of: badge.first, matching: find.text('$firstCount')),
+          findsOneWidget,
+        );
+        matrix.setActiveClient(second);
+        await settle(tester);
+        expect(
+          find.descendant(of: badge.first, matching: find.text('$secondCount')),
+          findsOneWidget,
+        );
+        return matrix;
+      },
+      beforePump: () {
+        first.rooms.addAll(unread(first, 2, 'ba'));
+        second.rooms.addAll(unread(second, 5, 'bb'));
+      },
+    );
+
+    for (final width in [400.0, 700.0]) {
+      accountTest(
+        'an account switch does not remount the tab pages at $width px',
+        (tester, matrix) async {
+          await settle(tester);
+          final before = tester.state(find.byType(ChatList));
+          matrix.setActiveClient(second);
+          await settle(tester);
+          expect(tester.state(find.byType(ChatList)), same(before));
+          return matrix;
+        },
+        width: width,
+      );
+    }
+  });
+
+  group('wordmark (W03-1)', () {
+    setUp(() => AppSettings.applicationName.setItem('Acme'));
+    tearDown(() => AppSettings.applicationName.setItem('FluffyChat'));
+
+    accountTest('follows the application name', (tester, matrix) async {
+      await goTo(tester, '/rooms');
+      await settle(tester);
+      expect(find.text('Acme'), findsOneWidget);
+      return matrix;
+    });
+  });
+
   group('wiring of earlier fixes', () {
     ServerCapabilities cached(MatrixState matrix, Client client) =>
         matrix.serverCapabilities.cached(client);
@@ -500,20 +901,6 @@ void main() {
       () => first.rooms.removeWhere(
         (room) => room.id == '!space:example.org' || room.id == '!a:x',
       ),
-    );
-
-    accountTest(
-      'a joined space row shows the space bubble',
-      (tester, matrix) async {
-        await goTo(tester, '/rooms');
-        await settle(tester);
-        expect(find.byType(SpaceUnreadBubble), findsOneWidget);
-        return matrix;
-      },
-      beforePump: () => first.rooms.addAll([
-        testSpace(first, ['!a:x']),
-        testSpaceChild(first, '!a:x', unread: 1),
-      ]),
     );
 
     accountTest('logging out forgets the cached server capabilities', (

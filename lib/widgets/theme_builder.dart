@@ -58,6 +58,7 @@ class ThemeController extends State<ThemeBuilder> {
   Future<void> setAccentHue(int? hue) async {
     if (hue == null) {
       await AppSettings.store.remove(AppSettings.accentHue.key);
+      AppSettings.accentHue.notifyRemoved();
       setState(() {});
       return;
     }

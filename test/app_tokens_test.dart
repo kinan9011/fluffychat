@@ -103,7 +103,7 @@ void main() {
         0xFF00494D,
       ],
       155: [
-        0xFF007A44,
+        0xFF007C45,
         0xFFDAF3E1,
         0xFFCEEED8,
         0xFF5BC083,
@@ -202,17 +202,17 @@ void main() {
         test(label, () {
           final t = dark ? AppTokens.dark(hue: hue) : AppTokens.light(hue: hue);
           final checks = {
-            'fg on bg': wcagContrast(t.fg, t.bg),
-            'fg on surf': wcagContrast(t.fg, t.surf),
-            'fg on surf2': wcagContrast(t.fg, t.surf2),
-            'onacc on acc': wcagContrast(t.onacc, t.acc),
-            'outFg on outS': wcagContrast(t.outFg, t.outS),
-            'mut on bg': wcagContrast(t.mut, t.bg),
-            'mut on surf': wcagContrast(t.mut, t.surf),
-            'acc on bg': wcagContrast(t.acc, t.bg),
-            'acc on surf': wcagContrast(t.acc, t.surf),
-            'acc on accs': wcagContrast(t.acc, t.accs),
-            'fg on out': wcagContrast(t.fg, t.out),
+            'fg on bg': wcagContrast8(t.fg, t.bg),
+            'fg on surf': wcagContrast8(t.fg, t.surf),
+            'fg on surf2': wcagContrast8(t.fg, t.surf2),
+            'onacc on acc': wcagContrast8(t.onacc, t.acc),
+            'outFg on outS': wcagContrast8(t.outFg, t.outS),
+            'mut on bg': wcagContrast8(t.mut, t.bg),
+            'mut on surf': wcagContrast8(t.mut, t.surf),
+            'acc on bg': wcagContrast8(t.acc, t.bg),
+            'acc on surf': wcagContrast8(t.acc, t.surf),
+            'acc on accs': wcagContrast8(t.acc, t.accs),
+            'fg on out': wcagContrast8(t.fg, t.out),
           };
           for (final entry in checks.entries) {
             expect(
@@ -331,33 +331,105 @@ void main() {
       expect(a.lerp(null, 0.5), a);
     });
 
-    testWidgets(
-      'of(context) reads the theme extension, falls back by brightness',
-      (tester) async {
-        late AppTokens fromExtension;
-        late AppTokens fromFallback;
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(extensions: [AppTokens.dark(hue: 25)]),
-            home: Builder(
-              builder: (context) {
-                fromExtension = AppTokens.of(context);
-                return Theme(
-                  data: ThemeData(brightness: Brightness.dark),
-                  child: Builder(
-                    builder: (context) {
-                      fromFallback = AppTokens.of(context);
-                      return const SizedBox();
-                    },
-                  ),
-                );
-              },
-            ),
+    testWidgets('of(context) reads the theme extension', (tester) async {
+      late AppTokens fromExtension;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [AppTokens.dark(hue: 25)]),
+          home: Builder(
+            builder: (context) {
+              fromExtension = AppTokens.of(context);
+              return const SizedBox();
+            },
           ),
-        );
-        expect(fromExtension, AppTokens.dark(hue: 25));
-        expect(fromFallback, AppTokens.dark());
-      },
+        ),
+      );
+      expect(fromExtension, AppTokens.dark(hue: 25));
+    });
+  });
+
+  group('L1: contrast is measured on the painted 8-bit colours', () {
+    test('every integer hue passes every text pair in light and dark', () {
+      for (var hue = 0; hue < 360; hue++) {
+        for (final dark in [false, true]) {
+          final t = dark
+              ? AppTokens.dark(hue: hue.toDouble())
+              : AppTokens.light(hue: hue.toDouble());
+          final pairs = {
+            'acc/bg': (t.acc, t.bg),
+            'acc/surf': (t.acc, t.surf),
+            'acc/accs': (t.acc, t.accs),
+            'onacc/acc': (t.onacc, t.acc),
+            'outFg/outS': (t.outFg, t.outS),
+            'fg/out': (t.fg, t.out),
+            'outMut/outS': (t.outMut, t.outS),
+            'fg/bg': (t.fg, t.bg),
+            'fg/surf': (t.fg, t.surf),
+            'fg/surf2': (t.fg, t.surf2),
+            'mut/bg': (t.mut, t.bg),
+            'mut/surf': (t.mut, t.surf),
+            'mut/surf2': (t.mut, t.surf2),
+            'mut/accs': (t.mut, t.accs),
+            'fg/accs': (t.fg, t.accs),
+            'onRed/red': (t.onRed, t.red),
+            'white/mbad': (Colors.white, t.mbad),
+            'white/avatar': (Colors.white, avatarColorForHue(hue.toDouble())),
+          };
+          for (final entry in pairs.entries) {
+            expect(
+              wcagContrast8(entry.value.$1, entry.value.$2),
+              greaterThanOrEqualTo(4.5),
+              reason: '${entry.key} ${dark ? 'dark' : 'light'} hue $hue',
+            );
+          }
+        }
+      }
+    });
+
+    test('light hue 268 accent is unchanged', () {
+      expect(AppTokens.light().acc.toARGB32(), 0xFF4463C7);
+    });
+  });
+
+  group('B8 helpers', () {
+    test('swatch is oklch(.58 .15 h) and maps back to its hue', () {
+      final expected = oklchColor(0.58, 0.15, 268);
+      final actual = AppTokens.swatch(268);
+      expect(actual.r * 255, closeTo(expected.r * 255, 1));
+      expect(actual.g * 255, closeTo(expected.g * 255, 1));
+      expect(actual.b * 255, closeTo(expected.b * 255, 1));
+      for (final hue in AppTokens.accentHues) {
+        expect(accentHueOf(AppTokens.swatch(hue)), hue);
+      }
+    });
+
+    test('overlay clamps alpha to .18-.35 and survives nan', () {
+      expect(AppTokens.overlay(0.1).a, closeTo(0.18, 0.001));
+      expect(AppTokens.overlay(0.9).a, closeTo(0.35, 0.001));
+      expect(AppTokens.overlay(double.nan).a, closeTo(0.32, 0.001));
+      expect(AppTokens.overlay().a, closeTo(0.32, 0.001));
+    });
+
+    test('nameLightness', () {
+      expect(AppTokens.nameLightness(Brightness.light), 0.52);
+      expect(AppTokens.nameLightness(Brightness.dark), 0.76);
+    });
+  });
+
+  testWidgets('B4: AppTokens.of asserts when the theme has no tokens', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: Builder(
+          builder: (context) {
+            AppTokens.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
     );
+    expect(tester.takeException(), isA<AssertionError>());
   });
 }

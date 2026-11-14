@@ -12,11 +12,11 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/color_value.dart';
-import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -86,10 +86,13 @@ class SettingsStyleView extends StatelessWidget {
                     Theme.of(context).brightness == Brightness.light
                     ? light?.primary
                     : dark?.primary;
-                final colors = [null, AppConfig.chatColor, ...Colors.primaries];
-                if (systemColor == null) {
-                  colors.remove(null);
-                }
+                final colors = SettingsStyleController.accentSwatches(
+                  systemColor,
+                );
+                final checked = SettingsStyleController.checkedSwatch(
+                  colors,
+                  controller.currentAccentHue.toInt(),
+                );
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -98,8 +101,7 @@ class SettingsStyleView extends StatelessWidget {
                   ),
                   itemCount: colors.length,
                   itemBuilder: (context, i) {
-                    final color =
-                        colors[i] ?? systemColor ?? AppConfig.chatColor;
+                    final color = colors[i];
                     return Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Tooltip(
@@ -117,9 +119,7 @@ class SettingsStyleView extends StatelessWidget {
                             child: SizedBox(
                               width: colorPickerSize,
                               height: colorPickerSize,
-                              child:
-                                  accentHueOf(color) ==
-                                      controller.currentAccentHue
+                              child: i == checked
                                   ? Center(
                                       child: Icon(
                                         Icons.check,
@@ -138,6 +138,12 @@ class SettingsStyleView extends StatelessWidget {
                   },
                 );
               },
+            ),
+            Divider(color: theme.dividerColor),
+            SettingsSwitchListTile.adaptive(
+              setting: AppSettings.reduceTransparency,
+              title: L10n.of(context).reduceTransparency,
+              subtitle: L10n.of(context).reduceTransparencyDescription,
             ),
             Divider(color: theme.dividerColor),
             ListTile(

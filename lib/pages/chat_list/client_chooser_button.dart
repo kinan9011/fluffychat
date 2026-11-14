@@ -17,8 +17,13 @@ import 'chat_list.dart';
 
 class ClientChooserButton extends StatelessWidget {
   final ChatListController controller;
+  final bool overflowIcon;
 
-  const ClientChooserButton(this.controller, {super.key});
+  const ClientChooserButton(
+    this.controller, {
+    this.overflowIcon = false,
+    super.key,
+  });
 
   List<PopupMenuEntry<Object>> _bundleMenuItems(BuildContext context) {
     final matrix = Matrix.of(context);
@@ -195,12 +200,14 @@ class ClientChooserButton extends StatelessWidget {
           tooltip: L10n.of(context).accountsAndSettings,
           onSelected: (o) => _clientSelected(o, context),
           itemBuilder: _bundleMenuItems,
-          icon: Avatar(
-            mxContent: snapshot.data?.avatarUrl,
-            name: snapshot.data?.displayName ?? client?.userID?.localpart,
-            colorSeed: client?.userID,
-            size: 32,
-          ),
+          icon: overflowIcon
+              ? const Icon(Icons.more_vert_rounded)
+              : Avatar(
+                  mxContent: snapshot.data?.avatarUrl,
+                  name: snapshot.data?.displayName ?? client?.userID?.localpart,
+                  colorSeed: client?.userID,
+                  size: 32,
+                ),
         ),
       ),
     );

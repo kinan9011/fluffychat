@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/presence_builder.dart';
@@ -106,8 +107,7 @@ class Avatar extends StatelessWidget {
                       child: Text(
                         fallbackLetters,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'JetBrainsMono',
+                        style: AppTypography.mono.copyWith(
                           color: textColor ?? Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: (size / 2.5).roundToDouble(),

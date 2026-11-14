@@ -8,6 +8,7 @@ import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AppNavRail extends StatelessWidget {
@@ -16,6 +17,7 @@ class AppNavRail extends StatelessWidget {
   final ValueChanged<AppTab> onSelect;
   final Widget profileAvatar;
   final int accountCount;
+  final int chatsBadge;
 
   const AppNavRail({
     required this.tabs,
@@ -23,6 +25,7 @@ class AppNavRail extends StatelessWidget {
     required this.onSelect,
     required this.profileAvatar,
     this.accountCount = 1,
+    this.chatsBadge = 0,
     super.key,
   });
 
@@ -60,13 +63,20 @@ class AppNavRail extends StatelessWidget {
                   for (final tab in tabs)
                     if (tab != AppTab.profile)
                       _RailButton(
-                        label: tab.label(l10n),
+                        label: ChatsBadge.semanticsLabel(
+                          tab,
+                          tab == AppTab.chats ? chatsBadge : 0,
+                          l10n,
+                        ),
                         selected: tab == selected,
                         onTap: () => onSelect(tab),
-                        child: Icon(
-                          tab == selected ? tab.activeIcon : tab.icon,
-                          size: 24,
-                          color: tab == selected ? tokens.onacc : tokens.mut,
+                        child: ChatsBadge(
+                          count: tab == AppTab.chats ? chatsBadge : 0,
+                          child: Icon(
+                            tab == selected ? tab.activeIcon : tab.icon,
+                            size: 24,
+                            color: tab == selected ? tokens.onacc : tokens.mut,
+                          ),
                         ),
                       ),
                 ],
@@ -131,12 +141,14 @@ class AppTabStrip extends StatelessWidget {
   final AppTab? selected;
   final ValueChanged<AppTab> onSelect;
   final Widget profileAvatar;
+  final int chatsBadge;
 
   const AppTabStrip({
     required this.tabs,
     required this.selected,
     required this.onSelect,
     required this.profileAvatar,
+    this.chatsBadge = 0,
     super.key,
   });
 
@@ -161,7 +173,11 @@ class AppTabStrip extends StatelessWidget {
                     child: Semantics(
                       button: true,
                       selected: tab == selected,
-                      label: tab.label(l10n),
+                      label: ChatsBadge.semanticsLabel(
+                        tab,
+                        tab == AppTab.chats ? chatsBadge : 0,
+                        l10n,
+                      ),
                       onTap: () => onSelect(tab),
                       excludeSemantics: true,
                       child: Tooltip(
@@ -182,14 +198,19 @@ class AppTabStrip extends StatelessWidget {
                                         dimension: 26,
                                         child: profileAvatar,
                                       )
-                                    : Icon(
-                                        tab == selected
-                                            ? tab.activeIcon
-                                            : tab.icon,
-                                        size: 24,
-                                        color: tab == selected
-                                            ? tokens.acc
-                                            : tokens.fg,
+                                    : ChatsBadge(
+                                        count: tab == AppTab.chats
+                                            ? chatsBadge
+                                            : 0,
+                                        child: Icon(
+                                          tab == selected
+                                              ? tab.activeIcon
+                                              : tab.icon,
+                                          size: 24,
+                                          color: tab == selected
+                                              ? tokens.acc
+                                              : tokens.fg,
+                                        ),
                                       ),
                               ),
                             ),

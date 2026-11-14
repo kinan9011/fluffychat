@@ -2898,5 +2898,57 @@
     "groupCallsNotSupported": "Your server isn't set up for group calls. One-to-one calls still work.",
     "myQrCode": "My QR code",
     "accounts": "Accounts",
-    "mainNavigation": "Main navigation"
+    "mainNavigation": "Main navigation",
+    "allChats": "All chats",
+    "personal": "Personal",
+    "spaceNavigation": "Space navigation",
+    "spaceNavigationTabs": "Tabs",
+    "spaceNavigationSwitcher": "Switcher",
+    "showFoldersAfterSpaces": "Show folders after spaces",
+    "showUnreadCountsOnTabs": "Show unread counts on tabs",
+    "switchSpace": "Switch space",
+    "currentSpaceSemantics": "{name}, switch space",
+    "@currentSpaceSemantics": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "explorePublicSpaces": "Explore public spaces",
+    "spaceOverview": "Space overview",
+    "reduceTransparency": "Reduce transparency",
+    "reduceTransparencyDescription": "Use solid backgrounds instead of blurred glass",
+    "openProfile": "Open profile",
+    "tabUnreadSemantics": "{name}, {count} unread",
+    "@tabUnreadSemantics": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "unreadChatsTab": "Chats, {count} unread",
+    "@unreadChatsTab": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "closeNotice": "Close: {message}",
+    "@closeNotice": {
+        "type": "String",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    }
 }

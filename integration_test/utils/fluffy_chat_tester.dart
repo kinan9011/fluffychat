@@ -44,6 +44,22 @@ extension type FluffyChatTester(WidgetTester tester) {
     }
   }
 
+  Future<void> waitForGone(
+    Object object, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    _print('👀 Waiting for "$object" to disappear (${timeout.inSeconds}s)');
+    final end = DateTime.now().add(timeout);
+    while (object.toFinder().evaluate().isNotEmpty) {
+      if (DateTime.now().isAfter(end)) {
+        throw Exception(
+          '⏱️ "$object" is still there after ${timeout.inSeconds}s!',
+        );
+      }
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+  }
+
   Future<Finder> _ensureVisible(Object object, {int? index}) async {
     var finder = object.toFinder();
     if (finder.evaluate().isEmpty) await waitFor(object);
@@ -74,6 +90,14 @@ extension type FluffyChatTester(WidgetTester tester) {
     _print('👆 Tapping on "$object"');
     await tester.tap(finder);
     if (pumpAndSettle) await tester.pumpAndSettle();
+  }
+
+  Future<void> longPressOn(Object object, {int? index}) async {
+    final finder = await _ensureVisible(object, index: index);
+
+    _print('👆 Long pressing on "$object"');
+    await tester.longPress(finder);
+    await tester.pumpAndSettle();
   }
 
   Future<void> goBack() => tapOn(find.byTooltip('Back'));
@@ -121,6 +145,9 @@ extension on Object {
 
 extension StartTest on WidgetTester {
   Future<FluffyChatTester> startFluffyChatTest() async {
+    // The test binding resets the lifecycle state for every test, but the app
+    // only sends read markers while it is resumed.
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     app.main(['integration_test']);
 
     return FluffyChatTester(this);

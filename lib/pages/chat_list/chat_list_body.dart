@@ -8,12 +8,22 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_tabs.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_top_bar.dart';
+import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
+import 'package:fluffychat/pages/chat_list/space_switcher.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
+import 'package:fluffychat/utils/chat_list/folder_filter.dart';
+import 'package:fluffychat/utils/chat_list/folder_ref.dart';
+import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/own_avatar.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -32,12 +42,12 @@ class ChatListViewBody extends StatelessWidget {
     final theme = Theme.of(context);
 
     final client = Matrix.of(context).client;
-    final activeSpace = controller.activeSpaceId;
-    if (activeSpace != null) {
+    final overview = controller.overviewSpaceId;
+    if (overview != null) {
       return SpaceView(
-        key: ValueKey(activeSpace),
-        spaceId: activeSpace,
-        onBack: controller.clearActiveSpace,
+        key: ValueKey(overview),
+        spaceId: overview,
+        onBack: controller.closeSpaceOverview,
         onChatTab: controller.onChatTap,
         activeChat: controller.activeChat,
       );
@@ -61,203 +71,272 @@ class ChatListViewBody extends StatelessWidget {
     final userSearchResult = controller.userSearchResult;
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
-    return StreamBuilder(
-      key: ValueKey(client.userID.toString()),
-      stream: client.onSync.stream
-          .where((s) => s.hasRoomUpdate)
-          .rateLimit(const Duration(seconds: 1)),
-      builder: (context, _) {
-        final rooms = controller.filteredRooms
-            .where(
-              (room) =>
-                  !AppSettings.hideRoomsInSpaces.value ||
-                  spaceDelegateCandidates[room.id] == null,
-            )
-            .toList();
+    final l10n = L10n.of(context);
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        AppSettings.spaceNavigation.listenable,
+        AppSettings.showFoldersAfterSpaces.listenable,
+        AppSettings.showTabUnreadCounts.listenable,
+        AppSettings.hideRoomsInSpaces.listenable,
+      ]),
+      builder: (context, _) => StreamBuilder(
+        key: ValueKey(client.userID.toString()),
+        stream: client.onSync.stream
+            .where((s) => s.hasRoomUpdate)
+            .rateLimit(const Duration(seconds: 1)),
+        builder: (context, _) {
+          final mode = SpaceNavigationMode.fromSetting(
+            AppSettings.spaceNavigation.value,
+          );
+          final spaceModel = SpaceTabsModel.build(
+            client.rooms,
+            nameOf: (room) => room.getLocalizedDisplayname(MatrixLocals(l10n)),
+          );
+          final folderContext = FolderContext(
+            spaces: spaceModel,
+            hideRoomsInSpaces: AppSettings.hideRoomsInSpaces.value,
+          );
+          final scope = controller.scope;
+          final items = FolderFilter.tabs(
+            mode: mode,
+            spaces: spaceModel.tabs,
+            tags: controller.roomTags.keys.toList(),
+            showFoldersAfterSpaces: AppSettings.showFoldersAfterSpaces.value,
+            currentSpaceId: scope.spaceId,
+          );
+          final scopeIsShown =
+              (scope.spaceId == null ||
+                  spaceModel.tabs.any((tab) => tab.spaceId == scope.spaceId)) &&
+              items.any((item) => item.scope == scope);
+          if (client.prevBatch != null && !scopeIsShown) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (controller.mounted) controller.resetScope();
+            });
+          }
+          final rooms = FolderFilter.apply(client.rooms, scope, folderContext);
+          final unreadRooms = client.rooms
+              .where((room) => room.isUnreadOrInvited)
+              .toList();
+          final tabs = chatListTabData(
+            items,
+            l10n: l10n,
+            mode: mode,
+            showCounts: AppSettings.showTabUnreadCounts.value,
+            countOf: (tabScope) =>
+                FolderFilter.unreadCount(unreadRooms, tabScope, folderContext),
+          );
 
-        return CustomScrollView(
-          controller: controller.scrollController,
-          slivers: [
-            ChatListHeader(controller: controller),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                if (controller.isSearchMode) ...[
-                  SearchTitle(
-                    title: L10n.of(context).publicRooms,
-                    icon: const Icon(Icons.explore_outlined),
-                  ),
-                  PublicRoomsHorizontalList(publicRooms: publicRooms),
-                  SearchTitle(
-                    title: L10n.of(context).publicSpaces,
-                    icon: const Icon(Icons.workspaces_outlined),
-                  ),
-                  PublicRoomsHorizontalList(publicRooms: publicSpaces),
-                  SearchTitle(
-                    title: L10n.of(context).users,
-                    icon: const Icon(Icons.group_outlined),
-                  ),
-                  AnimatedContainer(
-                    clipBehavior: Clip.hardEdge,
-                    decoration: const BoxDecoration(),
-                    height:
-                        userSearchResult == null ||
-                            userSearchResult.results.isEmpty
-                        ? 0
-                        : 106,
-                    duration: FluffyThemes.animationDuration,
-                    curve: FluffyThemes.animationCurve,
-                    child: userSearchResult == null
-                        ? null
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: userSearchResult.results.length,
-                            itemBuilder: (context, i) => _SearchItem(
-                              title:
-                                  userSearchResult.results[i].displayName ??
-                                  userSearchResult
-                                      .results[i]
-                                      .userId
-                                      .localpart ??
-                                  L10n.of(context).unknownDevice,
-                              avatar: userSearchResult.results[i].avatarUrl,
-                              onPressed: () => UserDialog.show(
-                                context: context,
-                                profile: userSearchResult.results[i],
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
-                if (client.rooms.isNotEmpty && !controller.isSearchMode)
-                  Container(
-                    height: 36 + 8 + 8,
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
+          return CustomScrollView(
+            controller: controller.scrollController,
+            slivers: [
+              if (controller.isSearchMode)
+                ChatListHeader(controller: controller)
+              else
+                SliverToBoxAdapter(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Column(
                       children: [
-                        ...ActiveFilter.values
-                            .where((filter) => filter != ActiveFilter.tag)
-                            .map(
-                              (filter) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4.0,
-                                ),
-                                child: Center(
-                                  child: FilterChip(
-                                    selected: filter == controller.activeFilter,
-                                    onSelected: (_) => controller
-                                        .setActiveFilter(filter, null),
-                                    label: Text(
-                                      filter.toLocalizedString(context),
-                                    ),
-                                  ),
+                        _TopBar(
+                          controller: controller,
+                          client: client,
+                          mode: mode,
+                          spaces: spaceModel.tabs,
+                        ),
+                        if (client.rooms.isNotEmpty)
+                          ChatListTabBar(
+                            client: client,
+                            tabs: tabs,
+                            selected: scope,
+                            onSelect: controller.selectTab,
+                            onLongPress: (tab) {
+                              final spaceId = tab.space?.spaceId;
+                              if (spaceId == null) return;
+                              controller.spaceTabAction(spaceId);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  if (controller.isSearchMode) ...[
+                    SearchTitle(
+                      title: L10n.of(context).publicRooms,
+                      icon: const Icon(Icons.explore_outlined),
+                    ),
+                    PublicRoomsHorizontalList(publicRooms: publicRooms),
+                    SearchTitle(
+                      title: L10n.of(context).publicSpaces,
+                      icon: const Icon(Icons.workspaces_outlined),
+                    ),
+                    PublicRoomsHorizontalList(publicRooms: publicSpaces),
+                    SearchTitle(
+                      title: L10n.of(context).users,
+                      icon: const Icon(Icons.group_outlined),
+                    ),
+                    AnimatedContainer(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: const BoxDecoration(),
+                      height:
+                          userSearchResult == null ||
+                              userSearchResult.results.isEmpty
+                          ? 0
+                          : 106,
+                      duration: FluffyThemes.animationDuration,
+                      curve: FluffyThemes.animationCurve,
+                      child: userSearchResult == null
+                          ? null
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: userSearchResult.results.length,
+                              itemBuilder: (context, i) => _SearchItem(
+                                title:
+                                    userSearchResult.results[i].displayName ??
+                                    userSearchResult
+                                        .results[i]
+                                        .userId
+                                        .localpart ??
+                                    L10n.of(context).unknownDevice,
+                                avatar: userSearchResult.results[i].avatarUrl,
+                                onPressed: () => UserDialog.show(
+                                  context: context,
+                                  profile: userSearchResult.results[i],
                                 ),
                               ),
                             ),
-                        ...controller.roomTags.entries.map(
-                          (entry) => Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4.0,
+                    ),
+                  ],
+                  if (controller.isSearchMode)
+                    SearchTitle(
+                      title: L10n.of(context).chats,
+                      icon: const Icon(Icons.forum_outlined),
+                    ),
+                  if (client.prevBatch != null &&
+                      rooms.isEmpty &&
+                      !controller.isSearchMode) ...[
+                    Column(
+                      mainAxisAlignment: .center,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const Column(
+                              mainAxisSize: .min,
+                              children: [
+                                DummyChatListItem(opacity: 0.5, animate: false),
+                                DummyChatListItem(opacity: 0.3, animate: false),
+                              ],
                             ),
-                            child: Center(
-                              child: FilterChip(
-                                selected: entry.key == controller.activeTag,
-                                onSelected: (_) => controller.setActiveFilter(
-                                  ActiveFilter.tag,
-                                  entry.key,
-                                ),
-                                label: Text(entry.key.replaceFirst('u.', '')),
-                              ),
+                            Icon(
+                              CupertinoIcons.chat_bubble_text_fill,
+                              size: 128,
+                              color: theme.colorScheme.secondary,
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            client.rooms.isEmpty
+                                ? L10n.of(context).noChatsFoundHere
+                                : L10n.of(context).noMoreChatsFound,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: theme.colorScheme.secondary,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                if (controller.isSearchMode)
-                  SearchTitle(
-                    title: L10n.of(context).chats,
-                    icon: const Icon(Icons.forum_outlined),
-                  ),
-                if (client.prevBatch != null &&
-                    rooms.isEmpty &&
-                    !controller.isSearchMode) ...[
-                  Column(
-                    mainAxisAlignment: .center,
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const Column(
-                            mainAxisSize: .min,
-                            children: [
-                              DummyChatListItem(opacity: 0.5, animate: false),
-                              DummyChatListItem(opacity: 0.3, animate: false),
-                            ],
-                          ),
-                          Icon(
-                            CupertinoIcons.chat_bubble_text_fill,
-                            size: 128,
-                            color: theme.colorScheme.secondary,
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          client.rooms.isEmpty
-                              ? L10n.of(context).noChatsFoundHere
-                              : L10n.of(context).noMoreChatsFound,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: theme.colorScheme.secondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ]),
-            ),
-            if (client.prevBatch == null)
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, i) => DummyChatListItem(
-                    opacity: (dummyChatCount - i) / dummyChatCount,
-                    animate: true,
-                  ),
-                  childCount: dummyChatCount,
-                ),
+                  ],
+                ]),
               ),
-            if (client.prevBatch != null)
-              SliverSafeArea(
-                top: false,
-                sliver: SliverList.builder(
-                  itemCount: rooms.length,
-                  itemBuilder: (BuildContext context, int i) {
-                    final room = rooms[i];
-                    final space = spaceDelegateCandidates[room.id];
-                    return ChatListItem(
-                      room,
-                      space: space,
-                      key: Key('chat_list_item_${room.id}'),
-                      filter: filter,
-                      onTap: () => controller.onChatTap(room),
-                      onLongPress: (context) =>
-                          controller.chatContextAction(room, context, space),
-                      activeChat: controller.activeChat == room.id,
-                    );
-                  },
+              if (client.prevBatch == null)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, i) => DummyChatListItem(
+                      opacity: (dummyChatCount - i) / dummyChatCount,
+                      animate: true,
+                    ),
+                    childCount: dummyChatCount,
+                  ),
                 ),
-              ),
-          ],
-        );
-      },
+              if (client.prevBatch != null)
+                SliverSafeArea(
+                  top: false,
+                  sliver: SliverList.builder(
+                    itemCount: rooms.length,
+                    itemBuilder: (BuildContext context, int i) {
+                      final room = rooms[i];
+                      final space = spaceDelegateCandidates[room.id];
+                      return ChatListItem(
+                        room,
+                        space: space,
+                        key: Key('chat_list_item_${room.id}'),
+                        filter: filter,
+                        onTap: () => controller.onChatTap(room),
+                        onLongPress: (context) =>
+                            controller.chatContextAction(room, context, space),
+                        activeChat: controller.activeChat == room.id,
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
+}
+
+class _TopBar extends StatelessWidget {
+  final ChatListController controller;
+  final Client client;
+  final SpaceNavigationMode mode;
+  final List<SpaceTab> spaces;
+
+  const _TopBar({
+    required this.controller,
+    required this.client,
+    required this.mode,
+    required this.spaces,
+  });
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder(
+    stream: client.onSyncStatus.stream,
+    builder: (context, _) {
+      final status =
+          client.onSyncStatus.value ??
+          const SyncStatusUpdate(SyncStatus.waitingForResponse);
+      final synced =
+          client.onSync.value != null &&
+          status.status != SyncStatus.error &&
+          client.prevBatch != null;
+      return ChatListTopBar(
+        title: AppSettings.applicationName.value,
+        avatar: const OwnAvatar(size: 35),
+        onProfile: () => context.go('/profile'),
+        onSearch: controller.startSearch,
+        overflow: ClientChooserButton(controller, overflowIcon: true),
+        syncStatus: synced ? null : status,
+        spaceChip: mode == SpaceNavigationMode.switcher
+            ? SpaceSwitcherChip(
+                client: client,
+                spaces: spaces,
+                selectedSpaceId: controller.scope.spaceId,
+                onSelect: controller.selectSpace,
+                onCreateSpace: () => context.go('/rooms/newspace'),
+                onExplore: controller.startSearch,
+              )
+            : null,
+      );
+    },
+  );
 }
 
 class PublicRoomsHorizontalList extends StatelessWidget {

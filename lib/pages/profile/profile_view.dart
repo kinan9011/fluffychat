@@ -65,7 +65,7 @@ class ProfileView extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.copy_outlined),
                 title: Text(l10n.matrixId),
-                subtitle: Text(userId),
+                subtitle: Text(AppTypography.ltr(userId)),
                 onTap: controller.copyMatrixId,
               ),
               ListTile(
@@ -158,7 +158,10 @@ class _AccountTileState extends State<_AccountTile> {
             size: 40,
           ),
           title: Text(displayName, overflow: TextOverflow.ellipsis),
-          subtitle: Text(userId, overflow: TextOverflow.ellipsis),
+          subtitle: Text(
+            AppTypography.ltr(userId),
+            overflow: TextOverflow.ellipsis,
+          ),
           trailing: widget.selected ? const Icon(Icons.check_rounded) : null,
           onTap: widget.onTap,
         );

@@ -8,6 +8,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/utils/chat_list/folder_ref.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
@@ -35,6 +36,8 @@ class SettingsChatView extends StatelessWidget {
         child: MaxWidthBody(
           child: Column(
             children: [
+              const _SpaceNavigationSection(),
+              const Divider(),
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).formattedMessages,
                 subtitle: L10n.of(context).formattedMessagesDescription,
@@ -157,6 +160,63 @@ class SettingsChatView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SpaceNavigationSection extends StatelessWidget {
+  const _SpaceNavigationSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          title: Text(
+            l10n.spaceNavigation,
+            style: TextStyle(
+              color: theme.colorScheme.secondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: AppSettings.spaceNavigation.listenable,
+          builder: (context, _, _) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<SpaceNavigationMode>(
+              selected: {
+                SpaceNavigationMode.fromSetting(
+                  AppSettings.spaceNavigation.value,
+                ),
+              },
+              onSelectionChanged: (selected) =>
+                  AppSettings.spaceNavigation.setItem(selected.single.name),
+              segments: [
+                ButtonSegment(
+                  value: SpaceNavigationMode.tabs,
+                  label: Text(l10n.spaceNavigationTabs),
+                ),
+                ButtonSegment(
+                  value: SpaceNavigationMode.switcher,
+                  label: Text(l10n.spaceNavigationSwitcher),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SettingsSwitchListTile.adaptive(
+          title: l10n.showFoldersAfterSpaces,
+          setting: AppSettings.showFoldersAfterSpaces,
+        ),
+        SettingsSwitchListTile.adaptive(
+          title: l10n.showUnreadCountsOnTabs,
+          setting: AppSettings.showTabUnreadCounts,
+        ),
+      ],
     );
   }
 }

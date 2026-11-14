@@ -5,6 +5,7 @@
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
@@ -233,10 +234,7 @@ class InputBar extends StatelessWidget {
         waitDuration: const Duration(days: 1), // don't show on hover
         child: ListTile(
           onTap: () => onSelected(suggestion),
-          title: Text(
-            commandExample(command),
-            style: const TextStyle(fontFamily: 'JetBrainsMono'),
-          ),
+          title: Text(commandExample(command), style: AppTypography.mono),
           subtitle: Text(
             hint,
             maxLines: 1,

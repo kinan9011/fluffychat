@@ -52,3 +52,11 @@ abstract class AppElevation {
     ),
   ];
 }
+
+abstract class AppTypography {
+  static const monoFamily = 'JetBrainsMono';
+  static const mono = TextStyle(fontFamily: monoFamily);
+
+  /// Keeps Matrix IDs and server names left-to-right inside RTL text.
+  static String ltr(String text) => '\u2066$text\u2069';
+}

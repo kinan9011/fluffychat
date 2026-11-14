@@ -391,6 +391,7 @@ class _SpaceViewState extends State<SpaceView> {
                       scrolledUnderElevation: 0,
                       backgroundColor: Colors.transparent,
                       automaticallyImplyLeading: false,
+                      leading: BackButton(onPressed: widget.onBack),
                       title: TextField(
                         controller: _filterController,
                         onChanged: (_) => setState(() {}),
