@@ -57,6 +57,9 @@ extension LocalizedExceptionExtension on Object {
           ? L10n.of(context).backupFileTooLarge
           : L10n.of(context).backupFileInvalid;
     }
+    if (this is BackupRestoreFailedException) {
+      return L10n.of(context).backupRestoreFailed;
+    }
     if (this is UnsafeAuthUrlException) {
       return L10n.of(context).unsafeSignInUrl;
     }

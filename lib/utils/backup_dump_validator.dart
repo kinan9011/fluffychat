@@ -43,6 +43,13 @@ class InvalidBackupException implements Exception {
   String toString() => 'InvalidBackupException(tooLarge: $tooLarge)';
 }
 
+class BackupRestoreFailedException implements Exception {
+  const BackupRestoreFailedException();
+
+  @override
+  String toString() => 'BackupRestoreFailedException';
+}
+
 /// Returns the decoded dump if [bytes] is a backup that is safe to import.
 /// Throws [InvalidBackupException] otherwise. Must run before the importer
 /// clears the current database.

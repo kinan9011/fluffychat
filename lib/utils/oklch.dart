@@ -106,6 +106,13 @@ Color oklchColor(double l, double c, double h, [double alpha = 1]) {
   );
 }
 
+/// Hue of a swatch for the accent setting. Rounded so that a swatch stored as
+/// 8-bit sRGB maps back to the exact hue (268, not 267.93); greys have no hue.
+double? accentHueOf(Color color) {
+  final lch = oklchOf(color);
+  return lch.c < 0.03 ? null : lch.h.roundToDouble() % 360;
+}
+
 double _luminance(Color color) =>
     0.2126 * _toLinear(color.r) +
     0.7152 * _toLinear(color.g) +

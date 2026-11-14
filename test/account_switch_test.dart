@@ -13,9 +13,12 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
+import 'package:fluffychat/widgets/layouts/app_shell.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
@@ -782,5 +785,113 @@ void main() {
       expect(matrix.activeCallRoomId.value, isNull);
       return matrix;
     });
+  });
+  group('shell banners (A15)', () {
+    void setFlags({bool unencrypted = false, bool quarantined = false}) {
+      unencryptedClientsThisSession.clear();
+      if (unencrypted) unencryptedClientsThisSession.add('a');
+      AppSettings.store.setStringList(
+        AppSettings.databaseQuarantinedClients.key,
+        quarantined ? ['a'] : [],
+      );
+      AppSettings.store.setBool(
+        AppSettings.databaseUnencryptedNoticeDismissed.key,
+        false,
+      );
+    }
+
+    tearDown(setFlags);
+
+    Finder banners() => find.byType(MaterialBanner);
+
+    for (final width in [400.0, 1280.0]) {
+      accountTest(
+        'an unencrypted database shows one banner at $width px',
+        (tester, matrix) async {
+          await settle(tester);
+          expect(banners(), findsOneWidget);
+          expect(find.text('Your local data is not encrypted'), findsOneWidget);
+          return matrix;
+        },
+        width: width,
+        beforePump: () => setFlags(unencrypted: true),
+      );
+
+      accountTest(
+        'a quarantined database shows one banner at $width px',
+        (tester, matrix) async {
+          await settle(tester);
+          expect(banners(), findsOneWidget);
+          expect(find.textContaining('moved aside'), findsOneWidget);
+          return matrix;
+        },
+        width: width,
+        beforePump: () => setFlags(quarantined: true),
+      );
+
+      accountTest('no banner without a flag at $width px', (
+        tester,
+        matrix,
+      ) async {
+        await settle(tester);
+        expect(banners(), findsNothing);
+        return matrix;
+      }, width: width);
+    }
+
+    accountTest('both notices show, and survive a tab change', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      expect(banners(), findsNWidgets(2));
+      await goTo(tester, '/settings');
+      await settle(tester);
+      expect(banners(), findsNWidgets(2));
+      return matrix;
+    }, beforePump: () => setFlags(unencrypted: true, quarantined: true));
+
+    accountTest('closing a banner keeps the shell state', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      final appShell = tester.state(find.byType(AppShell));
+      final chatList = tester.state<ChatListController>(find.byType(ChatList));
+      await tester.tap(find.text('Close').first);
+      await settle(tester);
+      expect(banners(), findsOneWidget);
+      expect(tester.state(find.byType(AppShell)), same(appShell));
+      expect(
+        tester.state<ChatListController>(find.byType(ChatList)),
+        same(chatList),
+      );
+      expect(hasDatabaseQuarantineNotice, isFalse);
+      return matrix;
+    }, beforePump: () => setFlags(unencrypted: true, quarantined: true));
+
+    accountTest('the security action opens the security settings', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      await tester.tap(find.text('Security'));
+      await settle(tester);
+      expect(location(), '/settings/security');
+      expect(banners(), findsNothing);
+      return matrix;
+    }, beforePump: () => setFlags(unencrypted: true));
+
+    accountTest('a dismissed unencrypted notice stays away', (
+      tester,
+      matrix,
+    ) async {
+      await settle(tester);
+      await tester.tap(find.text('Close'));
+      await settle(tester);
+      expect(banners(), findsNothing);
+      expect(AppSettings.databaseUnencryptedNoticeDismissed.value, isTrue);
+      return matrix;
+    }, beforePump: () => setFlags(unencrypted: true));
   });
 }

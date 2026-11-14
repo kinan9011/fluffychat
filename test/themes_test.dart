@@ -12,18 +12,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<ThemeData> build(
-  WidgetTester tester,
-  Brightness brightness, [
-  Color? seed,
-]) async {
+Future<ThemeData> build(WidgetTester tester, Brightness brightness) async {
   late ThemeData theme;
   await tester.pumpWidget(
     MediaQuery(
       data: const MediaQueryData(size: Size(400, 800)),
       child: Builder(
         builder: (context) {
-          theme = FluffyThemes.buildTheme(context, brightness, seed);
+          theme = FluffyThemes.buildTheme(context, brightness);
           return const SizedBox();
         },
       ),
@@ -95,79 +91,158 @@ void main() {
     expect(theme.colorScheme.surface, AppTokens.light().surf);
   });
 
-  testWidgets('a custom colour keeps working: its hue replaces the setting', (
+  testWidgets('text on the error colour is >= 4.5:1 in both themes', (
     tester,
   ) async {
-    final seed = oklchColor(0.5, 0.15, 25);
-    final theme = await build(tester, Brightness.light, seed);
-    final hue = oklchOf(theme.colorScheme.primary).h;
-    expect(hue, closeTo(25, 3));
-  });
-
-  testWidgets('a grey seed has no hue and falls back to the setting', (
-    tester,
-  ) async {
-    final theme = await build(
-      tester,
-      Brightness.light,
-      const Color(0xFF808080),
-    );
-    expect(theme.extension<AppTokens>(), AppTokens.light());
-  });
-
-  testWidgets('the default swatch maps back to exactly hue 268', (
-    tester,
-  ) async {
-    final theme = await build(tester, Brightness.light, AppConfig.chatColor);
-    expect(theme.extension<AppTokens>(), AppTokens.light());
-  });
-
-  group('deployer config (web config.json / MDM)', () {
-    final legacySeed = oklchColor(0.5, 0.15, 155);
-
-    testWidgets('colorSchemeSeedInt still sets the accent hue', (tester) async {
-      await AppSettings.colorSchemeSeedInt.setItem(legacySeed.toARGB32());
-      final theme = await build(tester, Brightness.light);
-      expect(theme.extension<AppTokens>(), AppTokens.light(hue: 155));
-    });
-
-    testWidgets('the default colorSchemeSeedInt value is ignored', (
-      tester,
-    ) async {
-      await AppSettings.colorSchemeSeedInt.setItem(
-        AppSettings.colorSchemeSeedInt.defaultValue,
+    for (final brightness in Brightness.values) {
+      final scheme = (await build(tester, brightness)).colorScheme;
+      expect(
+        wcagContrast(scheme.onError, scheme.error),
+        greaterThanOrEqualTo(4.5),
+        reason: brightness.name,
       );
+      expect(
+        scheme.onError,
+        brightness == Brightness.dark
+            ? AppTokens.dark().onRed
+            : AppTokens.light().onRed,
+      );
+    }
+  });
+
+  group('accentHueOf', () {
+    test('rounds a swatch to the exact hue and ignores greys', () {
+      expect(accentHueOf(AppConfig.chatColor), 268);
+      expect(accentHueOf(const Color(0xFF5625BA)), 289);
+      expect(accentHueOf(const Color(0xFFF44336)), 29);
+      expect(accentHueOf(const Color(0xFF4CAF50)), 144);
+      expect(accentHueOf(const Color(0xFF9E9E9E)), isNull);
+    });
+  });
+
+  group('single accent source (B1)', () {
+    testWidgets('an explicit user 268 beats a deployer seed', (tester) async {
+      AppSettings.applyPlatformConfiguration({
+        'colorSchemeSeedInt': 0xFF4CAF50,
+      }, PlatformConfigSource.web);
+      await AppSettings.accentHue.setItem(268);
+      expect(FluffyThemes.accentHue(), 268);
       final theme = await build(tester, Brightness.light);
       expect(theme.extension<AppTokens>(), AppTokens.light());
     });
 
-    testWidgets('accentHue wins over the legacy seed', (tester) async {
-      await AppSettings.colorSchemeSeedInt.setItem(legacySeed.toARGB32());
-      await AppSettings.accentHue.setItem(330);
+    testWidgets('a deployer seed 0xFF5625BA is honoured', (tester) async {
+      AppSettings.applyPlatformConfiguration({
+        'colorSchemeSeedInt': 0xFF5625BA,
+      }, PlatformConfigSource.web);
+      expect(FluffyThemes.accentHue(), 289);
+      final theme = await build(tester, Brightness.light);
+      expect(theme.extension<AppTokens>(), AppTokens.light(hue: 289));
+    });
+
+    testWidgets('a deployer accentHue wins over a deployer seed', (
+      tester,
+    ) async {
+      AppSettings.applyPlatformConfiguration({
+        'colorSchemeSeedInt': 0xFF4CAF50,
+        'accentHue': 330,
+      }, PlatformConfigSource.web);
+      expect(FluffyThemes.accentHue(), 330);
       final theme = await build(tester, Brightness.dark);
       expect(theme.extension<AppTokens>(), AppTokens.dark(hue: 330));
     });
 
-    testWidgets('a colour the user picked wins over deployer config', (
-      tester,
-    ) async {
-      await AppSettings.accentHue.setItem(330);
-      final theme = await build(
-        tester,
-        Brightness.light,
-        oklchColor(0.5, 0.15, 25),
-      );
-      expect(oklchOf(theme.colorScheme.primary).h, closeTo(25, 3));
+    testWidgets('a user hue wins over a deployer accentHue', (tester) async {
+      AppSettings.applyPlatformConfiguration({
+        'accentHue': 330,
+      }, PlatformConfigSource.web);
+      await AppSettings.accentHue.setItem(155);
+      expect(FluffyThemes.accentHue(), 155);
     });
 
-    testWidgets('a deployer config.json value is applied end to end', (
+    testWidgets('a grey deployer seed has no hue and the default applies', (
       tester,
     ) async {
       AppSettings.applyPlatformConfiguration({
-        'colorSchemeSeedInt': legacySeed.toARGB32(),
+        'colorSchemeSeedInt': 0xFF9E9E9E,
       }, PlatformConfigSource.web);
+      expect(FluffyThemes.accentHue(), 268);
+    });
+
+    testWidgets('nothing configured gives hue 268', (tester) async {
+      expect(FluffyThemes.accentHue(), 268);
       final theme = await build(tester, Brightness.light);
-      expect(theme.extension<AppTokens>(), AppTokens.light(hue: 155));
+      expect(theme.extension<AppTokens>(), AppTokens.light());
+    });
+
+    testWidgets('an out-of-range user hue is normalised', (tester) async {
+      await AppSettings.accentHue.setItem(-30);
+      expect(FluffyThemes.accentHue(), 330);
+    });
+  });
+
+  group('legacy accent migration', () {
+    Future<SharedPreferences> prefs(Map<String, Object> values) async {
+      SharedPreferences.setMockInitialValues(values);
+      return SharedPreferences.getInstance();
+    }
+
+    test('primary_color is migrated once to accentHue', () async {
+      final store = await prefs({'primary_color': 0xFFF44336});
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getInt(AppSettings.accentHue.key), 29);
+      expect(store.containsKey('primary_color'), isFalse);
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getInt(AppSettings.accentHue.key), 29);
+    });
+
+    test('an existing accentHue is kept, the legacy key is removed', () async {
+      final store = await prefs({
+        'primary_color': 0xFFF44336,
+        AppSettings.accentHue.key: 155,
+      });
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getInt(AppSettings.accentHue.key), 155);
+      expect(store.containsKey('primary_color'), isFalse);
+    });
+
+    test('a grey legacy colour writes no hue', () async {
+      final store = await prefs({'primary_color': 0xFF9E9E9E});
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.containsKey(AppSettings.accentHue.key), isFalse);
+      expect(store.containsKey('primary_color'), isFalse);
+    });
+
+    test('a stored user colorSchemeSeedInt is migrated and removed', () async {
+      final store = await prefs({
+        AppSettings.colorSchemeSeedInt.key: 0xFF5625BA,
+      });
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getInt(AppSettings.accentHue.key), 289);
+      expect(store.containsKey(AppSettings.colorSchemeSeedInt.key), isFalse);
+    });
+
+    test('primary_color wins over a stored colorSchemeSeedInt', () async {
+      final store = await prefs({
+        'primary_color': 0xFFF44336,
+        AppSettings.colorSchemeSeedInt.key: 0xFF4CAF50,
+      });
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getInt(AppSettings.accentHue.key), 29);
+      expect(store.containsKey(AppSettings.colorSchemeSeedInt.key), isFalse);
+    });
+
+    test('a wrongly typed legacy value is removed without a crash', () async {
+      final store = await prefs({'primary_color': 'oops'});
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.containsKey('primary_color'), isFalse);
+      expect(store.containsKey(AppSettings.accentHue.key), isFalse);
+    });
+
+    test('nothing stored is a no-op', () async {
+      final store = await prefs({});
+      await AppSettings.migrateLegacyAccent(store);
+      expect(store.getKeys(), isEmpty);
     });
   });
 }

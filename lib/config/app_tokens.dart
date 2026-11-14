@@ -29,6 +29,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color warn;
   final Color warnS;
   final Color red;
+  final Color onRed;
   final Color mbad;
   final Color chip;
   final Color shadow;
@@ -56,6 +57,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.warn,
     required this.warnS,
     required this.red,
+    required this.onRed,
     required this.mbad,
     required this.chip,
     required this.shadow,
@@ -88,12 +90,13 @@ class AppTokens extends ThemeExtension<AppTokens> {
       warn: oklchColor(0.62, 0.14, 65),
       warnS: oklchColor(0.95, 0.05, 80),
       red: oklchColor(0.57, 0.19, 25),
-      mbad: oklchColor(0.70, 0.01, 270),
+      onRed: const Color(0xFFFFFFFF),
+      mbad: oklchColor(0.56, 0.01, 270),
       chip: oklchColor(0.35, 0.03, 250, 0.5),
       shadow: const Color.fromRGBO(20, 20, 50, 0.09),
       outS: acc,
       outFg: const Color(0xFFFFFFFF),
-      outMut: const Color.fromRGBO(255, 255, 255, 0.78),
+      outMut: const Color.fromRGBO(255, 255, 255, 0.90),
       out: oklchColor(0.92, 0.045, h),
       inBubble: const Color(0xFFFFFFFF),
       wallG: _wallGradient(
@@ -123,12 +126,13 @@ class AppTokens extends ThemeExtension<AppTokens> {
       warn: oklchColor(0.80, 0.13, 75),
       warnS: oklchColor(0.30, 0.05, 75),
       red: oklchColor(0.70, 0.17, 25),
+      onRed: oklchColor(0.18, 0.03, 25),
       mbad: oklchColor(0.45, 0.01, 270),
       chip: oklchColor(0.30, 0.02, 270, 0.75),
       shadow: const Color.fromRGBO(0, 0, 0, 0.4),
       outS: oklchColor(0.50, 0.15, h),
       outFg: const Color(0xFFFFFFFF),
-      outMut: const Color.fromRGBO(255, 255, 255, 0.72),
+      outMut: const Color.fromRGBO(255, 255, 255, 0.88),
       out: oklchColor(0.37, 0.10, h),
       inBubble: oklchColor(0.25, 0.016, 270),
       wallG: _wallGradient(
@@ -186,6 +190,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     warn,
     warnS,
     red,
+    onRed,
     mbad,
     chip,
     shadow,
@@ -223,6 +228,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? warn,
     Color? warnS,
     Color? red,
+    Color? onRed,
     Color? mbad,
     Color? chip,
     Color? shadow,
@@ -249,6 +255,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     warn: warn ?? this.warn,
     warnS: warnS ?? this.warnS,
     red: red ?? this.red,
+    onRed: onRed ?? this.onRed,
     mbad: mbad ?? this.mbad,
     chip: chip ?? this.chip,
     shadow: shadow ?? this.shadow,
@@ -281,6 +288,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       warn: c(warn, other.warn),
       warnS: c(warnS, other.warnS),
       red: c(red, other.red),
+      onRed: c(onRed, other.onRed),
       mbad: c(mbad, other.mbad),
       chip: c(chip, other.chip),
       shadow: c(shadow, other.shadow),

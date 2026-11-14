@@ -12,6 +12,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/color_value.dart';
+import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -117,9 +118,8 @@ class SettingsStyleView extends StatelessWidget {
                               width: colorPickerSize,
                               height: colorPickerSize,
                               child:
-                                  (controller.currentColor ??
-                                          AppConfig.chatColor) ==
-                                      color
+                                  accentHueOf(color) ==
+                                      controller.currentAccentHue
                                   ? Center(
                                       child: Icon(
                                         Icons.check,

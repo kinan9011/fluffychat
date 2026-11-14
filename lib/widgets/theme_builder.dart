@@ -4,26 +4,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/utils/color_value.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeBuilder extends StatefulWidget {
-  final Widget Function(
-    BuildContext context,
-    ThemeMode themeMode,
-    Color? primaryColor,
-  )
-  builder;
+  final Widget Function(BuildContext context, ThemeMode themeMode) builder;
 
   final String themeModeSettingsKey;
-  final String primaryColorSettingsKey;
 
   const ThemeBuilder({
     required this.builder,
     this.themeModeSettingsKey = 'theme_mode',
-    this.primaryColorSettingsKey = 'primary_color',
     super.key,
   });
 
@@ -34,11 +27,8 @@ class ThemeBuilder extends StatefulWidget {
 class ThemeController extends State<ThemeBuilder> {
   SharedPreferences? _sharedPreferences;
   ThemeMode? _themeMode;
-  Color? _primaryColor;
 
   ThemeMode get themeMode => _themeMode ?? ThemeMode.system;
-
-  Color? get primaryColor => _primaryColor;
 
   static ThemeController of(BuildContext context) =>
       Provider.of<ThemeController>(context, listen: false);
@@ -48,13 +38,11 @@ class ThemeController extends State<ThemeBuilder> {
         await SharedPreferences.getInstance();
 
     final rawThemeMode = preferences.getString(widget.themeModeSettingsKey);
-    final rawColor = preferences.getInt(widget.primaryColorSettingsKey);
 
     setState(() {
       _themeMode = ThemeMode.values.singleWhereOrNull(
         (value) => value.name == rawThemeMode,
       );
-      _primaryColor = rawColor == null ? null : Color(rawColor);
     });
   }
 
@@ -67,20 +55,14 @@ class ThemeController extends State<ThemeBuilder> {
     });
   }
 
-  Future<void> setPrimaryColor(Color? newPrimaryColor) async {
-    final preferences = _sharedPreferences ??=
-        await SharedPreferences.getInstance();
-    if (newPrimaryColor == null) {
-      await preferences.remove(widget.primaryColorSettingsKey);
-    } else {
-      await preferences.setInt(
-        widget.primaryColorSettingsKey,
-        newPrimaryColor.hexValue,
-      );
+  Future<void> setAccentHue(int? hue) async {
+    if (hue == null) {
+      await AppSettings.store.remove(AppSettings.accentHue.key);
+      setState(() {});
+      return;
     }
-    setState(() {
-      _primaryColor = newPrimaryColor;
-    });
+    await AppSettings.accentHue.setItem(hue % 360);
+    setState(() {});
   }
 
   @override
@@ -93,7 +75,7 @@ class ThemeController extends State<ThemeBuilder> {
   Widget build(BuildContext context) {
     return Provider(
       create: (_) => this,
-      child: widget.builder(context, themeMode, primaryColor),
+      child: widget.builder(context, themeMode),
     );
   }
 }

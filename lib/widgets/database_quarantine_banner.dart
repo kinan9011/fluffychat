@@ -5,34 +5,31 @@
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
+import 'package:fluffychat/widgets/shell_banner.dart';
 import 'package:material_ui/material_ui.dart';
 
-void showDatabaseQuarantineBanner(BuildContext context) {
-  if (!hasDatabaseQuarantineNotice) return;
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
-  final l10n = L10n.of(context);
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  scaffoldMessenger.showMaterialBanner(
-    MaterialBanner(
-      backgroundColor: colorScheme.errorContainer,
-      contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onErrorContainer,
-      ),
-      leading: Icon(
-        Icons.warning_amber_rounded,
-        color: colorScheme.onErrorContainer,
-      ),
-      content: Text(l10n.databaseQuarantined),
-      actions: [
+class DatabaseQuarantineBanner extends StatelessWidget {
+  final Widget child;
+
+  const DatabaseQuarantineBanner({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    return ShellBanner(
+      isVisible: () => hasDatabaseQuarantineNotice,
+      icon: Icons.warning_amber_rounded,
+      message: l10n.databaseQuarantined,
+      actions: (hide) => [
         TextButton(
           onPressed: () {
             dismissDatabaseQuarantineNotice();
-            scaffoldMessenger.hideCurrentMaterialBanner();
+            hide();
           },
           child: Text(l10n.close),
         ),
       ],
-    ),
-  );
+      child: child,
+    );
+  }
 }

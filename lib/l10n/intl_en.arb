@@ -2877,6 +2877,7 @@
     "archiveInvalid": "This file is not a valid archive.",
     "backupFileTooLarge": "This backup file is too large.",
     "backupFileInvalid": "This file is not a valid backup.",
+    "backupRestoreFailed": "The backup could not be restored. Make sure it is a complete backup from this app and that the device has free storage, then try again.",
     "databaseNotEncrypted": "Your local data is not encrypted",
     "databaseNotEncryptedDescription": "Secure storage is unavailable on this device, so messages and keys stored by the app are not encrypted on disk.",
     "databaseNotEncryptedWeb": "This browser stores your messages and keys without app encryption. Use it only on a device you trust, and sign out when you are done.",

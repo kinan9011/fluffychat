@@ -18,24 +18,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';
 
-class _BannerHost extends StatefulWidget {
+class _BannerHost extends StatelessWidget {
   const _BannerHost();
 
   @override
-  State<_BannerHost> createState() => _BannerHostState();
-}
-
-class _BannerHostState extends State<_BannerHost> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => showDatabaseUnencryptedBanner(context),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
+  Widget build(BuildContext context) =>
+      const DatabaseUnencryptedBanner(child: Scaffold(body: Placeholder()));
 }
 
 GoRouter _router() => GoRouter(

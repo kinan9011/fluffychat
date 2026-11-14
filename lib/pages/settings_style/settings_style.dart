@@ -5,8 +5,10 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/file_selector.dart';
+import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:material_ui/material_ui.dart';
@@ -22,10 +24,8 @@ class SettingsStyle extends StatefulWidget {
 }
 
 class SettingsStyleController extends State<SettingsStyle> {
-  void setChatColor(Color color) {
-    AppSettings.colorSchemeSeedInt.setItem(color.toARGB32());
-    ThemeController.of(context).setPrimaryColor(color);
-  }
+  void setChatColor(Color color) =>
+      ThemeController.of(context).setAccentHue(accentHueOf(color)?.toInt());
 
   Future<void> setWallpaper() async {
     final client = Matrix.of(context).client;
@@ -111,7 +111,7 @@ class SettingsStyleController extends State<SettingsStyle> {
   );
 
   ThemeMode get currentTheme => ThemeController.of(context).themeMode;
-  Color? get currentColor => ThemeController.of(context).primaryColor;
+  double get currentAccentHue => FluffyThemes.accentHue();
 
   void switchTheme(ThemeMode? newTheme) {
     if (newTheme == null) return;

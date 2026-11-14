@@ -67,35 +67,23 @@ abstract class FluffyThemes {
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
 
-  /// [seed] is a user-picked colour; only its hue is used, lightness and
-  /// chroma come from [AppTokens]. Without it, deployer config applies:
-  /// `accentHue`, then the legacy `colorSchemeSeedInt` (web config.json, MDM)
-  /// when changed from its default, then hue 268.
-  static double _accentHue(Color? seed) {
-    final picked = seed == null ? null : _hueOf(seed);
-    if (picked != null) return picked;
-    // `value` already includes deployer config (it replaces the default), so
-    // compare with the compiled-in defaults, not with `defaultValue`.
-    final hue = AppSettings.accentHue.value;
-    if (hue != defaultAccentHue.toInt()) return hue.toDouble();
-    final legacy = AppSettings.colorSchemeSeedInt.value;
-    if (legacy == defaultColorSchemeSeed) return hue.toDouble();
-    return _hueOf(Color(legacy)) ?? hue.toDouble();
+  /// Precedence: the user's `accentHue` (a stored key is the user's intent,
+  /// even if it equals the default), then deployer `accentHue`, then deployer
+  /// `colorSchemeSeedInt` (web config.json, MDM), then hue 268.
+  static double accentHue() {
+    if (AppSettings.store.containsKey(AppSettings.accentHue.key) ||
+        AppSettings.accentHue.hasPlatformValue) {
+      return normalizeHue(AppSettings.accentHue.value.toDouble());
+    }
+    if (!AppSettings.colorSchemeSeedInt.hasPlatformValue) {
+      return defaultAccentHue;
+    }
+    return accentHueOf(Color(AppSettings.colorSchemeSeedInt.value)) ??
+        defaultAccentHue;
   }
 
-  /// Rounded so that a swatch stored as 8-bit sRGB maps back to the exact hue
-  /// (268, not 267.93); greys have no hue.
-  static double? _hueOf(Color color) {
-    final lch = oklchOf(color);
-    return lch.c < 0.03 ? null : lch.h.roundToDouble();
-  }
-
-  static ThemeData buildTheme(
-    BuildContext context,
-    Brightness brightness, [
-    Color? seed,
-  ]) {
-    final hue = _accentHue(seed);
+  static ThemeData buildTheme(BuildContext context, Brightness brightness) {
+    final hue = accentHue();
     final isDark = brightness == Brightness.dark;
     final tokens = isDark
         ? AppTokens.dark(hue: hue)
@@ -116,7 +104,7 @@ abstract class FluffyThemes {
           outline: tokens.mut,
           outlineVariant: tokens.line,
           error: tokens.red,
-          onError: isDark ? tokens.bg : Colors.white,
+          onError: tokens.onRed,
           surfaceContainerLowest: tokens.bg,
           surfaceContainerLow: tokens.surf,
           surfaceContainer: tokens.surf2,

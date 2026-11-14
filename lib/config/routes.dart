@@ -38,6 +38,8 @@ import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_in/sign_in_page.dart';
 import 'package:fluffychat/widgets/config_viewer.dart';
+import 'package:fluffychat/widgets/database_quarantine_banner.dart';
+import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:fluffychat/widgets/layouts/app_shell.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:fluffychat/widgets/layouts/empty_page.dart';
@@ -201,20 +203,24 @@ abstract class AppRoutes {
             if (matrix.activeClientOrNull == null) {
               return const SizedBox.shrink();
             }
-            return AppShell(
-              navigationShell: navigationShell,
-              location: state.uri.path,
-              accountCount: accountCount,
-              onFirstShown: matrix.runStartupHooksOnce,
-              leftColumn: (context, tab) => switch (tab) {
-                AppTab.chats => ChatList(
-                  activeChat: state.pathParameters['roomid'],
-                  activeSpace: state.uri.queryParameters['spaceId'],
+            return DatabaseQuarantineBanner(
+              child: DatabaseUnencryptedBanner(
+                child: AppShell(
+                  navigationShell: navigationShell,
+                  location: state.uri.path,
+                  accountCount: accountCount,
+                  onFirstShown: matrix.runStartupHooksOnce,
+                  leftColumn: (context, tab) => switch (tab) {
+                    AppTab.chats => ChatList(
+                      activeChat: state.pathParameters['roomid'],
+                      activeSpace: state.uri.queryParameters['spaceId'],
+                    ),
+                    AppTab.calls => const CallsPage(),
+                    AppTab.settings => const Settings(),
+                    AppTab.profile => const ProfilePage(),
+                  },
                 ),
-                AppTab.calls => const CallsPage(),
-                AppTab.settings => const Settings(),
-                AppTab.profile => const ProfilePage(),
-              },
+              ),
             );
           },
         ),
