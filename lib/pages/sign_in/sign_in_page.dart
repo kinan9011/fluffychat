@@ -8,13 +8,13 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
 import 'package:fluffychat/pages/sign_in/view_model/sign_in_view_model.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/sign_in_flows/check_homeserver.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/view_model_builder.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class SignInPage extends StatelessWidget {
   final bool signUp;
@@ -118,8 +118,7 @@ class SignInPage extends StatelessWidget {
                                           Icons.open_in_new_outlined,
                                           size: 16,
                                         ),
-                                        onPressed: () =>
-                                            launchUrlString(website),
+                                        onPressed: () => launchWebUrl(website),
                                       ),
                                     ),
                                 ],

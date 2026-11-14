@@ -6,8 +6,8 @@
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/sign_in_flows/calc_redirect_url.dart';
+import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -58,7 +58,7 @@ Future<void> ssoLoginFlow(
     },
   );
 
-  final result = await FlutterWebAuth2.authenticate(
+  final result = await authenticateInBrowser(
     url: url.toString(),
     callbackUrlScheme: urlScheme,
     options: FlutterWebAuth2Options(useWebview: PlatformInfos.isMobile),

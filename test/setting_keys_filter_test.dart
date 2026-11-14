@@ -36,7 +36,7 @@ void main() {
         'unifiedPushEndpoint': 'https://evil.example/up',
         'unifiedPushRegistered': true,
         'noEncryptionWarningShown': true,
-        'databaseUnencrypted': false,
+        'databaseUnencryptedClients': ['x'],
         'databaseUnencryptedNoticeDismissed': true,
         'knownErrorHashes': ['x'],
         'lastUpdateCheckDate': '2999-01-01',
@@ -106,6 +106,57 @@ void main() {
       expect(AppSettings.callsEnabled.defaultValue, isTrue);
     });
 
+    group('numeric settings are range checked', () {
+      const kept = <String, List<Object>>{
+        'fontSizeFactor': [1.5, 0.5, 3.0],
+        'textMessageMaxLength': [16384, 1, 65536],
+        'messagePreviewMaxLines': [0, 500],
+        'sendTimelineEventTimeout': [5, 120],
+        'audioRecordingNumChannels': [1, 2],
+        'audioRecordingBitRate': [64000, 6000, 510000],
+        'audioRecordingSamplingRate': [48000, 8000],
+      };
+      const dropped = <String, List<Object>>{
+        'fontSizeFactor': [1000.0, 0.1, 1, double.nan, double.infinity, '1.0'],
+        'textMessageMaxLength': [-1, 0, 65537, '100'],
+        'messagePreviewMaxLines': [-5, 501],
+        'sendTimelineEventTimeout': [0, 4, 121],
+        'audioRecordingNumChannels': [0, 3],
+        'audioRecordingBitRate': [0, 1000000000],
+        'audioRecordingSamplingRate': [4000, 96000],
+      };
+      for (final entry in kept.entries) {
+        for (final value in entry.value) {
+          test('${entry.key} $value is kept', () {
+            expect(web({entry.key: value}), {entry.key: value});
+          });
+        }
+      }
+      for (final entry in dropped.entries) {
+        for (final value in entry.value) {
+          test('${entry.key} $value is dropped', () {
+            expect(web({entry.key: value}), isEmpty);
+          });
+        }
+      }
+
+      test('validated keys are not also plain allowlist keys', () {
+        expect(
+          webAllowedSettings.intersection(webValidatedSettings.keys.toSet()),
+          isEmpty,
+        );
+      });
+
+      test('MDM stays unvalidated', () {
+        expect(
+          filterPlatformConfiguration({
+            'fontSizeFactor': 1000.0,
+          }, PlatformConfigSource.mdm),
+          {'fontSizeFactor': 1000.0},
+        );
+      });
+    });
+
     test('the removed spaces rail setting is no longer accepted', () {
       expect(web({'displayNavigationRail': true}), isEmpty);
     });
@@ -136,7 +187,7 @@ void main() {
           'unifiedPushEndpoint': 'https://x',
           'unifiedPushRegistered': true,
           'noEncryptionWarningShown': true,
-          'databaseUnencrypted': false,
+          'databaseUnencryptedClients': ['x'],
           'databaseUnencryptedNoticeDismissed': true,
           'knownErrorHashes': <String>[],
           'lastUpdateCheckDate': 'x',

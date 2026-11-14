@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/utils/html_image_size.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:html/parser.dart' as parser;
 
 void main() {
   group('htmlImageSize', () {
@@ -12,7 +13,6 @@ void main() {
       final size = htmlImageSize(null, null);
       expect(size.width, htmlImageDefaultDimension);
       expect(size.height, htmlImageDefaultDimension);
-      expect(size.isThumbnail, isFalse);
     });
 
     test('regular emote size is kept', () {
@@ -25,7 +25,6 @@ void main() {
       final size = htmlImageSize('100000', '50000');
       expect(size.width, htmlImageMaxDimension);
       expect(size.height, htmlImageMaxDimension / 2);
-      expect(size.isThumbnail, isTrue);
     });
 
     test('a single huge dimension is capped', () {
@@ -65,6 +64,34 @@ void main() {
           }
         }
       }
+    });
+  });
+
+  group('limitHtmlImages', () {
+    const image = '<img src="mxc://a/b" alt="x">';
+
+    test('replaces every image above the cap with its alt text', () {
+      final body = parser.parse('<p>${image * 200}</p>').body!;
+
+      expect(limitHtmlImages(body), 150);
+      expect(body.querySelectorAll('img'), hasLength(htmlMaxImagesPerMessage));
+      expect(body.text, 'x' * 150);
+    });
+
+    test('keeps a message at the cap untouched', () {
+      final body = parser.parse('<p>${image * 50}</p>').body!;
+
+      expect(limitHtmlImages(body), 0);
+      expect(body.querySelectorAll('img'), hasLength(50));
+    });
+
+    test('a missing alt text becomes empty text', () {
+      final body = parser
+          .parse('<img src="mxc://a/b"><img src="mxc://a/c">')
+          .body!;
+
+      expect(limitHtmlImages(body, 1), 1);
+      expect(body.querySelectorAll('img'), hasLength(1));
     });
   });
 }

@@ -5,7 +5,9 @@
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,19 +55,13 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await AppSettings.init(loadWebConfigFile: false);
     await AppSettings.store.clear();
-    // a readable key resets the in-memory state left by earlier tests
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-          (call) async => call.method == 'read' ? 'fake-password' : null,
-        );
-    await getDatabaseCipher();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-          null,
-        );
+    unencryptedClientsThisSession.clear();
   });
+
+  Future<void> markUnencrypted() async {
+    await AppSettings.store.setStringList(ClientManager.clientNamespace, ['a']);
+    await AppSettings.databaseUnencryptedClients.setItem(['a']);
+  }
 
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -86,7 +82,7 @@ void main() {
   testWidgets('banner is shown when the database is unencrypted', (
     tester,
   ) async {
-    await AppSettings.databaseUnencrypted.setItem(true);
+    await markUnencrypted();
     await pumpApp(tester);
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('Your local data is not encrypted'), findsOneWidget);
@@ -95,13 +91,20 @@ void main() {
   testWidgets('banner is shown even if persisting the flag failed', (
     tester,
   ) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (call) async => throw MissingPluginException(),
+        );
     await tester.runAsync(
       () => getDatabaseCipher(
-        markEncryption: ({required bool isEncrypted}) async =>
+        'a',
+        databaseState: () async => DatabaseFileState.none,
+        markEncryption: (name, {required bool isEncrypted}) async =>
             throw StateError('prefs write failed'),
       ),
     );
-    expect(AppSettings.databaseUnencrypted.value, isFalse);
+    expect(AppSettings.databaseUnencryptedClients.value, isEmpty);
 
     await pumpApp(tester);
 
@@ -109,7 +112,7 @@ void main() {
   });
 
   testWidgets('close dismisses the banner and remembers it', (tester) async {
-    await AppSettings.databaseUnencrypted.setItem(true);
+    await markUnencrypted();
     await pumpApp(tester);
 
     await tester.tap(find.text('Close'));
@@ -122,7 +125,7 @@ void main() {
   });
 
   testWidgets('security opens the security settings', (tester) async {
-    await AppSettings.databaseUnencrypted.setItem(true);
+    await markUnencrypted();
     await pumpApp(tester);
 
     await tester.tap(find.text('Security'));
@@ -133,7 +136,7 @@ void main() {
   });
 
   testGoldens('DatabaseUnencryptedBanner', (tester) async {
-    await AppSettings.databaseUnencrypted.setItem(true);
+    await markUnencrypted();
     await expectGoldenVariants(
       tester,
       'database_unencrypted_banner',

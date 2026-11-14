@@ -31,6 +31,10 @@ void expectInvalid(Uint8List bytes, {bool tooLarge = false}) {
 }
 
 void main() {
+  test('a backup is capped at 64 MiB', () {
+    expect(maxBackupDumpBytes, 64 * 1024 * 1024);
+  });
+
   group('validateBackupDump', () {
     test('accepts a complete dump and returns the decoded text', () {
       final dump = validDump();

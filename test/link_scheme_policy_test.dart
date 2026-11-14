@@ -45,6 +45,19 @@ void main() {
       'zoommtg://zoom.us/join': LinkSchemeAction.confirm,
       'ftp://example.org/file': LinkSchemeAction.confirm,
       'custom-app://do/something': LinkSchemeAction.confirm,
+      'mailto:a@b.c': LinkSchemeAction.launch,
+      'mailto:a@b.c?subject=hi&body=x': LinkSchemeAction.launch,
+      'mailto:a@b.c?SUBJECT=x': LinkSchemeAction.launch,
+      'mailto:?attach=/home/u/.ssh/id_rsa': LinkSchemeAction.confirm,
+      'mailto:a@b.c?Attach=x': LinkSchemeAction.confirm,
+      'mailto:a@b.c?subject=hi&attachment=x': LinkSchemeAction.confirm,
+      'mailto:a@b.c?%zz=1': LinkSchemeAction.confirm,
+      'itms-services://?action=download-manifest&url=https://x.y/m.plist':
+          LinkSchemeAction.block,
+      'hcp://x': LinkSchemeAction.block,
+      r'mk:@MSITStore:C:\x.chm': LinkSchemeAction.block,
+      'mhtml:file://x': LinkSchemeAction.block,
+      'jnlp://x/a.jnlp': LinkSchemeAction.block,
     };
 
     for (final entry in matrix.entries) {

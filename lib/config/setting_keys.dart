@@ -53,7 +53,14 @@ enum AppSettings<T> {
     'chat.fluffy.no_encryption_warning_shown',
     false,
   ),
-  databaseUnencrypted<bool>('chat.fluffy.database_unencrypted', false),
+  databaseUnencryptedClients<List<String>>(
+    'chat.fluffy.database_unencrypted_clients',
+    [],
+  ),
+  databaseQuarantinedClients<List<String>>(
+    'chat.fluffy.database_quarantined_clients',
+    [],
+  ),
   databaseUnencryptedNoticeDismissed<bool>(
     'chat.fluffy.database_unencrypted_notice_dismissed',
     false,
@@ -156,6 +163,7 @@ enum AppSettings<T> {
         PlatformInfos.isMobile,
       );
     }
+    await store.remove('chat.fluffy.database_unencrypted');
 
     // Load configuration from config.json file or MDM:
     if (PlatformInfos.isMobile) {
@@ -196,8 +204,9 @@ const runtimeStateSettings = <AppSettings<Object?>>{
   AppSettings.unifiedPushRegistered,
   AppSettings.unifiedPushEndpoint,
   AppSettings.noEncryptionWarningShown,
-  AppSettings.databaseUnencrypted,
+  AppSettings.databaseUnencryptedClients,
   AppSettings.databaseUnencryptedNoticeDismissed,
+  AppSettings.databaseQuarantinedClients,
   AppSettings.knownErrorHashes,
   AppSettings.lastUpdateCheckDate,
 };
@@ -214,6 +223,9 @@ const webDeniedSettings = <AppSettings<Object?>>{
 bool _isHttpsUrl(Object? value) =>
     value is String && Uri.tryParse(value)?.scheme == 'https';
 
+bool _intIn(Object? value, int min, int max) =>
+    value is int && value >= min && value <= max;
+
 /// Privacy settings where config.json may only choose the more private value,
 /// and links that are opened with launchUrlString (must be https).
 final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
@@ -224,6 +236,14 @@ final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
       value is String &&
       value != ShareKeysWith.all.name &&
       ShareKeysWith.values.any((share) => share.name == value),
+  AppSettings.fontSizeFactor: (value) =>
+      value is double && value.isFinite && value >= 0.5 && value <= 3.0,
+  AppSettings.textMessageMaxLength: (value) => _intIn(value, 1, 65536),
+  AppSettings.messagePreviewMaxLines: (value) => _intIn(value, 0, 500),
+  AppSettings.sendTimelineEventTimeout: (value) => _intIn(value, 5, 120),
+  AppSettings.audioRecordingNumChannels: (value) => _intIn(value, 1, 2),
+  AppSettings.audioRecordingBitRate: (value) => _intIn(value, 6000, 510000),
+  AppSettings.audioRecordingSamplingRate: (value) => _intIn(value, 8000, 48000),
   AppSettings.website: _isHttpsUrl,
   AppSettings.logoUrl: _isHttpsUrl,
   AppSettings.privacyPolicy: _isHttpsUrl,
@@ -241,20 +261,13 @@ const webAllowedSettings = <AppSettings<Object?>>{
   AppSettings.enableMatrixNativeOIDC,
   AppSettings.enableSoftLogout,
   AppSettings.checkForUpdates,
-  AppSettings.textMessageMaxLength,
-  AppSettings.messagePreviewMaxLines,
-  AppSettings.sendTimelineEventTimeout,
   AppSettings.chatFilter,
   AppSettings.emojiSuggestionLocale,
   AppSettings.benchmarksInLogs,
-  AppSettings.audioRecordingNumChannels,
   AppSettings.audioRecordingAutoGain,
   AppSettings.audioRecordingEchoCancel,
   AppSettings.audioRecordingNoiseSuppress,
-  AppSettings.audioRecordingBitRate,
-  AppSettings.audioRecordingSamplingRate,
   AppSettings.renderHtml,
-  AppSettings.fontSizeFactor,
   AppSettings.hideRedactedEvents,
   AppSettings.hideUnknownEvents,
   AppSettings.autoplayImages,

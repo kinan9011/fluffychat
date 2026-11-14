@@ -9,14 +9,18 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/database_key_error/database_key_error_page.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/font_licenses.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:fluffychat/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:material_ui/material_ui.dart';
@@ -87,7 +91,16 @@ void main(List<String> args) => runZonedGuarded(() async {
       AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
     await ForegroundServices.startService('background_push');
 
-    final clients = await ClientManager.getClients(store: store);
+    final List<Client> clients;
+    try {
+      clients = await ClientManager.getClients(store: store);
+    } on DatabaseKeyUnavailableException catch (e) {
+      Logs().w('Database key unavailable in background-fetch mode', e);
+      return;
+    } on DatabaseOpenFailedException catch (e) {
+      Logs().w('Database not openable in background-fetch mode', e);
+      return;
+    }
 
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
@@ -106,7 +119,18 @@ void main(List<String> args) => runZonedGuarded(() async {
     return;
   }
 
-  final clients = await ClientManager.getClients(store: store);
+  final List<Client> clients;
+  try {
+    clients = await ClientManager.getClients(store: store);
+  } on DatabaseKeyUnavailableException catch (e) {
+    Logs().w('Database key unavailable, asking the user', e);
+    _showDatabaseErrorPage(store, args, keyProblem: true);
+    return;
+  } on DatabaseOpenFailedException catch (e) {
+    Logs().w('Database not openable, asking the user', e);
+    _showDatabaseErrorPage(store, args, keyProblem: false);
+    return;
+  }
 
   // Started in foreground mode.
   Logs().i(
@@ -115,6 +139,28 @@ void main(List<String> args) => runZonedGuarded(() async {
   await startGui(clients, store);
 }, ErrorReporter.onFlutterError);
 
+void _showDatabaseErrorPage(
+  SharedPreferences store,
+  List<String> args, {
+  required bool keyProblem,
+}) => runApp(
+  DatabaseKeyErrorPage.app(
+    onRetry: () => main(args),
+    onReset: () => _resetDatabasesAndRestart(store, args),
+    keyProblem: keyProblem,
+  ),
+);
+
+Future<void> _resetDatabasesAndRestart(
+  SharedPreferences store,
+  List<String> args,
+) async {
+  await resetLocalDatabases(
+    store.getStringList(ClientManager.clientNamespace) ?? [],
+  );
+  main(args);
+}
+
 /// Fetch the pincode for the applock and start the flutter engine.
 Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   // Fetch the pin for the applock if existing for mobile applications.
@@ -122,11 +168,9 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   var useBiometrics = false;
   if (PlatformInfos.supportsAppLock) {
     try {
-      pin = await const FlutterSecureStorage().read(
-        key: 'chat.fluffy.app_lock',
-      );
+      pin = await createSecureStorage().read(key: 'chat.fluffy.app_lock');
       useBiometrics =
-          (await const FlutterSecureStorage().read(
+          (await createSecureStorage().read(
             key: 'chat.fluffy.use_biometrics',
           )) ==
           'true';

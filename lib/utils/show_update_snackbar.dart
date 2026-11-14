@@ -8,13 +8,13 @@ import 'dart:convert';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 abstract class UpdateNotifier {
   static const String versionStoreKey = 'last_known_version';
@@ -78,7 +78,7 @@ abstract class UpdateNotifier {
           ),
           TextButton(
             onPressed: () {
-              launchUrlString(downloadUrl);
+              launchWebUrl(downloadUrl);
               scaffoldMessenger.hideCurrentMaterialBanner();
             },
             child: Text(l10n.download),
@@ -130,7 +130,7 @@ abstract class UpdateNotifier {
               AdaptiveDialogAction(
                 bigButtons: true,
                 targetPlatform: TargetPlatform.android,
-                onPressed: () => launchUrlString(AppConfig.helpUrl),
+                onPressed: () => launchWebUrl(AppConfig.helpUrl),
                 child: Row(
                   mainAxisSize: .min,
                   spacing: 4,
@@ -151,7 +151,7 @@ abstract class UpdateNotifier {
               AdaptiveDialogAction(
                 bigButtons: true,
                 targetPlatform: TargetPlatform.android,
-                onPressed: () => launchUrlString(AppConfig.changelogUrl),
+                onPressed: () => launchWebUrl(AppConfig.changelogUrl),
                 child: Text(l10n.changelog),
               ),
               AdaptiveDialogAction(

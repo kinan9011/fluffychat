@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/foundation.dart';
 
-const maxBackupDumpBytes = 256 * 1024 * 1024;
+const maxBackupDumpBytes = 64 * 1024 * 1024;
 
 /// Boxes `MatrixSdkDatabase.importDump` dereferences unconditionally. Missing
 /// one makes the import throw after the existing database was already cleared.

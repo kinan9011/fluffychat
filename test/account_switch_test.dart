@@ -12,6 +12,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
+import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
@@ -19,6 +20,7 @@ import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -635,6 +637,149 @@ void main() {
         system.map((call) => call.method),
         contains('SystemNavigator.pop'),
       );
+      return matrix;
+    });
+  });
+
+  group('callkit rejoin', () {
+    const roomId = '!nothere:fakeServer.notExisting';
+    CallKitParams call({
+      required String id,
+      required bool accepted,
+      String clientName = 'Second',
+    }) => CallKitParams(
+      id: id,
+      isAccepted: accepted,
+      extra: {'roomId': roomId, 'clientName': clientName},
+    );
+
+    accountTest('an accepted entry without another participant is ended', (
+      tester,
+      matrix,
+    ) async {
+      final ended = <String>[];
+      final before = location();
+
+      await rejoinAcceptedCall(
+        [call(id: 'c1', accepted: true)],
+        matrix,
+        hasActiveCall: (_, _) async => false,
+        endCall: (id) async => ended.add(id),
+      );
+      await settle(tester);
+
+      expect(ended, ['c1']);
+      expect(location(), before);
+      expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an accepted entry with another participant is joined', (
+      tester,
+      matrix,
+    ) async {
+      final ended = <String>[];
+      Client? checkedClient;
+
+      await rejoinAcceptedCall(
+        [call(id: 'c1', accepted: true)],
+        matrix,
+        hasActiveCall: (client, _) async {
+          checkedClient = client;
+          return true;
+        },
+        endCall: (id) async => ended.add(id),
+      );
+      await settle(tester);
+
+      expect(ended, isEmpty);
+      expect(checkedClient, second);
+      expect(location(), '/rooms/$roomId?action=call');
+      expect(matrix.client, second);
+      return matrix;
+    });
+
+    accountTest('a ringing entry is never checked or joined', (
+      tester,
+      matrix,
+    ) async {
+      var checks = 0;
+      final before = location();
+
+      await rejoinAcceptedCall(
+        [call(id: 'c1', accepted: false)],
+        matrix,
+        hasActiveCall: (_, _) async {
+          checks++;
+          return true;
+        },
+        endCall: (_) async => fail('nothing to end'),
+      );
+      await settle(tester);
+
+      expect(checks, 0);
+      expect(location(), before);
+      expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an entry of an unknown account is ignored', (
+      tester,
+      matrix,
+    ) async {
+      await rejoinAcceptedCall(
+        [call(id: 'c1', accepted: true, clientName: 'Nobody')],
+        matrix,
+        hasActiveCall: (_, _) async => fail('no target'),
+        endCall: (_) async => fail('no target'),
+      );
+      expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an accept event joins a logged in account directly', (
+      tester,
+      matrix,
+    ) async {
+      await onCallKitEvent(
+        matrix,
+        CallEventActionCallAccept(call(id: 'c1', accepted: false)),
+      );
+      await settle(tester);
+
+      expect(location(), '/rooms/$roomId?action=call');
+      expect(matrix.client, second);
+      return matrix;
+    });
+
+    accountTest('an accept event of an unknown account does nothing', (
+      tester,
+      matrix,
+    ) async {
+      final before = location();
+      await onCallKitEvent(
+        matrix,
+        CallEventActionCallAccept(
+          call(id: 'c1', accepted: false, clientName: 'Nobody'),
+        ),
+      );
+      await settle(tester);
+
+      expect(location(), before);
+      expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an ended event clears the active call room', (
+      tester,
+      matrix,
+    ) async {
+      final params = call(id: 'c1', accepted: true);
+      matrix.activeCallRoomId.value = roomId;
+
+      await onCallKitEvent(matrix, CallEventActionCallEnded(params));
+
+      expect(matrix.activeCallRoomId.value, isNull);
       return matrix;
     });
   });

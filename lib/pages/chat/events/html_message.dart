@@ -401,7 +401,8 @@ class HtmlMessage extends StatelessWidget {
               uri: mxcUrl,
               width: size.width,
               height: size.height,
-              isThumbnail: size.isThumbnail,
+              isThumbnail: true,
+              animated: true,
             ),
           ),
         );
@@ -587,6 +588,7 @@ class HtmlMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final element = parser.parse(html).body ?? dom.Element.html('');
+    limitHtmlImages(element);
     final configuredMaxLines = AppSettings.messagePreviewMaxLines.value;
     final maxLines = configuredMaxLines <= 0 ? null : configuredMaxLines;
     final span = _renderHtml(element, context);

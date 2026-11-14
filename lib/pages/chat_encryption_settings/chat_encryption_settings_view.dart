@@ -8,10 +8,10 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class ChatEncryptionSettingsView extends StatelessWidget {
   final ChatEncryptionSettingsController controller;
@@ -36,7 +36,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           title: Text(L10n.of(context).encryption),
           actions: [
             TextButton(
-              onPressed: () => launchUrlString(AppConfig.encryptionTutorial),
+              onPressed: () => launchWebUrl(AppConfig.encryptionTutorial),
               child: Text(L10n.of(context).help),
             ),
           ],

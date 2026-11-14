@@ -11,6 +11,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
+import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -28,7 +29,6 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
@@ -410,10 +410,7 @@ class MatrixState extends State<Matrix> {
             cancelLabel: L10n.of(context).doNotShowAgain,
           );
           if (result == OkCancelResult.ok && link != null) {
-            launchUrlString(
-              link.toString(),
-              mode: LaunchMode.externalApplication,
-            );
+            launchWebUrl(link.toString(), mode: LaunchMode.externalApplication);
           }
           if (result == OkCancelResult.cancel) {
             await AppSettings.showNoGoogle.setItem(true);

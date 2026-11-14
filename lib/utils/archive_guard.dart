@@ -95,7 +95,7 @@ List<ArchiveEntryBytes> extractArchiveSafely(
     throw const ArchiveGuardException(ArchiveGuardError.tooLarge);
   }
 
-  _checkCentralDirectory(bytes, limits);
+  checkZipCentralDirectory(bytes, limits);
 
   final Archive archive;
   try {
@@ -149,6 +149,9 @@ List<ArchiveEntryBytes> extractArchiveSafely(
 }
 
 const _eocdSignature = 0x06054b50;
+const _zip64LocatorSignature = 0x07064b50;
+const _zip64LocatorLength = 20;
+const _zip64Marker = 0xFFFFFFFF;
 const _directorySignature = 0x02014b50;
 const _eocdMinLength = 22;
 const _directoryRecordMinLength = 46;
@@ -162,14 +165,23 @@ const _unixFileTypeMask = 0xf000;
 /// not by the declared count, and it inflates symlink entries while decoding.
 /// Both happen before any other limit could be checked, so the directory is
 /// validated here first.
-void _checkCentralDirectory(Uint8List bytes, ArchiveLimits limits) {
+@visibleForTesting
+void checkZipCentralDirectory(Uint8List bytes, ArchiveLimits limits) {
   final data = ByteData.sublistView(bytes);
   final lowest = max(0, bytes.length - _eocdMinLength - _maxEocdCommentLength);
   for (var eocd = bytes.length - _eocdMinLength; eocd >= lowest; eocd--) {
     if (data.getUint32(eocd, Endian.little) != _eocdSignature) continue;
+    if (eocd >= _zip64LocatorLength &&
+        data.getUint32(eocd - _zip64LocatorLength, Endian.little) ==
+            _zip64LocatorSignature) {
+      throw const ArchiveGuardException(ArchiveGuardError.invalid);
+    }
     final entries = data.getUint16(eocd + 10, Endian.little);
     final directoryBytes = data.getUint32(eocd + 12, Endian.little);
     final directoryOffset = data.getUint32(eocd + 16, Endian.little);
+    if (directoryBytes == _zip64Marker || directoryOffset == _zip64Marker) {
+      throw const ArchiveGuardException(ArchiveGuardError.invalid);
+    }
     if (entries > limits.maxEntries ||
         directoryBytes >
             limits.maxEntries * _maxCentralDirectoryBytesPerEntry) {
@@ -186,30 +198,50 @@ void _checkCentralDirectory(Uint8List bytes, ArchiveLimits limits) {
       if (entries == 0) return;
       throw const ArchiveGuardException(ArchiveGuardError.invalid);
     }
-    _checkDirectoryRecords(data, start, entries, limits);
+    _checkDirectoryRecords(
+      data,
+      start,
+      start + directoryBytes,
+      eocd,
+      entries,
+      limits,
+    );
     return;
   }
   throw const ArchiveGuardException(ArchiveGuardError.invalid);
 }
 
+/// Walks the records by the directory's byte range, so a declared count that
+/// is lower than the real number of records cannot hide a record.
 void _checkDirectoryRecords(
   ByteData data,
   int start,
+  int end,
+  int eocd,
   int entries,
   ArchiveLimits limits,
 ) {
+  if (end > eocd) {
+    throw const ArchiveGuardException(ArchiveGuardError.invalid);
+  }
   var offset = start;
-  for (var i = 0; i < entries; i++) {
-    if (offset + _directoryRecordMinLength > data.lengthInBytes ||
+  var count = 0;
+  while (offset < end) {
+    if (++count > limits.maxEntries) {
+      throw const ArchiveGuardException(ArchiveGuardError.tooManyEntries);
+    }
+    if (offset + _directoryRecordMinLength > end ||
         data.getUint32(offset, Endian.little) != _directorySignature) {
       throw const ArchiveGuardException(ArchiveGuardError.invalid);
     }
     final versionMadeBy = data.getUint16(offset + 4, Endian.little);
+    final compressedSize = data.getUint32(offset + 20, Endian.little);
     final uncompressedSize = data.getUint32(offset + 24, Endian.little);
     final nameLength = data.getUint16(offset + 28, Endian.little);
     final extraLength = data.getUint16(offset + 30, Endian.little);
     final commentLength = data.getUint16(offset + 32, Endian.little);
     final attributes = data.getUint32(offset + 38, Endian.little);
+    final localHeaderOffset = data.getUint32(offset + 42, Endian.little);
 
     final isUnixSymlink =
         versionMadeBy >> 8 == _unixCreator &&
@@ -220,7 +252,13 @@ void _checkDirectoryRecords(
     if (uncompressedSize > limits.maxEntryBytes) {
       throw const ArchiveGuardException(ArchiveGuardError.tooLarge);
     }
+    if (compressedSize == _zip64Marker || localHeaderOffset == _zip64Marker) {
+      throw const ArchiveGuardException(ArchiveGuardError.invalid);
+    }
     offset +=
         _directoryRecordMinLength + nameLength + extraLength + commentLength;
+  }
+  if (offset != end || count != entries) {
+    throw const ArchiveGuardException(ArchiveGuardError.invalid);
   }
 }
