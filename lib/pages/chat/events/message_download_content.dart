@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/events/file_bubble_view.dart';
 import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
+import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -26,7 +28,10 @@ class MessageDownloadContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filename = event.content.tryGet<String>('filename') ?? event.body;
+    final filename = safeDisplayText(
+      event.content.tryGet<String>('filename') ?? event.body,
+      maxGraphemes: 255,
+    );
     final filetype = (filename.contains('.')
         ? filename.split('.').last.toUpperCase()
         : event.content
@@ -40,65 +45,21 @@ class MessageDownloadContent extends StatelessWidget {
     return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .start,
-      spacing: 8,
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-            onTap: () => event.saveFile(context),
-            child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisSize: .min,
-                spacing: 16,
-                children: [
-                  if (fileSendingStatus != null)
-                    FileSendStatusIndicator(
-                      fileSendingStatus: fileSendingStatus,
-                    )
-                  else
-                    CircleAvatar(
-                      backgroundColor: textColor.withAlpha(32),
-                      child: Icon(
-                        Icons.file_download_outlined,
-                        color: textColor,
-                      ),
-                    ),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      mainAxisSize: .min,
-                      children: [
-                        Text(
-                          filename,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          '$sizeString | $filetype',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: textColor, fontSize: 10),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        FileBubbleView(
+          filename: filename,
+          meta: '$sizeString · $filetype',
+          outgoing: event.senderId == event.room.client.userID,
+          leading: fileSendingStatus == null
+              ? null
+              : FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
+          onTap: () => event.saveFile(context),
         ),
         if (fileDescription != null) ...[
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
+              horizontal: 13.0,
+              vertical: 4.0,
             ),
             child: Linkify(
               text: fileDescription,

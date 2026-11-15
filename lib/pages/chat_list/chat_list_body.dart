@@ -254,6 +254,7 @@ class ChatListViewBody extends StatelessWidget {
                                         .userId
                                         .localpart ??
                                     L10n.of(context).unknownDevice,
+                                colorSeed: userSearchResult.results[i].userId,
                                 avatar: userSearchResult.results[i].avatarUrl,
                                 onPressed: () => UserDialog.show(
                                   context: context,
@@ -478,6 +479,7 @@ class PublicRoomsHorizontalList extends StatelessWidget {
                     publicRooms[i].name ??
                     publicRooms[i].canonicalAlias?.localpart ??
                     L10n.of(context).group,
+                colorSeed: publicRooms[i].roomId,
                 avatar: publicRooms[i].avatarUrl,
                 onPressed: () => showAdaptiveDialog(
                   context: context,
@@ -496,11 +498,13 @@ class PublicRoomsHorizontalList extends StatelessWidget {
 
 class _SearchItem extends StatelessWidget {
   final String title;
+  final String colorSeed;
   final Uri? avatar;
   final void Function() onPressed;
 
   const _SearchItem({
     required this.title,
+    required this.colorSeed,
     this.avatar,
     required this.onPressed,
   });
@@ -514,7 +518,7 @@ class _SearchItem extends StatelessWidget {
         mainAxisSize: .min,
         children: [
           const SizedBox(height: 8),
-          Avatar(mxContent: avatar, name: title),
+          Avatar(mxContent: avatar, name: title, colorSeed: colorSeed),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(

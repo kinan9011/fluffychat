@@ -10,6 +10,7 @@ import 'flows/auth_flows.dart';
 import 'flows/basic_messaging.dart';
 import 'flows/chat_flows.dart';
 import 'flows/chat_list_flows.dart';
+import 'flows/conversation_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/shell_navigation.dart';
@@ -26,6 +27,9 @@ void main() {
     testWidgets('Chat list swipe and archive', chatListSwipeArchive);
     testWidgets('Chat list peek', chatListPeek);
     testWidgets('Chat list draft', chatListDraft);
+    testWidgets('Conversation shell', conversationShell);
+    testWidgets('Conversation bubbles', conversationBubbles);
+    testWidgets('Conversation jump buttons', conversationJumpButtons);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

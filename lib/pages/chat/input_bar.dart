@@ -8,6 +8,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat/mention_suggestion_tile.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
 import 'package:fluffychat/utils/markdown_context_builder.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -269,11 +270,11 @@ class InputBar extends StatelessWidget {
           // ensure proper ordering ...
           key: ValueKey(suggestion['name']),
           uri: suggestion['mxc'] is String
-              ? Uri.parse(suggestion['mxc'] ?? '')
+              ? Uri.tryParse(suggestion['mxc'] ?? '')
               : null,
+          client: client,
           width: size,
           height: size,
-          isThumbnail: false,
         ),
         title: Row(
           crossAxisAlignment: .center,
@@ -290,6 +291,9 @@ class InputBar extends StatelessWidget {
                             suggestion.tryGet<String>('pack_avatar_url') ?? '',
                           ),
                           name: suggestion.tryGet<String>('pack_display_name'),
+                          colorSeed: suggestion.tryGet<String>(
+                            'pack_avatar_url',
+                          ),
                           size: size * 0.9,
                           client: client,
                         )
@@ -302,18 +306,11 @@ class InputBar extends StatelessWidget {
       );
     }
     if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
-      final url = Uri.parse(suggestion['avatar_url'] ?? '');
-      return ListTile(
+      return MentionSuggestionTile(
+        suggestion: suggestion,
+        client: client,
+        size: size,
         onTap: () => onSelected(suggestion),
-        leading: Avatar(
-          mxContent: url,
-          name:
-              suggestion.tryGet<String>('displayname') ??
-              suggestion.tryGet<String>('mxid'),
-          size: size,
-          client: client,
-        ),
-        title: Text(suggestion['displayname'] ?? suggestion['mxid']!),
       );
     }
     return const SizedBox.shrink();

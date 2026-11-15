@@ -2790,3 +2790,13 @@ background_updates:
 
 
 # vim:ft=yaml
+
+# The flows run longer than the default 5 minute access token lifetime: the
+# app instances of earlier flows keep syncing and race each other refreshing a
+# token that rotates.
+refreshable_access_token_lifetime: 2h
+
+# The conversation flows send dozens of messages in a row.
+rc_message:
+  per_second: 1000
+  burst_count: 10000

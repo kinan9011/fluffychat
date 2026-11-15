@@ -5,7 +5,7 @@
 
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/utd_dialog.dart';
+import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:flutter/gestures.dart';
@@ -83,7 +83,7 @@ class StateMessage extends StatelessWidget {
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(7),
                                       onTap: () =>
-                                          UtdDialog.show(context, event),
+                                          showUtdWhySheet(context, event),
                                       child: Icon(
                                         Icons.info_outlined,
                                         size: 14,

@@ -3,16 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:fluffychat/config/app_tokens.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
+import 'package:fluffychat/utils/chat/bubble_shape.dart';
+import 'package:fluffychat/utils/chat/display_text.dart';
+import 'package:fluffychat/utils/chat/message_ticks.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -22,13 +27,17 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../../config/app_config.dart';
-import '../sticker_picker_dialog.dart';
+import 'deleted_bubble_content.dart';
+import 'message_bubble.dart';
 import 'message_content.dart';
+import 'message_focus.dart';
+import 'message_footer.dart';
+import 'message_hover_actions.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'swipe_to_reply.dart';
+import 'utd_bubble_content.dart';
 
 class Message extends StatelessWidget {
   final Event event;
@@ -36,21 +45,20 @@ class Message extends StatelessWidget {
   final Event? previousEvent;
   final bool displayReadMarker;
   final void Function(Event) onSelect;
+  final void Function(Event event, Rect anchor) onOpenMenu;
   final void Function(Event) onInfoTab;
   final void Function(String) scrollToEventId;
   final void Function() onSwipe;
   final void Function() onMention;
-  final void Function() onEdit;
   final void Function(String eventId)? enterThread;
   final bool longPressSelect;
   final bool selected;
-  final bool singleSelected;
   final Timeline timeline;
   final bool highlightMarker;
   final bool animateIn;
   final bool wallpaperMode;
-  final ScrollController scrollController;
-  final List<Color> colors;
+  final Tick tick;
+  final bool Function(Event) isHighlight;
   final void Function()? onExpand;
   final bool isCollapsed;
   final Set<String> bigEmojis;
@@ -63,35 +71,47 @@ class Message extends StatelessWidget {
     this.longPressSelect = false,
     required this.bigEmojis,
     required this.onSelect,
+    required this.onOpenMenu,
     required this.onInfoTab,
     required this.scrollToEventId,
     required this.onSwipe,
     this.selected = false,
-    required this.onEdit,
-    required this.singleSelected,
     required this.timeline,
     this.highlightMarker = false,
     this.animateIn = false,
     this.wallpaperMode = false,
+    this.tick = Tick.none,
+    required this.isHighlight,
     required this.onMention,
-    required this.scrollController,
-    required this.colors,
     this.onExpand,
     required this.enterThread,
     this.isCollapsed = false,
     super.key,
   });
 
+  static const _sameSenderTypes = {
+    EventTypes.Message,
+    EventTypes.Sticker,
+    EventTypes.Encrypted,
+  };
+
+  bool _sameRun(Event? other) =>
+      other != null &&
+      _sameSenderTypes.contains(other.type) &&
+      other.senderId == event.senderId &&
+      other.originServerTs.sameEnvironment(event.originServerTs);
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (!{
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.CallInvite,
-      PollEventContent.startType,
-    }.contains(event.type)) {
+    final undecryptable = event.isUndecryptable;
+    final menuEnabled = !longPressSelect && !event.redacted;
+    if (!undecryptable &&
+        !{
+          EventTypes.Message,
+          EventTypes.Sticker,
+          EventTypes.CallInvite,
+          PollEventContent.startType,
+        }.contains(event.type)) {
       if (event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
       }
@@ -103,57 +123,16 @@ class Message extends StatelessWidget {
       return StateMessage(event);
     }
 
+    final tokens = AppTokens.of(context);
+    final theme = Theme.of(context);
     final client = Matrix.of(context).client;
     final ownMessage = event.senderId == client.userID;
-    final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
-
-    var color = theme.colorScheme.surfaceContainerHigh;
-    final displayTime =
-        event.type == EventTypes.RoomCreate ||
-        previousEvent == null ||
-        !event.originServerTs.sameEnvironment(previousEvent!.originServerTs);
-
-    final nextEventSameSender =
-        nextEvent != null &&
-        {EventTypes.Message, EventTypes.Sticker}.contains(nextEvent!.type) &&
-        nextEvent!.senderId == event.senderId &&
-        nextEvent!.originServerTs.sameEnvironment(event.originServerTs);
-
-    final previousEventSameSender =
-        previousEvent != null &&
-        {
-          EventTypes.Message,
-          EventTypes.Sticker,
-        }.contains(previousEvent!.type) &&
-        previousEvent!.senderId == event.senderId &&
-        previousEvent!.originServerTs.sameEnvironment(event.originServerTs);
-
-    final textColor = ownMessage
-        ? theme.onBubbleColor
-        : theme.colorScheme.onSurface;
-
-    final linkColor = ownMessage
-        ? theme.brightness == Brightness.light
-              ? theme.colorScheme.primaryFixed
-              : theme.colorScheme.onTertiaryContainer
-        : theme.colorScheme.primary;
-
-    final rowMainAxisAlignment = ownMessage
-        ? MainAxisAlignment.end
-        : MainAxisAlignment.start;
-
+    final isDirect = event.room.isDirectChat;
+    final nextEventSameSender = _sameRun(nextEvent);
+    final previousEventSameSender = _sameRun(previousEvent);
     final displayEvent = event.getDisplayEvent(timeline);
-    const hardCorner = Radius.circular(3);
-    const roundedCorner = Radius.circular(AppConfig.borderRadius);
-    final borderRadius = BorderRadius.only(
-      topLeft: !ownMessage ? hardCorner : roundedCorner,
-      topRight: ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
-      bottomLeft: !ownMessage && previousEventSameSender
-          ? hardCorner
-          : roundedCorner,
-      bottomRight: ownMessage ? hardCorner : roundedCorner,
-    );
-    const avatarSize = Avatar.defaultSize;
+    final kind = bubbleKind(displayEvent, own: ownMessage);
+    final colors = BubbleColors.of(tokens, outgoing: ownMessage, kind: kind);
     final noBubble =
         ({
           MessageTypes.Video,
@@ -162,37 +141,18 @@ class Message extends StatelessWidget {
         }.contains(event.messageType) &&
         event.fileDescription == null &&
         !event.redacted);
-
-    if (ownMessage) {
-      color = displayEvent.status.isError
-          ? Colors.redAccent
-          : theme.bubbleColor;
-    }
-
-    final sentReactions = <String>{};
-    if (singleSelected) {
-      sentReactions.addAll(
-        event
-            .aggregatedEvents(timeline, RelationshipTypes.reaction)
-            .where(
-              (event) =>
-                  event.senderId == event.room.client.userID &&
-                  event.type == 'm.reaction',
-            )
-            .map(
-              (event) => event.content
-                  .tryGetMap<String, Object?>('m.relates_to')
-                  ?.tryGet<String>('key'),
-            )
-            .whereType<String>(),
-      );
-    }
-
+    final mention =
+        !ownMessage &&
+        kind == BubbleKind.normal &&
+        (isHighlight(event) ||
+            (client.userID != null &&
+                event.mentions.userIds.contains(client.userID)));
+    final showSender = !nextEventSameSender && !ownMessage && !isDirect;
+    final showAvatarColumn = !ownMessage && !isDirect;
     final hasReactions = event.hasAggregatedEvents(
       timeline,
       RelationshipTypes.reaction,
     );
-
     final threadChildren = event.aggregatedEvents(
       timeline,
       RelationshipTypes.thread,
@@ -201,23 +161,124 @@ class Message extends StatelessWidget {
       timeline,
       RelationshipTypes.edit,
     );
-
-    final showReactionPicker =
-        singleSelected && event.room.canSendDefaultMessages;
-
-    final enterThread = this.enterThread;
     final sender = event.senderFromMemoryOrFallback;
+    final radius = bubbleRadius(
+      outgoing: ownMessage,
+      tail: !previousEventSameSender,
+    );
+    final direction = Directionality.of(context);
+    final footer = MessageFooter(
+      time: selected
+          ? event.originServerTs.localizedDetailedTime(context)
+          : event.originServerTs.localizedTimeOfDay(context),
+      edited: isEdited,
+      tick: ownMessage ? tick : Tick.none,
+      color: noBubble ? Colors.white : colors.secondary,
+    );
 
-    final wallpaperTextShadow = !wallpaperMode
-        ? null
-        : [
-            Shadow(
-              offset: Offset(0.0, 0.0),
-              blurRadius: 2,
-              color: theme.colorScheme.surface,
+    final Widget content;
+    switch (kind) {
+      case BubbleKind.deleted:
+        content = InkWell(
+          onTap: () => onInfoTab(event),
+          child: _DeletedContent(event: event),
+        );
+      case BubbleKind.undecryptable:
+        content = UtdBubbleContent(
+          onWhy: () => showUtdWhySheet(context, event),
+        );
+      case BubbleKind.normal:
+      case BubbleKind.error:
+        content = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (event.inReplyToEventId(includingFallback: false) != null)
+              FutureBuilder<Event?>(
+                future: event.getReplyEvent(timeline),
+                builder: (context, snapshot) {
+                  final replyEvent = snapshot.data;
+                  final replyId = event.inReplyToEventId();
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6, top: 6, right: 6),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: replyId == null
+                          ? null
+                          : () =>
+                                scrollToEventId(replyEvent?.eventId ?? replyId),
+                      child: AbsorbPointer(
+                        child: replyEvent == null
+                            ? ReplyQuoteView(
+                                name: '…',
+                                text: '…',
+                                outgoing: ownMessage,
+                              )
+                            : ReplyContent(
+                                replyEvent,
+                                ownMessage: ownMessage,
+                                timeline: timeline,
+                              ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            MessageContent(
+              displayEvent,
+              textColor: colors.text,
+              linkColor: colors.link,
+              onInfoTab: onInfoTab,
+              borderRadius: radius.resolve(direction),
+              timeline: timeline,
+              selected: selected,
+              bigEmojis: bigEmojis,
             ),
-          ];
-    final eventStateTextColor = theme.colorScheme.onSurface;
+          ],
+        );
+    }
+
+    final bubbleMax = bubbleMaxWidth(
+      MediaQuery.sizeOf(context).width.clamp(0, FluffyThemes.maxTimelineWidth),
+    );
+    final bubble = MessageBubble(
+      kind: kind,
+      outgoing: ownMessage,
+      tail: !previousEventSameSender,
+      mention: mention,
+      transparent: noBubble,
+      maxWidth: bubbleMax,
+      child: noBubble
+          ? Stack(
+              children: [
+                content,
+                PositionedDirectional(
+                  bottom: 6,
+                  end: 6,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: tokens.chip,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      child: footer,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : BubbleBody(
+              content: content,
+              footer: footer,
+              width: displayEvent.messageType == MessageTypes.Location
+                  ? math.min(bubbleMax, AppChat.mapBubbleWidth)
+                  : null,
+            ),
+    );
 
     return Center(
       child: SwipeToReply(
@@ -237,612 +298,165 @@ class Message extends StatelessWidget {
                 : 8.0,
           ),
           child: Column(
-            mainAxisSize: .min,
-            crossAxisAlignment: ownMessage ? .end : .start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: ownMessage
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: <Widget>[
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: InkWell(
-                      hoverColor: longPressSelect ? Colors.transparent : null,
-                      enableFeedback: !selected,
-                      onTap: longPressSelect ? null : () => onSelect(event),
-                      borderRadius: BorderRadius.circular(
-                        AppConfig.borderRadius / 2,
-                      ),
+              MessageHoverActions(
+                enabled:
+                    menuEnabled &&
+                    event.room.canSendDefaultMessages &&
+                    event.status.isSent,
+                outgoing: ownMessage,
+                onReact: () => _openMenuFrom(context),
+                onReply: onSwipe,
+                onMore: () => _openMenuFrom(context),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
                       child: Material(
-                        borderRadius: BorderRadius.circular(
-                          AppConfig.borderRadius / 2,
-                        ),
+                        borderRadius: BorderRadius.circular(AppRadius.banner),
                         color: selected || highlightMarker
-                            ? theme.colorScheme.secondaryContainer.withAlpha(
-                                128,
-                              )
+                            ? tokens.accs.withValues(alpha: 0.7)
                             : Colors.transparent,
                       ),
                     ),
-                  ),
-                  Row(
-                    crossAxisAlignment: .start,
-                    mainAxisAlignment: rowMainAxisAlignment,
-                    children: [
-                      if (longPressSelect && !event.redacted)
-                        SizedBox(
-                          height: avatarSize,
-                          width: avatarSize,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            tooltip: L10n.of(context).select,
-                            icon: Icon(
-                              selected
-                                  ? Icons.check_circle
-                                  : Icons.circle_outlined,
-                            ),
-                            onPressed: () => onSelect(event),
-                          ),
-                        )
-                      else if (nextEventSameSender || ownMessage)
-                        SizedBox(width: avatarSize)
-                      else
-                        FutureBuilder<User?>(
-                          future: event.fetchSenderUser(),
-                          builder: (context, snapshot) {
-                            final user = snapshot.data ?? sender;
-                            return Avatar(
-                              mxContent: user.avatarUrl,
-                              name: user.calcDisplayname(),
-                              onTap: () => showMemberActionsPopupMenu(
-                                context: context,
-                                user: user,
-                                onMention: onMention,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: ownMessage
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                      spacing: AppChat.groupGap,
+                      children: [
+                        if (longPressSelect &&
+                            !event.redacted &&
+                            !undecryptable)
+                          SizedBox.square(
+                            dimension: AppChat.jumpHit,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              tooltip: L10n.of(context).select,
+                              icon: Icon(
+                                selected
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
                               ),
-                              size: avatarSize,
-                              presenceUserId: user.stateKey,
-                              presenceBackgroundColor: wallpaperMode
-                                  ? Colors.transparent
-                                  : null,
-                            );
-                          },
-                        ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: .start,
-                          mainAxisSize: .min,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: Row(
-                                mainAxisAlignment: ownMessage ? .end : .start,
-                                children: [
-                                  if (sender.powerLevel.role !=
-                                          PowerLevelRole.user &&
-                                      !nextEventSameSender &&
-                                      !ownMessage &&
-                                      !event.room.isDirectChat)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 2.0,
-                                      ),
-                                      child: Icon(
-                                        sender.powerLevel.role ==
-                                                PowerLevelRole.moderator
-                                            ? Icons.add_moderator_outlined
-                                            : Icons.admin_panel_settings,
-                                        size: 14,
-                                        color: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                      ),
-                                    ),
-                                  if ((!nextEventSameSender) && !ownMessage)
-                                    FutureBuilder<User?>(
-                                      future: event.fetchSenderUser(),
-                                      builder: (context, snapshot) {
-                                        final displayname =
-                                            snapshot.data?.calcDisplayname() ??
-                                            sender.calcDisplayname();
-                                        return ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: 200,
-                                          ),
-                                          child: Text(
-                                            displayname,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: event.room.isDirectChat
-                                                  ? Colors.transparent
-                                                  : event.senderId.nameColor(
-                                                      theme.brightness,
-                                                    ),
-                                              fontSize: 11,
-                                              shadows: event.room.isDirectChat
-                                                  ? null
-                                                  : wallpaperTextShadow,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                ],
-                              ),
+                              onPressed: () => onSelect(event),
                             ),
-
-                            Container(
-                              alignment: alignment,
-                              padding: const EdgeInsets.only(left: 8),
-                              child: GestureDetector(
-                                onDoubleTap:
-                                    AppSettings.doubleTapToReact.value &&
-                                        event.room.canSendDefaultMessages
-                                    ? () {
-                                        HapticFeedback.lightImpact();
-                                        final emoji =
-                                            AppSettings.doubleTapReaction.value;
-                                        final existingReaction = event
-                                            .aggregatedEvents(
-                                              timeline,
-                                              RelationshipTypes.reaction,
-                                            )
-                                            .firstWhereOrNull(
-                                              (e) =>
-                                                  e.senderId ==
-                                                      event
-                                                          .room
-                                                          .client
-                                                          .userID &&
-                                                  e.content
-                                                          .tryGetMap<
-                                                            String,
-                                                            Object?
-                                                          >('m.relates_to')
-                                                          ?.tryGet<String>(
-                                                            'key',
-                                                          ) ==
-                                                      emoji,
-                                            );
-                                        if (existingReaction != null) {
-                                          existingReaction.redactEvent();
-                                        } else {
-                                          event.room.sendReaction(
-                                            event.eventId,
-                                            emoji,
-                                          );
-                                        }
-                                      }
-                                    : null,
-                                onLongPress: longPressSelect
-                                    ? null
-                                    : () {
-                                        HapticFeedback.heavyImpact();
-                                        onSelect(event);
-                                      },
-                                child: _AnimateIn(
-                                  key: ValueKey(
-                                    event.transactionId ?? event.eventId,
+                          )
+                        else if (showAvatarColumn)
+                          SizedBox(
+                            width: AppChat.bubbleAvatar,
+                            child: previousEventSameSender
+                                ? null
+                                : _SenderAvatar(
+                                    event: event,
+                                    fallback: sender,
+                                    onMention: onMention,
+                                    wallpaperMode: wallpaperMode,
                                   ),
-                                  animateIn: animateIn,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: noBubble
-                                          ? Colors.transparent
-                                          : color,
-                                      borderRadius: borderRadius,
-                                    ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: BubbleBackground(
-                                      colors: colors,
-                                      ignore:
-                                          noBubble ||
-                                          !ownMessage ||
-                                          MediaQuery.highContrastOf(context),
-                                      scrollController: scrollController,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            AppConfig.borderRadius,
-                                          ),
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              FluffyThemes.columnWidth * 1.5,
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: .min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            if (event.inReplyToEventId(
-                                                  includingFallback: false,
-                                                ) !=
-                                                null)
-                                              FutureBuilder<Event?>(
-                                                future: event.getReplyEvent(
-                                                  timeline,
-                                                ),
-                                                builder: (BuildContext context, snapshot) {
-                                                  final replyEvent =
-                                                      snapshot.hasData
-                                                      ? snapshot.data!
-                                                      : Event(
-                                                          eventId:
-                                                              event
-                                                                  .inReplyToEventId() ??
-                                                              '\$fake_event_id',
-                                                          content: {
-                                                            'msgtype': 'm.text',
-                                                            'body': '...',
-                                                          },
-                                                          senderId:
-                                                              event.senderId,
-                                                          type:
-                                                              'm.room.message',
-                                                          room: event.room,
-                                                          status:
-                                                              EventStatus.sent,
-                                                          originServerTs:
-                                                              DateTime.now(),
-                                                        );
-                                                  return Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 16,
-                                                          right: 16,
-                                                          top: 8,
-                                                        ),
-                                                    child: Material(
-                                                      color: Colors.transparent,
-                                                      borderRadius: ReplyContent
-                                                          .borderRadius,
-                                                      child: InkWell(
-                                                        borderRadius:
-                                                            ReplyContent
-                                                                .borderRadius,
-                                                        onTap: () =>
-                                                            scrollToEventId(
-                                                              replyEvent
-                                                                  .eventId,
-                                                            ),
-                                                        child: AbsorbPointer(
-                                                          child: ReplyContent(
-                                                            replyEvent,
-                                                            ownMessage:
-                                                                ownMessage,
-                                                            timeline: timeline,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            MessageContent(
-                                              displayEvent,
-                                              textColor: textColor,
-                                              linkColor: linkColor,
-                                              onInfoTab: onInfoTab,
-                                              borderRadius: borderRadius,
-                                              timeline: timeline,
-                                              selected: selected,
-                                              bigEmojis: bigEmojis,
-                                            ),
-                                          ],
+                          ),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: ownMessage
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (showSender)
+                                _SenderName(
+                                  event: event,
+                                  fallback: sender,
+                                  brightness: theme.brightness,
+                                ),
+                              Builder(
+                                builder: (bubbleContext) => MessageFocus(
+                                  enabled: menuEnabled,
+                                  actionLabel: L10n.of(context).moreOptions,
+                                  onOpenMenu: () => _openMenu(bubbleContext),
+                                  child: GestureDetector(
+                                    onDoubleTap:
+                                        menuEnabled &&
+                                            AppSettings
+                                                .doubleTapToReact
+                                                .value &&
+                                            event.room.canSendDefaultMessages
+                                        ? () => _doubleTapReact(client)
+                                        : null,
+                                    onLongPress: menuEnabled
+                                        ? () => _openMenu(bubbleContext)
+                                        : null,
+                                    onSecondaryTapUp: menuEnabled
+                                        ? (_) => _openMenu(bubbleContext)
+                                        : null,
+                                    child: _AnimateIn(
+                                      key: ValueKey(
+                                        event.transactionId ?? event.eventId,
+                                      ),
+                                      animateIn: animateIn,
+                                      child: KeyedSubtree(
+                                        key: mention
+                                            ? Key(
+                                                'mention_ring_${event.eventId}',
+                                              )
+                                            : null,
+                                        child: Semantics(
+                                          hint: mention
+                                              ? L10n.of(context).mentionsYou
+                                              : null,
+                                          child: bubble,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-
-                            AnimatedSize(
-                              duration: FluffyThemes.animationDuration,
-                              curve: FluffyThemes.animationCurve,
-                              alignment: Alignment.bottomCenter,
-                              child: !hasReactions
-                                  ? const SizedBox.shrink()
-                                  : Container(
-                                      alignment: ownMessage
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      padding: EdgeInsets.only(
-                                        top: 1.0,
-                                        left: 8.0,
-                                        right: ownMessage ? 0 : 12.0,
-                                      ),
-                                      child: MessageReactions(event, timeline),
-                                    ),
-                            ),
-                            Row(
-                              mainAxisAlignment: ownMessage ? .end : .start,
-                              children: [
-                                const SizedBox(width: 8),
-                                if (event.status.isSent &&
-                                    (displayTime ||
-                                        !previousEventSameSender ||
-                                        selected))
-                                  Text(
-                                    ' ${selected ? event.originServerTs.localizedDetailedTime(context) : event.originServerTs.localizedTimeOfDay(context)}',
-                                    style: TextStyle(
-                                      color: eventStateTextColor,
-                                      fontSize: 11,
-                                      shadows: wallpaperTextShadow,
-                                    ),
-                                  ),
-                                if (isEdited) ...[
-                                  Text(' ', style: TextStyle(fontSize: 11)),
-                                  Text(
-                                    L10n.of(context).edited,
-                                    style: TextStyle(
-                                      color: eventStateTextColor,
-                                      fontSize: 11,
-                                      shadows: wallpaperTextShadow,
-                                    ),
-                                  ),
-                                ],
-                                if (event.status == EventStatus.error) ...[
-                                  Text(' ', style: TextStyle(fontSize: 11)),
-                                  Text(
+                              AnimatedSize(
+                                duration: FluffyThemes.animationDuration,
+                                curve: FluffyThemes.animationCurve,
+                                alignment: Alignment.bottomCenter,
+                                child: hasReactions
+                                    ? MessageReactions(event, timeline)
+                                    : const SizedBox.shrink(),
+                              ),
+                              if (event.status == EventStatus.error)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
                                     L10n.of(context).couldNotBeSent,
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: theme.colorScheme.error,
-                                      shadows: wallpaperTextShadow,
+                                      color: tokens.red,
                                     ),
                                   ),
-                                  Text(' ', style: TextStyle(fontSize: 11)),
-                                  Icon(
-                                    Icons.error_outlined,
-                                    size: 14,
-                                    color: theme.colorScheme.error,
-                                    shadows: wallpaperTextShadow,
+                                ),
+                              if (event.status == EventStatus.sending &&
+                                  event.fileSendingStatus != null)
+                                Text(
+                                  switch (event.fileSendingStatus!) {
+                                    FileSendingStatus.generatingThumbnail =>
+                                      L10n.of(context).generatingThumbnail,
+                                    FileSendingStatus.encrypting => L10n.of(
+                                      context,
+                                    ).encrypting,
+                                    FileSendingStatus.uploading => L10n.of(
+                                      context,
+                                    ).uploading,
+                                  },
+                                  style: TextStyle(
+                                    color: tokens.mut,
+                                    fontSize: 11,
                                   ),
-                                ],
-                                if (event.status == EventStatus.sending) ...[
-                                  Text(
-                                    switch (event.fileSendingStatus) {
-                                      null => L10n.of(context).sending,
-                                      FileSendingStatus.generatingThumbnail =>
-                                        L10n.of(context).generatingThumbnail,
-                                      FileSendingStatus.encrypting => L10n.of(
-                                        context,
-                                      ).encrypting,
-                                      FileSendingStatus.uploading => L10n.of(
-                                        context,
-                                      ).uploading,
-                                    },
-                                    style: TextStyle(
-                                      color: eventStateTextColor,
-                                      fontSize: 11,
-                                      shadows: wallpaperTextShadow,
-                                    ),
-                                  ),
-                                  Text(' ', style: TextStyle(fontSize: 11)),
-                                  SizedBox.square(
-                                    dimension: 11,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                            Align(
-                              alignment: ownMessage
-                                  ? Alignment.bottomRight
-                                  : Alignment.bottomLeft,
-                              child: AnimatedSize(
-                                duration: FluffyThemes.animationDuration,
-                                curve: FluffyThemes.animationCurve,
-                                child: showReactionPicker
-                                    ? Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: Material(
-                                          elevation: 4,
-                                          borderRadius: BorderRadius.circular(
-                                            AppConfig.borderRadius,
-                                          ),
-                                          shadowColor: theme.colorScheme.surface
-                                              .withAlpha(128),
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            child: Row(
-                                              mainAxisSize: .min,
-                                              children: [
-                                                ...AppConfig.defaultReactions.map(
-                                                  (emoji) => IconButton(
-                                                    padding: EdgeInsets.zero,
-                                                    icon: Center(
-                                                      child: Opacity(
-                                                        opacity:
-                                                            sentReactions
-                                                                .contains(emoji)
-                                                            ? 0.33
-                                                            : 1,
-                                                        child: Text(
-                                                          emoji,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 20,
-                                                              ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    onPressed:
-                                                        sentReactions.contains(
-                                                          emoji,
-                                                        )
-                                                        ? null
-                                                        : () {
-                                                            onSelect(event);
-                                                            event.room
-                                                                .sendReaction(
-                                                                  event.eventId,
-                                                                  emoji,
-                                                                );
-                                                          },
-                                                  ),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.add_reaction_outlined,
-                                                  ),
-                                                  tooltip: L10n.of(
-                                                    context,
-                                                  ).customReaction,
-                                                  onPressed: () async {
-                                                    final emoji = await showAdaptiveBottomSheet<String>(
-                                                      context: context,
-                                                      builder: (context) => Scaffold(
-                                                        appBar: AppBar(
-                                                          title: Text(
-                                                            L10n.of(
-                                                              context,
-                                                            ).customReaction,
-                                                          ),
-                                                          leading: CloseButton(
-                                                            onPressed: () =>
-                                                                Navigator.of(
-                                                                  context,
-                                                                ).pop(null),
-                                                          ),
-                                                        ),
-                                                        body: SizedBox(
-                                                          height:
-                                                              double.infinity,
-                                                          child: DefaultTabController(
-                                                            length: 2,
-                                                            child: Column(
-                                                              children: [
-                                                                TabBar(
-                                                                  tabs: [
-                                                                    Tab(
-                                                                      text: L10n.of(
-                                                                        context,
-                                                                      ).emojis,
-                                                                    ),
-                                                                    Tab(
-                                                                      text: L10n.of(
-                                                                        context,
-                                                                      ).stickers,
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                Expanded(
-                                                                  child: TabBarView(
-                                                                    children: [
-                                                                      EmojiPicker(
-                                                                        onEmojiSelected:
-                                                                            (
-                                                                              _,
-                                                                              emoji,
-                                                                            ) =>
-                                                                                Navigator.of(
-                                                                                  context,
-                                                                                ).pop(
-                                                                                  emoji.emoji,
-                                                                                ),
-                                                                        config: Config(
-                                                                          locale: Localizations.localeOf(
-                                                                            context,
-                                                                          ),
-                                                                          emojiViewConfig: const EmojiViewConfig(
-                                                                            backgroundColor:
-                                                                                Colors.transparent,
-                                                                          ),
-                                                                          bottomActionBarConfig: const BottomActionBarConfig(
-                                                                            enabled:
-                                                                                false,
-                                                                          ),
-                                                                          categoryViewConfig: CategoryViewConfig(
-                                                                            initCategory:
-                                                                                Category.SMILEYS,
-                                                                            backspaceColor:
-                                                                                theme.colorScheme.primary,
-                                                                            iconColor: theme.colorScheme.primary.withAlpha(
-                                                                              128,
-                                                                            ),
-                                                                            iconColorSelected:
-                                                                                theme.colorScheme.primary,
-                                                                            indicatorColor:
-                                                                                theme.colorScheme.primary,
-                                                                            backgroundColor:
-                                                                                theme.colorScheme.surface,
-                                                                          ),
-                                                                          skinToneConfig: SkinToneConfig(
-                                                                            dialogBackgroundColor: Color.lerp(
-                                                                              theme.colorScheme.surface,
-                                                                              theme.colorScheme.primaryContainer,
-                                                                              0.75,
-                                                                            )!,
-                                                                            indicatorColor:
-                                                                                theme.colorScheme.onSurface,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      StickerPickerDialog(
-                                                                        room: event
-                                                                            .room,
-                                                                        usage: ImagePackUsage
-                                                                            .emoticon,
-                                                                        onSelected:
-                                                                            (
-                                                                              sticker,
-                                                                            ) =>
-                                                                                Navigator.of(
-                                                                                  context,
-                                                                                ).pop(
-                                                                                  sticker.url.toString(),
-                                                                                ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                    if (emoji == null) {
-                                                      return;
-                                                    }
-                                                    if (sentReactions.contains(
-                                                      emoji,
-                                                    )) {
-                                                      return;
-                                                    }
-                                                    onSelect(event);
-
-                                                    await event.room
-                                                        .sendReaction(
-                                                          event.eventId,
-                                                          emoji,
-                                                        );
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
-                            ),
-                          ],
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
               if (enterThread != null)
                 AnimatedSize(
@@ -851,73 +465,239 @@ class Message extends StatelessWidget {
                   alignment: Alignment.bottomCenter,
                   child: threadChildren.isEmpty
                       ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.only(
-                            top: 2.0,
-                            bottom: 8.0,
-                            left: avatarSize + 8,
-                          ),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: FluffyThemes.columnWidth * 1.5,
-                            ),
-                            child: TextButton.icon(
-                              style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                foregroundColor:
-                                    theme.colorScheme.onSecondaryContainer,
-                                backgroundColor:
-                                    theme.colorScheme.secondaryContainer,
-                              ),
-                              onPressed: () => enterThread(event.eventId),
-                              icon: const Icon(Icons.message),
-                              label: Text(
-                                '${L10n.of(context).countReplies(threadChildren.length)} | ${threadChildren.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true)}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
+                      : _ThreadChip(
+                          event: event,
+                          children: threadChildren,
+                          onTap: () => enterThread!(event.eventId),
                         ),
                 ),
-              if (displayReadMarker)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 16.0,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          AppConfig.borderRadius / 3,
-                        ),
-                        color: theme.colorScheme.surface.withAlpha(128),
-                      ),
-                      child: Text(
-                        L10n.of(context).readUpToHere,
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      ),
-                    ),
-                  ],
-                ),
+              if (displayReadMarker) const _ReadMarker(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openMenu(BuildContext bubbleContext) {
+    HapticFeedback.heavyImpact();
+    final box = bubbleContext.findRenderObject() as RenderBox?;
+    if (event.status.isError || box == null || !box.attached) {
+      onSelect(event);
+      return;
+    }
+    onOpenMenu(event, box.localToGlobal(Offset.zero) & box.size);
+  }
+
+  void _openMenuFrom(BuildContext context) {
+    Element? bubble;
+    void visit(Element element) {
+      if (bubble != null) return;
+      if (element.widget is MessageBubble) {
+        bubble = element;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    (context as Element).visitChildren(visit);
+    final box = bubble?.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached) return;
+    onOpenMenu(event, box.localToGlobal(Offset.zero) & box.size);
+  }
+
+  void _doubleTapReact(Client client) {
+    HapticFeedback.lightImpact();
+    final emoji = AppSettings.doubleTapReaction.value;
+    final existing = event
+        .aggregatedEvents(timeline, RelationshipTypes.reaction)
+        .firstWhereOrNull(
+          (e) =>
+              e.senderId == client.userID &&
+              e.content
+                      .tryGetMap<String, Object?>('m.relates_to')
+                      ?.tryGet<String>('key') ==
+                  emoji,
+        );
+    if (existing != null) {
+      existing.redactEvent();
+      return;
+    }
+    event.room.sendReaction(event.eventId, emoji);
+  }
+}
+
+class _SenderName extends StatelessWidget {
+  final Event event;
+  final User fallback;
+  final Brightness brightness;
+
+  const _SenderName({
+    required this.event,
+    required this.fallback,
+    required this.brightness,
+  });
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 2),
+    child: FutureBuilder<User?>(
+      future: event.fetchSenderUser(),
+      builder: (context, snapshot) => Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 2,
+        children: [
+          if (fallback.powerLevel.role != PowerLevelRole.user)
+            Icon(
+              fallback.powerLevel.role == PowerLevelRole.moderator
+                  ? Icons.add_moderator_outlined
+                  : Icons.admin_panel_settings,
+              size: 14,
+              color: event.senderId.nameColor(brightness),
+            ),
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: Text(
+                safeDisplayText(
+                  snapshot.data?.calcDisplayname() ??
+                      fallback.calcDisplayname(),
+                  maxGraphemes: 64,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: event.senderId.nameColor(brightness),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _SenderAvatar extends StatelessWidget {
+  final Event event;
+  final User fallback;
+  final VoidCallback onMention;
+  final bool wallpaperMode;
+
+  const _SenderAvatar({
+    required this.event,
+    required this.fallback,
+    required this.onMention,
+    required this.wallpaperMode,
+  });
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<User?>(
+    future: event.fetchSenderUser(),
+    builder: (context, snapshot) {
+      final user = snapshot.data ?? fallback;
+      return Avatar(
+        mxContent: user.avatarUrl,
+        name: user.calcDisplayname(),
+        colorSeed: user.id,
+        onTap: () => showMemberActionsPopupMenu(
+          context: context,
+          user: user,
+          onMention: onMention,
+        ),
+        size: AppChat.bubbleAvatar,
+        presenceUserId: user.stateKey,
+        presenceSize: 12,
+        presenceBorder: 2.5,
+        presenceBackgroundColor: wallpaperMode ? Colors.transparent : null,
+      );
+    },
+  );
+}
+
+class _DeletedContent extends StatelessWidget {
+  final Event event;
+
+  const _DeletedContent({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final redaction = event.redactedBecause;
+    return FutureBuilder<User?>(
+      future: redaction?.fetchSenderUser(),
+      builder: (context, snapshot) {
+        final redactor = safeDisplayText(
+          snapshot.data?.calcDisplayname() ??
+              redaction?.senderId.localpart ??
+              l10n.user,
+          maxGraphemes: 40,
+        );
+        final byAuthor =
+            redaction == null || redaction.senderId == event.senderId;
+        final authorName = byAuthor
+            ? safeDisplayText(
+                snapshot.data?.calcDisplayname() ??
+                    event.senderFromMemoryOrFallback.calcDisplayname(),
+                maxGraphemes: 40,
+              )
+            : redactor;
+        final reason = redaction?.content.tryGet<String>('reason');
+        return DeletedBubbleContent(
+          text: byAuthor
+              ? l10n.userDeletedThisMessage(authorName)
+              : reason == null
+              ? l10n.redactedBy(redactor)
+              : l10n.redactedByBecause(
+                  redactor,
+                  safeDisplayText(reason, maxGraphemes: 200),
+                ),
+        );
+      },
+    );
+  }
+}
+
+class _ThreadChip extends StatelessWidget {
+  final Event event;
+  final Set<Event> children;
+  final VoidCallback onTap;
+
+  const _ThreadChip({
+    required this.event,
+    required this.children,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 2.0,
+        bottom: 8.0,
+        left: AppChat.bubbleAvatar + AppChat.groupGap + 8,
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: FluffyThemes.columnWidth * 1.5,
+        ),
+        child: TextButton.icon(
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.banner),
+            ),
+            foregroundColor: tokens.acc,
+            backgroundColor: tokens.accs,
+          ),
+          onPressed: onTap,
+          icon: const Icon(Icons.message),
+          label: Text(
+            '${L10n.of(context).countReplies(children.length)} | ${children.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
@@ -925,74 +705,34 @@ class Message extends StatelessWidget {
   }
 }
 
-class BubbleBackground extends StatelessWidget {
-  const BubbleBackground({
-    super.key,
-    required this.scrollController,
-    required this.colors,
-    required this.ignore,
-    required this.child,
-  });
-
-  final ScrollController scrollController;
-  final List<Color> colors;
-  final bool ignore;
-  final Widget child;
+class _ReadMarker extends StatelessWidget {
+  const _ReadMarker();
 
   @override
   Widget build(BuildContext context) {
-    if (ignore) return child;
-    return CustomPaint(
-      painter: BubblePainter(
-        repaint: scrollController,
-        colors: colors,
-        context: context,
-      ),
-      child: child,
+    final tokens = AppTokens.of(context);
+    return Row(
+      children: [
+        Expanded(child: Divider(color: tokens.line)),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: tokens.chip,
+          ),
+          child: Text(
+            L10n.of(context).readUpToHere,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: tokens.line)),
+      ],
     );
-  }
-}
-
-class BubblePainter extends CustomPainter {
-  BubblePainter({
-    required this.context,
-    required this.colors,
-    required super.repaint,
-  });
-
-  final BuildContext context;
-  final List<Color> colors;
-  ScrollableState? _scrollable;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scrollable = _scrollable ??= Scrollable.of(context);
-    final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
-    final scrollableRect = Offset.zero & scrollableBox.size;
-    final bubbleBox = context.findRenderObject() as RenderBox;
-
-    final origin = bubbleBox.localToGlobal(
-      Offset.zero,
-      ancestor: scrollableBox,
-    );
-    final paint = Paint()
-      ..shader = ui.Gradient.linear(
-        scrollableRect.topCenter,
-        scrollableRect.bottomCenter,
-        colors,
-        [0.0, 1.0],
-        TileMode.clamp,
-        Matrix4.translationValues(-origin.dx, -origin.dy, 0.0).storage,
-      );
-    canvas.drawRect(Offset.zero & size, paint);
-  }
-
-  @override
-  bool shouldRepaint(BubblePainter oldDelegate) {
-    final scrollable = Scrollable.of(context);
-    final oldScrollable = _scrollable;
-    _scrollable = scrollable;
-    return scrollable.position != oldScrollable?.position;
   }
 }
 

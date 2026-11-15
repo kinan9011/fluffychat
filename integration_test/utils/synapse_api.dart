@@ -80,17 +80,48 @@ class SynapseUser {
   Future<void> join(String roomId) =>
       _request('POST', '/join/${Uri.encodeComponent(roomId)}', token: _token);
 
-  Future<String> sendText(String roomId, String text) async {
-    final json =
-        await _request(
-              'PUT',
-              '/rooms/${Uri.encodeComponent(roomId)}/send/m.room.message/'
-                  '${DateTime.now().microsecondsSinceEpoch}',
-              token: _token,
-              body: {'msgtype': 'm.text', 'body': text},
-            )
-            as Map<String, Object?>;
-    return json['event_id']! as String;
+  Future<String> sendText(String roomId, String text) =>
+      _send(roomId, {'msgtype': 'm.text', 'body': text});
+
+  /// Synapse rate limits messages per user: back off and retry on a 429.
+  Future<String> _send(String roomId, Map<String, Object?> body) async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        final json =
+            await _request(
+                  'PUT',
+                  '/rooms/${Uri.encodeComponent(roomId)}/send/m.room.message/'
+                      '${DateTime.now().microsecondsSinceEpoch}',
+                  token: _token,
+                  body: body,
+                )
+                as Map<String, Object?>;
+        return json['event_id']! as String;
+      } on Exception catch (e) {
+        if (attempt >= 8 || !e.toString().contains('429')) rethrow;
+        await Future<void>.delayed(const Duration(seconds: 1));
+      }
+    }
+  }
+
+  /// A message that mentions [mentionedUserId] the intentional way
+  /// (`m.mentions`), which is what raises the highlight count.
+  Future<String> sendMention(
+    String roomId,
+    String text,
+    String mentionedUserId,
+  ) => _send(roomId, {
+    'msgtype': 'm.text',
+    'body': text,
+    'm.mentions': {
+      'user_ids': [mentionedUserId],
+    },
+  });
+
+  Future<void> sendMany(String roomId, int count, String prefix) async {
+    for (var i = 1; i <= count; i++) {
+      await sendText(roomId, '$prefix $i');
+    }
   }
 
   Future<Object?> getRoomAccountData(String roomId, String type) => _request(

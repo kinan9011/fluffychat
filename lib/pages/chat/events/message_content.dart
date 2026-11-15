@@ -179,7 +179,7 @@ class MessageContent extends StatelessWidget {
                 !event.isRichMessage && bigEmojis.contains(event.body);
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.only(left: 13, top: 8, right: 13),
               child: HtmlMessage(
                 html: html,
                 textColor: textColor,
@@ -209,12 +209,7 @@ class MessageContent extends StatelessWidget {
             fontSize: fontSize,
           );
         }
-        return PollWidget(
-          event: event,
-          timeline: timeline,
-          textColor: textColor,
-          linkColor: linkColor,
-        );
+        return PollWidget(event: event, timeline: timeline);
       case EventTypes.CallInvite:
         return FutureBuilder<User?>(
           future: event.fetchSenderUser(),

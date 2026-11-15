@@ -3,17 +3,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:collection/collection.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/encryption_info.dart';
 import 'package:fluffychat/pages/chat/events/message.dart';
+import 'package:fluffychat/pages/chat/message_menu.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat/typing_indicators.dart';
 import 'package:fluffychat/utils/account_config.dart';
+import 'package:fluffychat/utils/chat/message_ticks.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -27,13 +29,17 @@ import '../../utils/date_time_extension.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
+  final double topPadding;
 
-  const ChatEventList({super.key, required this.controller});
+  const ChatEventList({
+    super.key,
+    required this.controller,
+    required this.topPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
     final timeline = controller.timeline;
-    final theme = Theme.of(context);
 
     if (controller.room.membership == .invite) {
       final room = controller.room;
@@ -97,13 +103,16 @@ class ChatEventList extends StatelessWidget {
       return const Center(child: CupertinoActivityIndicator());
     }
 
-    final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
-
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
     final events = timeline.events.filterByVisibleInGui(
       threadId: controller.activeThreadId,
     );
+    final tokens = AppTokens.of(context);
+    final client = controller.room.client;
+    final ticks = ownMessageTicks(events, client.userID);
+    bool isHighlight(Event event) =>
+        client.pushruleEvaluator.match(event).highlight;
 
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback
@@ -122,7 +131,7 @@ class ChatEventList extends StatelessWidget {
         ),
         child: ListView.custom(
           padding: EdgeInsets.only(
-            top: 8 + MediaQuery.paddingOf(context).top,
+            top: 8 + topPadding,
             bottom:
                 8 +
                 (controller.inputBarHeight ??
@@ -233,23 +242,22 @@ class ChatEventList extends StatelessWidget {
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 4.0),
-                            child: Material(
-                              borderRadius: BorderRadius.circular(
-                                AppConfig.borderRadius * 2,
-                              ),
-                              color: theme.colorScheme.inverseSurface.withAlpha(
-                                200,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: tokens.chip,
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                  vertical: 2.0,
+                                  horizontal: 11,
+                                  vertical: 4,
                                 ),
                                 child: Text(
                                   event.originServerTs.localizedDate(context),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onInverseSurface,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -268,15 +276,19 @@ class ChatEventList extends StatelessWidget {
                       highlightMarker:
                           controller.scrollToEventIdMarker == event.eventId,
                       onSelect: controller.onSelectMessage,
+                      onOpenMenu: (event, anchor) => showMessageMenu(
+                        context: context,
+                        controller: controller,
+                        event: event,
+                        anchor: anchor,
+                        outgoing: event.senderId == client.userID,
+                        timeline: timeline,
+                      ),
                       scrollToEventId: controller.scrollToEventId,
                       longPressSelect: controller.selectedEvents.isNotEmpty,
                       selected: controller.selectedEvents.any(
                         (e) => e.eventId == event.eventId,
                       ),
-                      singleSelected:
-                          controller.selectedEvents.singleOrNull?.eventId ==
-                          event.eventId,
-                      onEdit: controller.editSelectedEventAction,
                       timeline: timeline,
                       displayReadMarker:
                           i > 0 &&
@@ -284,8 +296,10 @@ class ChatEventList extends StatelessWidget {
                       nextEvent: nextEvent,
                       previousEvent: previousEvent,
                       wallpaperMode: hasWallpaper,
-                      scrollController: controller.scrollController,
-                      colors: colors,
+                      tick:
+                          ticks[event.transactionId ?? event.eventId] ??
+                          Tick.none,
+                      isHighlight: isHighlight,
                       isCollapsed: isCollapsed,
                       enterThread: controller.activeThreadId == null
                           ? controller.enterThread

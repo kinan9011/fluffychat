@@ -163,6 +163,7 @@ class CallPage extends StatelessWidget {
                                 child: Avatar(
                                   mxContent: ownUser.avatarUrl,
                                   name: ownUser.calcDisplayname(),
+                                  colorSeed: ownUser.id,
                                   size: 128,
                                 ),
                               )

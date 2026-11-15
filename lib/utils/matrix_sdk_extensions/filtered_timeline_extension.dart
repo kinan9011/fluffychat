@@ -44,12 +44,20 @@ extension IsStateExtension on Event {
 
   bool get isState => !{EventTypes.Message, EventTypes.Sticker}.contains(type);
 
-  bool get isCollapsedState => !{
-    EventTypes.Message,
-    EventTypes.Sticker,
-    EventTypes.RoomCreate,
-    EventTypes.RoomTombstone,
-  }.contains(type);
+  bool get isCollapsedState =>
+      !{
+        EventTypes.Message,
+        EventTypes.Sticker,
+        EventTypes.RoomCreate,
+        EventTypes.RoomTombstone,
+      }.contains(type) &&
+      !isUndecryptable;
+
+  /// Shown as a bubble ("Waiting for this message"), never folded away.
+  bool get isUndecryptable =>
+      type == EventTypes.Encrypted &&
+      !redacted &&
+      messageType == MessageTypes.BadEncrypted;
 
   bool get isKnownHiddenStates =>
       {PollEventContent.responseType}.contains(type) ||

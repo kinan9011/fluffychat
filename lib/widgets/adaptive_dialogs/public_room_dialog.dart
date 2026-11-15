@@ -121,6 +121,7 @@ class PublicRoomDialog extends StatelessWidget {
                       Avatar(
                         mxContent: avatar,
                         name: profile?.name ?? roomLink,
+                        colorSeed: roomLink,
                         size: Avatar.defaultSize * 1.5,
                         onTap: avatar != null
                             ? () => showDialog(

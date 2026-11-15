@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/widgets/chat_settings_popup_menu.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -33,8 +32,8 @@ extension ChatFlows on FluffyChatTester {
     await ensureLoggedIn();
     await ensureGroupChatCreated();
     await tapOn(groupChatName);
-    await tapOn(ChatSettingsPopupMenu);
-    await tapOn('Leave');
+    await tapOn(const Key('chat_overflow_button'));
+    await tapOn('Leave chat');
     await waitFor('Are you sure?');
     await tapOn('Leave');
     await waitFor(ChatList);

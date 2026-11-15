@@ -11,6 +11,10 @@ abstract class AppRadius {
   static const double card = 20;
   static const double bubble = 20;
   static const double bubbleTail = 6;
+  static const double menu = 22;
+  static const double composer = 26;
+  static const double reactionBar = 26;
+  static const double banner = 18;
   static const double iconTile = 10;
   static const double spaceAvatarFactor = 0.3;
 }
@@ -44,6 +48,14 @@ abstract class AppElevation {
     BoxShadow(color: shadow, offset: const Offset(0, 8), blurRadius: 28),
   ];
 
+  static const List<BoxShadow> reactionBar = [
+    BoxShadow(
+      color: Color.fromRGBO(0, 0, 0, 0.2),
+      offset: Offset(0, 8),
+      blurRadius: 24,
+    ),
+  ];
+
   static const List<BoxShadow> menu = [
     BoxShadow(
       color: Color.fromRGBO(0, 0, 0, 0.235),
@@ -51,6 +63,47 @@ abstract class AppElevation {
       blurRadius: 40,
     ),
   ];
+}
+
+/// Conversation layout constants (DESIGN.md 5.2, 7.5-7.12).
+abstract class AppChat {
+  static const double headerButton = 48;
+  static const double headerGap = 8;
+  static const double headerTopGap = 4;
+  static const double headerAvatar = 38;
+  static const double composerHeight = 52;
+  static const double actionButton = 52;
+  static const double jumpButton = 46;
+  static const double jumpHit = 48;
+  static const double jumpBadge = 20;
+  static const double bubbleAvatar = 30;
+  static const double mapBubbleWidth = 280;
+  static const double menuGap = 8;
+  static const double groupGap = 6;
+  static const double wallpaperGrid = 18;
+  static const double wallpaperDotRadius = 1.4;
+  static const double menuWidth = 246;
+  static const double reactionBarEmoji = 38;
+  static const double bubbleMaxFraction = 0.82;
+  static const int waveformBars = 26;
+  static const int maxReactionKeys = 24;
+  static const int maxMentionScan = 500;
+  static const int maxWallpaperDots = 40000;
+
+  static double listTopPadding({
+    required double topInset,
+    required int bannerCount,
+    required double bannerHeight,
+    double extraHeight = 0,
+  }) =>
+      topInset +
+      headerTopGap +
+      headerButton +
+      headerGap +
+      bannerCount * bannerHeight +
+      extraHeight;
+
+  static const double newDeviceBannerHeight = 56;
 }
 
 abstract class AppTypography {

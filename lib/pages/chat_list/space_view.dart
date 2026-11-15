@@ -563,6 +563,7 @@ class _SpaceViewState extends State<SpaceView> {
                                         size: avatarSize,
                                         mxContent: avatarUrl,
                                         name: '#',
+                                        colorSeed: item.roomId,
                                         backgroundColor:
                                             theme.colorScheme.surfaceContainer,
                                         textColor: item.roomId.nameColor(

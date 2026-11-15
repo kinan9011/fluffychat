@@ -127,6 +127,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                           leading: Avatar(
                             mxContent: pack.pack.avatarUrl,
                             name: packName,
+                            colorSeed: packSlugs[packIndex],
                             client: widget.room.client,
                           ),
                           title: Text(packName),

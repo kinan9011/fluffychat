@@ -3,9 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/app_tokens.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/sync_status_localization.dart';
@@ -23,14 +26,7 @@ class ChatAppBarTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final room = controller.room;
-    if (controller.selectedEvents.isNotEmpty) {
-      return Text(
-        controller.selectedEvents.length.toString(),
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onTertiaryContainer,
-        ),
-      );
-    }
+    final tokens = AppTokens.of(context);
     return InkWell(
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
@@ -50,10 +46,10 @@ class ChatAppBarTitle extends StatelessWidget {
                 MatrixLocals(L10n.of(context)),
               ),
               colorSeed: room.avatarColorSeed,
-              size: 32,
+              size: AppChat.headerAvatar,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
               mainAxisSize: .min,
@@ -63,10 +59,13 @@ class ChatAppBarTitle extends StatelessWidget {
                   spacing: 4,
                   children: [
                     if (room.allUsersVerified)
-                      Icon(
-                        Icons.verified,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 16,
+                      Semantics(
+                        label: L10n.of(context).verified,
+                        child: Icon(
+                          Icons.verified_user_rounded,
+                          color: tokens.ok,
+                          size: 15,
+                        ),
                       ),
                     Expanded(
                       child: Text(
@@ -75,7 +74,11 @@ class ChatAppBarTitle extends StatelessWidget {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w600,
+                          color: tokens.fg,
+                        ),
                       ),
                     ),
                   ],
@@ -91,7 +94,7 @@ class ChatAppBarTitle extends StatelessWidget {
                         (room.client.onSync.value != null &&
                             status.status != SyncStatus.error &&
                             room.client.prevBatch != null);
-                    final style = TextStyle(fontSize: 11);
+                    final style = TextStyle(fontSize: 12, color: tokens.fg);
                     return AnimatedSize(
                       duration: FluffyThemes.animationDuration,
                       child: hide
@@ -113,7 +116,11 @@ class ChatAppBarTitle extends StatelessWidget {
                                             lastActiveTimestamp
                                                 .localizedTimeShort(context),
                                           ),
-                                        ?statusMessage,
+                                        if (statusMessage != null)
+                                          safeDisplayText(
+                                            statusMessage,
+                                            maxGraphemes: 80,
+                                          ),
                                       ];
                                       final text = texts.join(' ◦ ');
                                       if (text.isEmpty) {
@@ -143,7 +150,10 @@ class ChatAppBarTitle extends StatelessWidget {
                                         Text(' ◦ ', style: style),
                                         Expanded(
                                           child: Text(
-                                            room.topic,
+                                            safeDisplayText(
+                                              room.topic,
+                                              maxGraphemes: 120,
+                                            ),
                                             style: style,
                                             maxLines: 1,
                                           ),
@@ -164,7 +174,7 @@ class ChatAppBarTitle extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     status.calcLocalizedString(context),
-                                    style: TextStyle(fontSize: 12),
+                                    style: style,
                                   ),
                                 ),
                               ],

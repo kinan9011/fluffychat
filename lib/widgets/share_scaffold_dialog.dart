@@ -165,6 +165,7 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
                       secondary: Avatar(
                         mxContent: room.avatar,
                         name: displayname,
+                        colorSeed: room.avatarColorSeed,
                         size: Avatar.defaultSize * 0.75,
                       ),
                       title: Text(

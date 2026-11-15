@@ -3,12 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../../config/app_config.dart';
+import 'message_bubble.dart';
 
 class ReplyContent extends StatelessWidget {
   final Event replyEvent;
@@ -22,88 +23,97 @@ class ReplyContent extends StatelessWidget {
     this.timeline,
   });
 
-  static const BorderRadius borderRadius = BorderRadius.only(
-    topRight: Radius.circular(AppConfig.borderRadius / 2),
-    bottomRight: Radius.circular(AppConfig.borderRadius / 2),
-  );
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     final timeline = this.timeline;
     final displayEvent = timeline != null
         ? replyEvent.getDisplayEvent(timeline)
         : replyEvent;
-    const fontSize = AppConfig.messageFontSize;
-    final color = theme.brightness == Brightness.dark
-        ? theme.colorScheme.onTertiaryContainer
-        : ownMessage
-        ? theme.colorScheme.tertiaryContainer
-        : theme.colorScheme.tertiary;
+    return FutureBuilder<User?>(
+      initialData: displayEvent.senderFromMemoryOrFallback,
+      future: displayEvent.fetchSenderUser(),
+      builder: (context, snapshot) => ReplyQuoteView(
+        name:
+            snapshot.data?.calcDisplayname() ??
+            displayEvent.senderFromMemoryOrFallback.calcDisplayname(),
+        text: displayEvent
+            .calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)),
+              withSenderNamePrefix: false,
+              hideReply: true,
+              plaintextBody: true,
+            )
+            .trim()
+            .replaceAll('\n', ' '),
+        outgoing: ownMessage,
+      ),
+    );
+  }
+}
 
-    return Material(
-      color: Colors.transparent,
-      borderRadius: borderRadius,
-      child: Row(
-        mainAxisSize: .min,
-        children: <Widget>[
-          Container(
-            width: 5,
-            height: fontSize * 2 + 16,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-              color: color,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: .start,
-              mainAxisAlignment: .center,
-              children: <Widget>[
-                FutureBuilder<User?>(
-                  initialData: displayEvent.senderFromMemoryOrFallback,
-                  future: displayEvent.fetchSenderUser(),
-                  builder: (context, snapshot) {
-                    return Text(
-                      '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                        fontSize: fontSize,
+/// Quote block inside a bubble (DESIGN.md 7.5): tinted with a 3 px accent
+/// border on incoming bubbles, translucent white on outgoing ones. Name and
+/// text come from other people, so both are one plain line.
+class ReplyQuoteView extends StatelessWidget {
+  final String name;
+  final String text;
+  final bool outgoing;
+
+  const ReplyQuoteView({
+    required this.name,
+    required this.text,
+    required this.outgoing,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final colors = BubbleColors.of(tokens, outgoing: outgoing);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(outgoing ? 12 : 10),
+      child: ColoredBox(
+        color: outgoing
+            ? tokens.outFg.withValues(alpha: 0.16)
+            : tokens.acc.withValues(alpha: 0.14),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              if (!outgoing)
+                ColoredBox(color: tokens.acc, child: const SizedBox(width: 3)),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: outgoing ? tokens.outFg : tokens.acc,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    );
-                  },
-                ),
-                Text(
-                  displayEvent
-                      .calcLocalizedBodyFallback(
-                        MatrixLocals(L10n.of(context)),
-                        withSenderNamePrefix: false,
-                        hideReply: true,
-                        plaintextBody: true,
-                      )
-                      .trim()
-                      .replaceAll('\n', ' '),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: theme.brightness == Brightness.dark
-                        ? theme.colorScheme.onSurface
-                        : ownMessage
-                        ? theme.colorScheme.onTertiary
-                        : theme.colorScheme.onSurface,
-                    fontSize: fontSize,
+                      Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: colors.secondary, fontSize: 13),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-        ],
+        ),
       ),
     );
   }

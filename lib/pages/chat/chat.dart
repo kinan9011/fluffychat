@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
 import 'package:fluffychat/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/utils/chat/mention_jump.dart';
 import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/file_selector.dart';
@@ -164,14 +165,15 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   bool get canSaveSelectedEvent =>
-      selectedEvents.length == 1 &&
-      {
-        MessageTypes.Video,
-        MessageTypes.Image,
-        MessageTypes.Sticker,
-        MessageTypes.Audio,
-        MessageTypes.File,
-      }.contains(selectedEvents.single.messageType);
+      selectedEvents.length == 1 && canSaveEvent(selectedEvents.single);
+
+  bool canSaveEvent(Event event) => {
+    MessageTypes.Video,
+    MessageTypes.Image,
+    MessageTypes.Sticker,
+    MessageTypes.Audio,
+    MessageTypes.File,
+  }.contains(event.messageType);
 
   void saveSelectedEvent(BuildContext context) =>
       selectedEvents.single.saveFile(context);
@@ -190,6 +192,92 @@ class ChatController extends State<ChatPageWithRoom>
       _scrolledUp || timeline?.allowNewEvent == false;
 
   bool get selectMode => selectedEvents.isNotEmpty;
+
+  final mentionJump = MentionJump();
+
+  String? _mentionFullyRead;
+
+  int? _mentionHighlightCount;
+
+  List<String> get unreadMentionIds {
+    final timeline = this.timeline;
+    if (timeline == null) return const [];
+    final events = timeline.events;
+    final key = (
+      events.length,
+      events.firstOrNull?.eventId,
+      room.fullyRead,
+      activeThreadId,
+      mentionJump.revision,
+      _viewUpdates,
+    );
+    if (key == _mentionCacheKey) return _mentionCache;
+    _mentionCacheKey = key;
+    return _mentionCache = mentionJump.pending(
+      eventsNewestFirst: events.filterByVisibleInGui(threadId: activeThreadId),
+      ownUserId: room.client.userID,
+      fullyReadEventId: room.fullyRead,
+      isHighlight: (event) =>
+          room.client.pushruleEvaluator.match(event).highlight,
+    );
+  }
+
+  (int, String?, String, String?, int, int)? _mentionCacheKey;
+
+  int _viewUpdates = 0;
+
+  List<String> _mentionCache = const [];
+
+  int get unreadBadgeCount => room.notificationCount;
+
+  /// Mentions the server counts (`highlight_count`) that are not loaded yet
+  /// count too, so the button shows up in a busy chat as well.
+  int get unreadMentionCount => mentionJump.countFor(
+    localPending: unreadMentionIds.length,
+    serverCount: room.highlightCount,
+  );
+
+  bool _jumpingToMention = false;
+
+  /// Walks through the unread mentions, oldest first. When none is loaded it
+  /// loads older history (bounded) until one is. Sends nothing: no read
+  /// marker, no receipt, no typing.
+  Future<void> jumpToNextMention() async {
+    final timeline = this.timeline;
+    if (timeline == null || _jumpingToMention) return;
+    _jumpingToMention = true;
+    try {
+      final String? id;
+      try {
+        id = await mentionJump.nextLoading(
+          pending: () => unreadMentionIds,
+          canLoadMore: () => mounted && timeline.canRequestHistory,
+          loadMore: () =>
+              timeline.requestHistory(historyCount: _loadHistoryCount),
+        );
+      } catch (e, s) {
+        if (!mounted) return;
+        ErrorReporter(
+          context,
+          'Unable to load older messages',
+        ).onErrorCallback(e, s);
+        return;
+      }
+      if (!mounted) return;
+      if (id == null) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(L10n.of(context).noOlderMentionFound)),
+        );
+        return;
+      }
+      mentionJump.visit(id);
+      setState(() {});
+      await scrollToEventId(id);
+    } finally {
+      _jumpingToMention = false;
+    }
+  }
 
   final int _loadHistoryCount = 100;
 
@@ -578,6 +666,15 @@ class ChatController extends State<ChatPageWithRoom>
 
   void updateView() {
     if (!mounted) return;
+    _viewUpdates++;
+    if (_mentionFullyRead != room.fullyRead) {
+      _mentionFullyRead = room.fullyRead;
+      mentionJump.reset();
+    }
+    if (_mentionHighlightCount != room.highlightCount) {
+      _mentionHighlightCount = room.highlightCount;
+      mentionJump.rearm();
+    }
     setReadMarker();
     setState(() {});
   }
@@ -1083,10 +1180,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   String _getSelectedEventString() {
     var copyString = '';
-    if (selectedEvents.length == 1) {
-      return selectedEvents.first.getDisplayEvent(timeline!).body;
+    final readable = selectedEvents.where(canSelectEvent).toList();
+    if (readable.length == 1) {
+      return readable.first.getDisplayEvent(timeline!).body;
     }
-    for (final event in selectedEvents) {
+    for (final event in readable) {
       if (copyString.isNotEmpty) copyString += '\n\n';
       copyString += event.getDisplayEvent(timeline!).body;
     }
@@ -1156,14 +1254,14 @@ class ChatController extends State<ChatPageWithRoom>
     final reasonInput = selectedEvents.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
-            title: L10n.of(context).redactMessage,
+            title: L10n.of(context).deleteForEveryone,
             message: L10n.of(context).redactMessageDescription,
             isDestructive: true,
             hintText: L10n.of(context).optionalRedactReason,
             maxLength: 255,
             maxLines: 3,
             minLines: 1,
-            okLabel: L10n.of(context).remove,
+            okLabel: L10n.of(context).delete,
             cancelLabel: L10n.of(context).cancel,
           )
         : null;
@@ -1211,10 +1309,12 @@ class ChatController extends State<ChatPageWithRoom>
     return clients;
   }
 
-  bool get canRedactSelectedEvents {
+  bool get canRedactSelectedEvents => canRedactEvents(selectedEvents);
+
+  bool canRedactEvents(Iterable<Event> events) {
     if (isArchived) return false;
     final clients = Matrix.of(context).currentBundle;
-    for (final event in selectedEvents) {
+    for (final event in events) {
       if (!event.status.isSent) return false;
       if (event.canRedact == false &&
           !(clients!.any((cl) => event.senderId == cl!.userID))) {
@@ -1224,36 +1324,35 @@ class ChatController extends State<ChatPageWithRoom>
     return true;
   }
 
-  bool get canPinSelectedEvents {
-    if (isArchived ||
-        !room.canChangeStateEvent(EventTypes.RoomPinnedEvents) ||
-        selectedEvents.length != 1 ||
-        !selectedEvents.single.status.isSent ||
-        activeThreadId != null) {
-      return false;
-    }
-    return true;
-  }
+  bool get canPinSelectedEvents =>
+      selectedEvents.length == 1 && canPinEvent(selectedEvents.single);
 
-  bool get canEditSelectedEvents {
-    if (isArchived ||
-        selectedEvents.length != 1 ||
-        !selectedEvents.first.status.isSent) {
-      return false;
-    }
-    return currentRoomBundle.any(
-      (cl) => selectedEvents.first.senderId == cl!.userID,
-    );
-  }
+  bool canPinEvent(Event event) =>
+      !isArchived &&
+      !event.isUndecryptable &&
+      room.canChangeStateEvent(EventTypes.RoomPinnedEvents) &&
+      event.status.isSent &&
+      activeThreadId == null;
+
+  bool get canEditSelectedEvents =>
+      selectedEvents.length == 1 && canEditEvent(selectedEvents.first);
+
+  bool canEditEvent(Event event) =>
+      !isArchived &&
+      !event.isUndecryptable &&
+      event.status.isSent &&
+      currentRoomBundle.any((cl) => event.senderId == cl!.userID);
 
   Future<void> forwardEventsAction() async {
     if (selectedEvents.isEmpty) return;
     final timeline = this.timeline;
     if (timeline == null) return;
 
-    final forwardEvents = List<Event>.from(
-      selectedEvents,
-    ).map((event) => event.getDisplayEvent(timeline)).toList();
+    final forwardEvents = selectedEvents
+        .where(canSelectEvent)
+        .map((event) => event.getDisplayEvent(timeline))
+        .toList();
+    if (forwardEvents.isEmpty) return;
 
     await showScaffoldDialog(
       context: context,
@@ -1397,6 +1496,21 @@ class ChatController extends State<ChatPageWithRoom>
       );
   }
 
+  void refresh() {
+    if (mounted) setState(() {});
+  }
+
+  bool canSelectEvent(Event event) => !event.redacted && !event.isUndecryptable;
+
+  void selectOnly(Event event) {
+    if (!canSelectEvent(event)) return;
+    setState(() {
+      selectedEvents
+        ..clear()
+        ..add(event);
+    });
+  }
+
   void clearSelectedEvents() => setState(() {
     selectedEvents.clear();
     showEmojiPicker = false;
@@ -1493,7 +1607,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onSelectMessage(Event event) {
-    if (!event.redacted) {
+    if (canSelectEvent(event)) {
       if (selectedEvents.contains(event)) {
         setState(() => selectedEvents.remove(event));
       } else {
