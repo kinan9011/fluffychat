@@ -292,6 +292,20 @@ void main() {
       expect(find.text('PAGE /settings'), findsOneWidget);
     });
 
+    testWidgets('the bar is not hit-testable until the reset has finished', (
+      tester,
+    ) async {
+      await pumpShell(tester, 400);
+      final bar = find.byType(AppBottomBar).hitTestable();
+      expect(bar, findsOneWidget);
+      accountChanges.add(Object());
+      await tester.pump();
+      await tester.pump();
+      expect(bar, findsNothing);
+      await tester.pumpAndSettle();
+      expect(bar, findsOneWidget);
+    });
+
     testWidgets('the hidden reset is excluded from semantics', (tester) async {
       await pumpShell(tester, 400);
       accountChanges.add(Object());

@@ -2950,5 +2950,165 @@
                 "type": "String"
             }
         }
+    },
+    "folders": "Folders",
+    "@folders": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "createFolder": "Create folder",
+    "@createFolder": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editFolder": "Edit folder",
+    "@editFolder": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "deleteFolder": "Delete folder",
+    "@deleteFolder": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "deleteFolderConfirm": "Delete the folder \"{name}\"? The chats stay where they are.",
+    "@deleteFolderConfirm": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "folderName": "Folder name",
+    "@folderName": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "folderChatTypes": "Chat types",
+    "@folderChatTypes": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "addChats": "Add chats",
+    "@addChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "excludeMutedChats": "Exclude muted chats",
+    "@excludeMutedChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "excludeReadChats": "Exclude read chats",
+    "@excludeReadChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "folderLimitReached": "You can have up to {max} folders",
+    "@folderLimitReached": {
+        "type": "String",
+        "placeholders": {
+            "max": {
+                "type": "int"
+            }
+        }
+    },
+    "foldersFromNewerVersion": "These folders were made with a newer version of the app and can't be edited here.",
+    "@foldersFromNewerVersion": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "foldersUnreadable": "These folders can't be read or are too big for this app, so they are left untouched. Another app may have saved them in a format this version does not understand.",
+    "@foldersUnreadable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "foldersTooLarge": "Your folders hold too many chats to sync. Remove some chats from your folders and try again.",
+    "@foldersTooLarge": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "folderSyncNotice": "Folders sync to your other devices through your homeserver. They are not end-to-end encrypted.",
+    "@folderSyncNotice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unmute": "Unmute",
+    "@unmute": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unarchive": "Unarchive",
+    "@unarchive": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "archivedChats": "Archived chats",
+    "@archivedChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "andCountMore": "{count} more",
+    "@andCountMore": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "leftChats": "Left chats",
+    "@leftChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "moreOptions": "More options",
+    "@moreOptions": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "chatRowSemantics": "{name}, {count} unread, last message {preview}, {time}",
+    "@chatRowSemantics": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            },
+            "preview": {
+                "type": "String"
+            },
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "chatRowSemanticsRead": "{name}, last message {preview}, {time}",
+    "@chatRowSemanticsRead": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "preview": {
+                "type": "String"
+            },
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "pinned": "Pinned",
+    "@pinned": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "muted": "Muted",
+    "@muted": {
+        "type": "String",
+        "placeholders": {}
     }
 }

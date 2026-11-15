@@ -22,6 +22,8 @@ void main() {
     testWidgets('Basic Messaging', basicMessaging);
     testWidgets('Shell navigation', shellNavigation);
     testWidgets('Chat list tabs', chatListTabs);
+    testWidgets('Chat list folders', chatListFolders);
+    testWidgets('Chat list swipe and archive', chatListSwipeArchive);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

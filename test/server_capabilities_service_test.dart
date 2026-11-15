@@ -321,6 +321,10 @@ void main() {
       'uses only the account homeserver and the five known endpoints',
       () async {
         final client = await prepareTestClient(loggedIn: true);
+        // Every background sync starts an unawaited one-time-key claim, which
+        // would otherwise land in the recorded window.
+        await client.abortSync();
+        await pumpEventQueue();
         FakeMatrixApi.calledEndpoints.clear();
         final inputs = await SdkServerCapabilitySource(client).fetch();
         final called = FakeMatrixApi.calledEndpoints.keys

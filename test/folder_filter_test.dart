@@ -5,8 +5,10 @@
 
 import 'package:fluffychat/utils/chat_list/folder_filter.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
+import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
 import 'package:fluffychat/utils/chat_list/unread_counts.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 
@@ -25,6 +27,7 @@ void main() {
     int unread = 0,
     Membership? membership,
     List<String> tags = const [],
+    Map<String, double?> ordered = const {},
   }) {
     final r = testSpaceChild(
       client,
@@ -32,11 +35,15 @@ void main() {
       unread: unread,
       membership: membership,
     );
-    if (tags.isNotEmpty) {
+    if (tags.isNotEmpty || ordered.isNotEmpty) {
       r.roomAccountData['m.tag'] = BasicEvent(
         type: 'm.tag',
         content: {
-          'tags': {for (final tag in tags) tag: <String, Object?>{}},
+          'tags': {
+            for (final tag in tags) tag: <String, Object?>{},
+            for (final e in ordered.entries)
+              e.key: <String, Object?>{'order': ?e.value},
+          },
         },
       );
     }
@@ -314,6 +321,273 @@ void main() {
       );
       expect(labels(tabs), ['allChats', 'unread', 'messages', 'groups']);
       expect(tabs.every((t) => t.scope.spaceId == '!a:x'), isTrue);
+    });
+  });
+
+  group('W03-2: user folders', () {
+    List<String> run(
+      List<Room> rooms,
+      UserFolder folder, {
+      bool archived = false,
+    }) => ids(
+      FolderFilter.apply(
+        rooms,
+        ChatListScope(
+          folder: FolderRef(FolderKind.user, folder.id),
+          archived: archived,
+        ),
+        FolderContext(spaces: model(rooms), userFolders: [folder]),
+      ),
+    );
+
+    test('a folder matches listed rooms', () {
+      final rooms = [room('!a:x'), room('!b:x'), room('!c:x')];
+      expect(
+        run(rooms, UserFolder(id: 'f', name: 'F', rooms: ['!c:x', '!a:x'])),
+        ['!a:x', '!c:x'],
+      );
+    });
+
+    test('a folder matches chat types', () {
+      final rooms = [room('!dm:x'), room('!g:x')];
+      markDirect(['!dm:x']);
+      expect(
+        run(rooms, UserFolder(id: 'f', name: 'F', types: {FolderChatType.dm})),
+        ['!dm:x'],
+      );
+      expect(
+        run(
+          rooms,
+          UserFolder(id: 'f', name: 'F', types: {FolderChatType.group}),
+        ),
+        ['!g:x'],
+      );
+    });
+
+    test('a folder without types and rooms shows nothing', () {
+      expect(run([room('!a:x')], UserFolder(id: 'f', name: 'F')), isEmpty);
+    });
+
+    test('exclude muted and exclude read', () {
+      client.accountData['m.push_rules'] = BasicEvent(
+        type: 'm.push_rules',
+        content: {
+          'global': {
+            'override': [
+              {
+                'rule_id': '!muted:x',
+                'default': false,
+                'enabled': true,
+                'conditions': <Object?>[],
+                'actions': <Object?>[],
+              },
+            ],
+          },
+        },
+      );
+      addTearDown(() => client.accountData.remove('m.push_rules'));
+      final rooms = [
+        room('!muted:x', unread: 1),
+        room('!unread:x', unread: 2),
+        room('!read:x'),
+      ];
+      expect(rooms.first.pushRuleState, PushRuleState.dontNotify);
+      final all = UserFolder(
+        id: 'f',
+        name: 'F',
+        rooms: ['!muted:x', '!unread:x', '!read:x'],
+      );
+      expect(run(rooms, all), ['!muted:x', '!unread:x', '!read:x']);
+      expect(run(rooms, all.copyWith(excludeMuted: true)), [
+        '!unread:x',
+        '!read:x',
+      ]);
+      expect(run(rooms, all.copyWith(excludeRead: true)), [
+        '!muted:x',
+        '!unread:x',
+      ]);
+    });
+
+    test('a missing folder id shows nothing', () {
+      final rooms = [room('!a:x')];
+      expect(
+        FolderFilter.apply(
+          rooms,
+          const ChatListScope(folder: FolderRef(FolderKind.user, 'gone')),
+          FolderContext(spaces: model(rooms)),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('user folders become tabs between the built-ins and the tags', () {
+      final tabs = FolderFilter.tabs(
+        mode: SpaceNavigationMode.tabs,
+        spaces: [],
+        tags: ['u.work'],
+        userFolders: [UserFolder(id: 'k1', name: 'Family')],
+        showFoldersAfterSpaces: true,
+      );
+      expect(tabs.map((t) => t.label ?? t.folder.storageKey).toList(), [
+        'allChats',
+        'unread',
+        'messages',
+        'groups',
+        'Family',
+        'u.work',
+      ]);
+      expect(tabs[4].folder, const FolderRef(FolderKind.user, 'k1'));
+    });
+  });
+
+  group('W03-2: archive', () {
+    test('an archived room only shows in the archived scope', () {
+      final rooms = [
+        room('!a:x', tags: [archivedTag]),
+        room('!b:x'),
+      ];
+      final ctx = FolderContext(spaces: model(rooms));
+      expect(ids(FolderFilter.apply(rooms, const ChatListScope(), ctx)), [
+        '!b:x',
+      ]);
+      expect(
+        ids(
+          FolderFilter.apply(rooms, const ChatListScope(archived: true), ctx),
+        ),
+        ['!a:x'],
+      );
+    });
+
+    test('archived rooms are not in unread counts or the chats badge', () {
+      final rooms = [
+        room('!a:x', unread: 3, tags: [archivedTag]),
+        room('!b:x', unread: 1),
+      ];
+      final ctx = FolderContext(spaces: model(rooms));
+      expect(
+        FolderFilter.unreadCount(
+          rooms.where((r) => r.isUnreadOrInvited),
+          const ChatListScope(),
+          ctx,
+        ),
+        1,
+      );
+      expect(unreadChatCount(rooms), 1);
+    });
+
+    test('the archived scope respects the current space', () {
+      final rooms = [
+        testSpace(client, ['!in:x'], id: '!s:x'),
+        room('!in:x', tags: [archivedTag]),
+        room('!out:x', tags: [archivedTag]),
+      ];
+      expect(
+        ids(
+          FolderFilter.apply(
+            rooms,
+            const ChatListScope(spaceId: '!s:x', archived: true),
+            FolderContext(spaces: model(rooms)),
+          ),
+        ),
+        ['!in:x'],
+      );
+    });
+
+    test('an invite that kept the archived tag is not archived (L1)', () {
+      final invite = room(
+        '!i:x',
+        membership: Membership.invite,
+        tags: [archivedTag],
+      );
+      final rooms = [invite, room('!b:x')];
+      final ctx = FolderContext(spaces: model(rooms));
+      expect(invite.isArchivedChat, isFalse);
+      expect(ids(FolderFilter.apply(rooms, const ChatListScope(), ctx)), [
+        '!i:x',
+        '!b:x',
+      ]);
+      expect(
+        FolderFilter.apply(rooms, const ChatListScope(archived: true), ctx),
+        isEmpty,
+      );
+      expect(unreadChatCount(rooms), 1);
+      expect(
+        room(
+          '!l:x',
+          membership: Membership.leave,
+          tags: [archivedTag],
+        ).isArchivedChat,
+        isFalse,
+      );
+    });
+
+    test('isArchivedChat reads only the custom tag', () {
+      expect(room('!a:x', tags: [archivedTag]).isArchivedChat, isTrue);
+      expect(room('!a:x', tags: ['m.lowpriority']).isArchivedChat, isFalse);
+      expect(room('!a:x').isArchivedChat, isFalse);
+    });
+
+    test('scope equality includes archived', () {
+      expect(const ChatListScope(), isNot(const ChatListScope(archived: true)));
+      expect(
+        const ChatListScope().copyWith(archived: true),
+        const ChatListScope(archived: true),
+      );
+    });
+  });
+
+  group('W03-2: pin order', () {
+    List<String> run(List<Room> rooms) => ids(
+      FolderFilter.apply(
+        rooms,
+        const ChatListScope(),
+        FolderContext(spaces: model(rooms)),
+      ),
+    );
+
+    test('favourites sort by order, hostile orders count as unset', () {
+      final rooms = [
+        room('!nan:x', ordered: {'m.favourite': double.nan}),
+        room('!late:x', ordered: {'m.favourite': 0.9}),
+        room('!none:x', tags: ['m.favourite']),
+        room('!early:x', ordered: {'m.favourite': 0.1}),
+        room('!inf:x', ordered: {'m.favourite': double.infinity}),
+        room('!neg:x', ordered: {'m.favourite': -1.0}),
+        room('!plain:x'),
+      ];
+      expect(run(rooms), [
+        '!early:x',
+        '!late:x',
+        '!nan:x',
+        '!none:x',
+        '!inf:x',
+        '!neg:x',
+        '!plain:x',
+      ]);
+    });
+
+    test('non favourites keep their order', () {
+      final rooms = [
+        room('!z:x'),
+        room('!pin:x', ordered: {'m.favourite': 0.5}),
+        room('!a:x'),
+      ];
+      expect(run(rooms), ['!z:x', '!pin:x', '!a:x']);
+    });
+
+    test('pinOrder validates the range', () {
+      expect(room('!a:x', ordered: {'m.favourite': 0.25}).pinOrder, 0.25);
+      expect(room('!a:x', ordered: {'m.favourite': 1.5}).pinOrder, isNull);
+      expect(room('!a:x', tags: ['m.favourite']).pinOrder, isNull);
+      expect(room('!a:x').pinOrder, isNull);
+    });
+
+    test('pinOrderForNew puts a new pin on top', () {
+      expect(pinOrderForNew([]), 0.5);
+      expect(pinOrderForNew([0.4, 0.2]), 0.1);
+      expect(pinOrderForNew([double.infinity, -1, null]), 0.5);
+      expect(pinOrderForNew([1e-10]), 0.0);
+      expect(pinOrderForNew([0.5, null]), 0.25);
     });
   });
 }

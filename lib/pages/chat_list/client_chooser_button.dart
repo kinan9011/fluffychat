@@ -82,7 +82,7 @@ class ClientChooserButton extends StatelessWidget {
           children: [
             const Icon(Icons.archive_outlined),
             const SizedBox(width: 18),
-            Text(L10n.of(context).archive),
+            Text(L10n.of(context).leftChats),
           ],
         ),
       ),

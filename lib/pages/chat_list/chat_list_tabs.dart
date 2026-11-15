@@ -46,7 +46,7 @@ List<ChatListTabData> chatListTabData(
         FolderKind.personal => l10n.personal,
         FolderKind.groups => l10n.groups,
         FolderKind.tag => item.folder.value!.replaceFirst('u.', ''),
-        FolderKind.user => '',
+        FolderKind.user => item.label ?? '',
       },
       count:
           showCounts &&

@@ -17,7 +17,10 @@ class ChatListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !controller.isSearchMode && controller.overviewSpaceId == null,
+      canPop:
+          !controller.isSearchMode &&
+          controller.overviewSpaceId == null &&
+          !controller.scope.archived,
       onPopInvokedWithResult: (pop, _) {
         if (pop) return;
         if (controller.overviewSpaceId != null) {
@@ -26,6 +29,10 @@ class ChatListView extends StatelessWidget {
         }
         if (controller.isSearchMode) {
           controller.cancelSearch();
+          return;
+        }
+        if (controller.scope.archived) {
+          controller.closeArchived();
           return;
         }
       },

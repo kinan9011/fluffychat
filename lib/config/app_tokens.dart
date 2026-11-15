@@ -26,6 +26,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color onacc;
   final Color accs;
   final Color ok;
+  final Color okS;
+  final Color onOkS;
   final Color warn;
   final Color warnS;
   final Color red;
@@ -54,6 +56,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.onacc,
     required this.accs,
     required this.ok,
+    required this.okS,
+    required this.onOkS,
     required this.warn,
     required this.warnS,
     required this.red,
@@ -87,6 +91,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
       onacc: const Color(0xFFFFFFFF),
       accs: accs,
       ok: oklchColor(0.56, 0.14, 155),
+      okS: oklchColor(0.53, 0.14, 155),
+      onOkS: const Color(0xFFFFFFFF),
       warn: oklchColor(0.62, 0.14, 65),
       warnS: oklchColor(0.95, 0.05, 80),
       red: oklchColor(0.57, 0.19, 25),
@@ -123,6 +129,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
       onacc: oklchColor(0.18, 0.03, h),
       accs: oklchColor(0.31, 0.06, h),
       ok: oklchColor(0.74, 0.14, 155),
+      okS: oklchColor(0.74, 0.14, 155),
+      onOkS: oklchColor(0.18, 0.03, 155),
       warn: oklchColor(0.80, 0.13, 75),
       warnS: oklchColor(0.30, 0.05, 75),
       red: oklchColor(0.70, 0.17, 25),
@@ -204,6 +212,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
     onacc,
     accs,
     ok,
+    okS,
+    onOkS,
     warn,
     warnS,
     red,
@@ -242,6 +252,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? onacc,
     Color? accs,
     Color? ok,
+    Color? okS,
+    Color? onOkS,
     Color? warn,
     Color? warnS,
     Color? red,
@@ -269,6 +281,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
     onacc: onacc ?? this.onacc,
     accs: accs ?? this.accs,
     ok: ok ?? this.ok,
+    okS: okS ?? this.okS,
+    onOkS: onOkS ?? this.onOkS,
     warn: warn ?? this.warn,
     warnS: warnS ?? this.warnS,
     red: red ?? this.red,
@@ -302,6 +316,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
       onacc: c(onacc, other.onacc),
       accs: c(accs, other.accs),
       ok: c(ok, other.ok),
+      okS: c(okS, other.okS),
+      onOkS: c(onOkS, other.onOkS),
       warn: c(warn, other.warn),
       warnS: c(warnS, other.warnS),
       red: c(red, other.red),

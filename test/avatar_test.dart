@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,6 +70,63 @@ void main() {
     expect(byId, '@anna:example.org'.avatarColor);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
+  });
+
+  testWidgets('the presence dot size and ring are configurable', (
+    tester,
+  ) async {
+    await tester.runAsync(
+      () => client.database.storePresence(
+        '@anna:example.org',
+        CachedPresence(PresenceType.online, 0, null, true, '@anna:example.org'),
+      ),
+    );
+    Future<Set<double>> dotSizes(Avatar avatar) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [AppTokens.light()]),
+          home: Scaffold(body: avatar),
+        ),
+      );
+      await tester.pump();
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+      return tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(PositionedDirectional),
+              matching: find.byType(Container),
+            ),
+          )
+          .map((c) => c.constraints?.maxWidth)
+          .whereType<double>()
+          .toSet();
+    }
+
+    expect(
+      await dotSizes(
+        Avatar(
+          name: 'Anna',
+          client: client,
+          presenceUserId: '@anna:example.org',
+        ),
+      ),
+      {16, 10},
+    );
+    expect(
+      await dotSizes(
+        Avatar(
+          name: 'Anna',
+          client: client,
+          presenceUserId: '@anna:example.org',
+          presenceSize: 15,
+          presenceBorder: 2.5,
+        ),
+      ),
+      {15, 10},
+    );
   });
 
   testWidgets('explicit colours still override the generated ones', (

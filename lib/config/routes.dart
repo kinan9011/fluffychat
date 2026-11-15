@@ -30,6 +30,8 @@ import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
 import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
 import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
+import 'package:fluffychat/pages/settings_folders/folder_editor.dart';
+import 'package:fluffychat/pages/settings_folders/settings_folders.dart';
 import 'package:fluffychat/pages/settings_homeserver/settings_homeserver.dart';
 import 'package:fluffychat/pages/settings_ignore_list/settings_ignore_list.dart';
 import 'package:fluffychat/pages/settings_notifications/settings_notifications.dart';
@@ -487,6 +489,31 @@ abstract class AppRoutes {
                         state,
                         EmotesSettings(roomId: state.pathParameters['roomid']),
                       ),
+                    ),
+                    GoRoute(
+                      path: 'folders',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        const SettingsFolders(),
+                      ),
+                      redirect: loggedOutRedirect,
+                      routes: [
+                        GoRoute(
+                          path: 'edit',
+                          pageBuilder: (context, state) => defaultPageBuilder(
+                            context,
+                            state,
+                            FolderEditor(
+                              key: ValueKey(
+                                state.uri.queryParameters['id'] ?? 'new',
+                              ),
+                              folderId: state.uri.queryParameters['id'],
+                            ),
+                          ),
+                          redirect: loggedOutRedirect,
+                        ),
+                      ],
                     ),
                   ],
                   redirect: loggedOutRedirect,

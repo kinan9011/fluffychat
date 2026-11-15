@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 
@@ -23,8 +24,18 @@ void main() {
   Room space(String id, List<String> children) =>
       testSpace(client, children, id: id);
 
-  Room room(String id, {int unread = 0, Membership? membership}) =>
-      testSpaceChild(client, id, unread: unread, membership: membership);
+  Room room(
+    String id, {
+    int unread = 0,
+    Membership? membership,
+    List<String> tags = const [],
+  }) => testSpaceChild(
+    client,
+    id,
+    unread: unread,
+    membership: membership,
+    tags: tags,
+  );
 
   test('two top-level spaces and a subspace give two tabs', () {
     final model = build([
@@ -50,6 +61,16 @@ void main() {
       room('!r4:x'),
     ]);
     expect(model.tabs.single.unread, 3);
+  });
+
+  test('archived chats do not count towards a space tab', () {
+    final model = build([
+      space('!a:x', ['!r1:x', '!r2:x', '!r3:x']),
+      room('!r1:x', unread: 2),
+      room('!r2:x', unread: 5, tags: [archivedTag]),
+      room('!r3:x', membership: Membership.invite, tags: [archivedTag]),
+    ]);
+    expect(model.tabs.single.unread, 2);
   });
 
   test('a cycle terminates and keeps both tabs', () {
@@ -122,6 +143,7 @@ void main() {
   });
 
   test('spaces below the depth cap are not walked, so they cost no budget', () {
+    final logsBefore = Logs().outputEvents.length;
     final chain = [
       for (var i = 0; i <= SpaceTabsModel.maxDepth + 1; i++)
         space('!s$i:x', [
@@ -137,6 +159,28 @@ void main() {
     ]);
     expect(model.tabs.map((t) => t.spaceId), ['!s0:x', '!zz:x']);
     expect(model.roomsBySpace['!zz:x'], {'!late:x'});
+    expect(model.roomsBySpace['!s0:x'], isNot(contains('!c0:x')));
+    expect(
+      Logs().outputEvents.skip(logsBefore).map((event) => event.title),
+      isNot(contains('[SpaceTabs] hierarchy truncated')),
+    );
+  });
+
+  test('one huge space cannot starve the other spaces (L2)', () {
+    final huge = [
+      for (var i = 0; i < SpaceTabsModel.maxVisited + 500; i++) '!c$i:x',
+    ];
+    final model = build([
+      space('!a-huge:x', huge),
+      space('!b:x', ['!r1:x']),
+      space('!c:x', ['!r2:x']),
+      room('!r1:x'),
+      room('!r2:x'),
+    ]);
+    expect(model.tabs.map((t) => t.spaceId), ['!a-huge:x', '!b:x', '!c:x']);
+    expect(model.roomsBySpace['!b:x'], {'!r1:x'});
+    expect(model.roomsBySpace['!c:x'], {'!r2:x'});
+    expect(model.roomsInAnySpace, containsAll(['!r1:x', '!r2:x']));
   });
 
   test('a child we are not in is listed but not counted', () {

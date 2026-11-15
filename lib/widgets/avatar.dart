@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -19,6 +20,8 @@ class Avatar extends StatelessWidget {
   final Client? client;
   final String? presenceUserId;
   final Color? presenceBackgroundColor;
+  final double presenceSize;
+  final double presenceBorder;
   final BorderRadius? borderRadius;
   final IconData? icon;
   final ShapeBorder? shapeBorder;
@@ -38,6 +41,8 @@ class Avatar extends StatelessWidget {
     this.client,
     this.presenceUserId,
     this.presenceBackgroundColor,
+    this.presenceSize = 16,
+    this.presenceBorder = 3,
     this.borderRadius,
     this.shapeBorder,
     this.icon,
@@ -135,24 +140,24 @@ class Avatar extends StatelessWidget {
                 return const SizedBox.shrink();
               }
               final dotColor = presence.presence.isOnline
-                  ? Colors.green
+                  ? AppTokens.of(context).ok
                   : presence.presence.isUnavailable
                   ? Colors.orange
                   : Colors.grey;
-              return Positioned(
+              return PositionedDirectional(
                 bottom: -3,
-                right: -3,
+                end: -3,
                 child: Container(
-                  width: 16,
-                  height: 16,
+                  width: presenceSize,
+                  height: presenceSize,
                   decoration: BoxDecoration(
                     color: presenceBackgroundColor ?? theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(32),
                   ),
                   alignment: Alignment.center,
                   child: Container(
-                    width: 10,
-                    height: 10,
+                    width: presenceSize - 2 * presenceBorder,
+                    height: presenceSize - 2 * presenceBorder,
                     decoration: BoxDecoration(
                       color: dotColor,
                       borderRadius: BorderRadius.circular(16),

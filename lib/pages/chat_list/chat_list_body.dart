@@ -4,19 +4,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat_list/archived_chats_row.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_tabs.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_top_bar.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
+import 'package:fluffychat/pages/chat_list/folder_tab_actions.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_switcher.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/utils/chat_list/folder_filter.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
+import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
@@ -92,8 +96,10 @@ class ChatListViewBody extends StatelessWidget {
             client.rooms,
             nameOf: (room) => room.getLocalizedDisplayname(MatrixLocals(l10n)),
           );
+          final userFolders = FolderStore.of(client).folders;
           final folderContext = FolderContext(
             spaces: spaceModel,
+            userFolders: userFolders,
             hideRoomsInSpaces: AppSettings.hideRoomsInSpaces.value,
           );
           final scope = controller.scope;
@@ -101,19 +107,38 @@ class ChatListViewBody extends StatelessWidget {
             mode: mode,
             spaces: spaceModel.tabs,
             tags: controller.roomTags.keys.toList(),
+            userFolders: userFolders,
             showFoldersAfterSpaces: AppSettings.showFoldersAfterSpaces.value,
             currentSpaceId: scope.spaceId,
           );
           final scopeIsShown =
               (scope.spaceId == null ||
                   spaceModel.tabs.any((tab) => tab.spaceId == scope.spaceId)) &&
-              items.any((item) => item.scope == scope);
+              items.any(
+                (item) => item.scope == scope.copyWith(archived: false),
+              );
           if (client.prevBatch != null && !scopeIsShown) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (controller.mounted) controller.resetScope();
             });
           }
           final rooms = FolderFilter.apply(client.rooms, scope, folderContext);
+          final archivedRooms = scope.archived || scope.folder != FolderRef.all
+              ? const <Room>[]
+              : FolderFilter.apply(
+                  client.rooms,
+                  scope.copyWith(archived: true),
+                  folderContext,
+                );
+          if (client.prevBatch != null && scope.archived && rooms.isEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (controller.mounted && controller.scope.archived) {
+                controller.closeArchived();
+              }
+            });
+          }
+          final showArchivedRow =
+              archivedRooms.isNotEmpty && !controller.isSearchMode;
           final unreadRooms = client.rooms
               .where((room) => room.isUnreadOrInvited)
               .toList();
@@ -129,10 +154,15 @@ class ChatListViewBody extends StatelessWidget {
           return CustomScrollView(
             controller: controller.scrollController,
             slivers: [
-              if (controller.isSearchMode)
-                ChatListHeader(controller: controller)
-              else
-                SliverToBoxAdapter(
+              switch ((controller.isSearchMode, scope.archived)) {
+                (true, _) => ChatListHeader(controller: controller),
+                (_, true) => SliverToBoxAdapter(
+                  child: SafeArea(
+                    bottom: false,
+                    child: _ArchivedHeader(onBack: controller.closeArchived),
+                  ),
+                ),
+                _ => SliverToBoxAdapter(
                   child: SafeArea(
                     bottom: false,
                     child: Column(
@@ -151,14 +181,23 @@ class ChatListViewBody extends StatelessWidget {
                             onSelect: controller.selectTab,
                             onLongPress: (tab) {
                               final spaceId = tab.space?.spaceId;
-                              if (spaceId == null) return;
-                              controller.spaceTabAction(spaceId);
+                              if (spaceId != null) {
+                                controller.spaceTabAction(spaceId);
+                                return;
+                              }
+                              final folderId = tab.scope.folder.value;
+                              if (tab.scope.folder.kind != FolderKind.user ||
+                                  folderId == null) {
+                                return;
+                              }
+                              showUserFolderTabMenu(context, client, folderId);
                             },
                           ),
                       ],
                     ),
                   ),
                 ),
+              },
               SliverList(
                 delegate: SliverChildListDelegate([
                   if (controller.isSearchMode) ...[
@@ -268,15 +307,42 @@ class ChatListViewBody extends StatelessWidget {
                 SliverSafeArea(
                   top: false,
                   sliver: SliverList.builder(
-                    itemCount: rooms.length,
+                    itemCount: rooms.length + (showArchivedRow ? 1 : 0),
+                    findChildIndexCallback: (key) {
+                      if (key is! ValueKey<String>) return null;
+                      final index = rooms.indexWhere(
+                        (room) => key.value == 'chat_list_item_${room.id}',
+                      );
+                      return index < 0
+                          ? null
+                          : index + (showArchivedRow ? 1 : 0);
+                    },
                     itemBuilder: (BuildContext context, int i) {
-                      final room = rooms[i];
+                      if (showArchivedRow && i == 0) {
+                        return ArchivedChatsRow(
+                          key: const ValueKey('archived_chats_row'),
+                          count: archivedRooms.length,
+                          names: archivedRooms
+                              .take(ArchivedChatsRow.maxNames)
+                              .map(
+                                (room) => room.getLocalizedDisplayname(
+                                  MatrixLocals(l10n),
+                                ),
+                              )
+                              .toList(),
+                          onTap: () => controller.selectTab(
+                            scope.copyWith(archived: true),
+                          ),
+                        );
+                      }
+                      final room = rooms[i - (showArchivedRow ? 1 : 0)];
                       final space = spaceDelegateCandidates[room.id];
                       return ChatListItem(
                         room,
                         space: space,
-                        key: Key('chat_list_item_${room.id}'),
+                        key: ValueKey('chat_list_item_${room.id}'),
                         filter: filter,
+                        actions: controller.rowActions,
                         onTap: () => controller.onChatTap(room),
                         onLongPress: (context) =>
                             controller.chatContextAction(room, context, space),
@@ -291,6 +357,34 @@ class ChatListViewBody extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ArchivedHeader extends StatelessWidget {
+  final VoidCallback onBack;
+
+  const _ArchivedHeader({required this.onBack});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsetsDirectional.fromSTEB(4, 2, 16, 8),
+    child: Row(
+      children: [
+        BackButton(onPressed: onBack),
+        Expanded(
+          child: Text(
+            L10n.of(context).archivedChats,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppTokens.of(context).fg,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _TopBar extends StatelessWidget {

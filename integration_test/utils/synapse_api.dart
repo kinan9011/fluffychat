@@ -30,7 +30,7 @@ class SynapseUser {
       );
       if (token != null) request.headers.set('Authorization', 'Bearer $token');
       request.headers.contentType = ContentType.json;
-      request.write(jsonEncode(body ?? {}));
+      if (method != 'GET') request.write(jsonEncode(body ?? {}));
       final response = await request.close();
       final text = await response.transform(utf8.decoder).join();
       if (response.statusCode >= 300) {

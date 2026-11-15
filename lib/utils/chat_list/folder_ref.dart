@@ -70,15 +70,27 @@ class FolderRef {
 class ChatListScope {
   final String? spaceId;
   final FolderRef folder;
+  final bool archived;
 
-  const ChatListScope({this.spaceId, this.folder = FolderRef.all});
+  const ChatListScope({
+    this.spaceId,
+    this.folder = FolderRef.all,
+    this.archived = false,
+  });
+
+  ChatListScope copyWith({bool? archived}) => ChatListScope(
+    spaceId: spaceId,
+    folder: folder,
+    archived: archived ?? this.archived,
+  );
 
   @override
   bool operator ==(Object other) =>
       other is ChatListScope &&
       other.spaceId == spaceId &&
-      other.folder == folder;
+      other.folder == folder &&
+      other.archived == archived;
 
   @override
-  int get hashCode => Object.hash(spaceId, folder);
+  int get hashCode => Object.hash(spaceId, folder, archived);
 }

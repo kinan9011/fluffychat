@@ -37,6 +37,16 @@ class SettingsChatView extends StatelessWidget {
           child: Column(
             children: [
               const _SpaceNavigationSection(),
+              ListTile(
+                key: const ValueKey('settings_folders'),
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(L10n.of(context).folders),
+                onTap: () => context.go('/settings/chat/folders'),
+                trailing: const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Icon(Icons.chevron_right_outlined),
+                ),
+              ),
               const Divider(),
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).formattedMessages,

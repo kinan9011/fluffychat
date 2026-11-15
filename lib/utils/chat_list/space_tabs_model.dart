@@ -23,7 +23,8 @@ class SpaceTab {
 }
 
 /// Top-level joined spaces as tabs and the rooms below each of them. The
-/// hierarchy comes from untrusted state events, so the walk is bounded.
+/// hierarchy comes from untrusted state events, so every walk is bounded and
+/// one huge space cannot starve the others.
 class SpaceTabsModel {
   static const maxDepth = 8;
   static const maxVisited = 10000;
@@ -72,12 +73,11 @@ class SpaceTabsModel {
     }
 
     final roomsBySpace = <String, Set<String>>{};
-    var visits = 0;
     var truncated = false;
 
     void walk(Room root) {
       final members = roomsBySpace[root.id] = {};
-      if (truncated) return;
+      var visits = 0;
       final seen = {root.id};
       final stack = [(root.id, 0)];
       while (stack.isNotEmpty) {
@@ -123,9 +123,12 @@ class SpaceTabsModel {
           spaceId: space.id,
           name: nameOf(space),
           avatar: space.avatar,
-          unread: (roomsBySpace[space.id] ?? const <String>{})
-              .where((id) => byId[id]?.isUnreadOrInvited ?? false)
-              .length,
+          unread: (roomsBySpace[space.id] ?? const <String>{}).where((id) {
+            final room = byId[id];
+            return room != null &&
+                room.isUnreadOrInvited &&
+                !room.isArchivedChat;
+          }).length,
         ),
     ]..sort(_compareTabs);
 

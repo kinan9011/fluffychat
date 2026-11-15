@@ -7,8 +7,10 @@ import 'dart:async';
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
+import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
+import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -74,6 +76,16 @@ class ChatListController extends State<ChatList>
   }
 
   void resetScope() => setState(() => scope = const ChatListScope());
+
+  void closeArchived() => selectTab(scope.copyWith(archived: false));
+
+  final ValueNotifier<String?> openSwipeRow = ValueNotifier(null);
+
+  late final rowActions = ChatRowActions.forChatList(
+    context,
+    openSwipeRow,
+    chatContextAction,
+  );
 
   Future<void> spaceTabAction(String spaceId) async {
     final l10n = L10n.of(context);
@@ -285,6 +297,7 @@ class ChatListController extends State<ChatList>
   void addAccountAction() => context.go('/settings/addaccount');
 
   void _onScroll() {
+    openSwipeRow.value = null;
     final newScrolledToTop = scrollController.position.pixels <= 0;
     if (newScrolledToTop != scrolledToTop.value) {
       scrolledToTop.value = newScrolledToTop;
@@ -320,6 +333,7 @@ class ChatListController extends State<ChatList>
       (_) => setState(() {
         scope = const ChatListScope();
         _overviewSpaceId = null;
+        openSwipeRow.value = null;
       }),
     );
 
@@ -351,6 +365,7 @@ class ChatListController extends State<ChatList>
     searchFocusNode.dispose();
     scrollController.dispose();
     scrolledToTop.dispose();
+    openSwipeRow.dispose();
     _clientStream.close();
     super.dispose();
   }
@@ -443,6 +458,25 @@ class ChatListController extends State<ChatList>
                   room.markedUnread
                       ? L10n.of(context).markAsRead
                       : L10n.of(context).markAsUnread,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: ChatContextAction.archive,
+            child: Row(
+              mainAxisSize: .min,
+              children: [
+                Icon(
+                  room.isArchivedChat
+                      ? Icons.unarchive_outlined
+                      : Icons.archive_outlined,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  room.isArchivedChat
+                      ? L10n.of(context).unarchive
+                      : L10n.of(context).archive,
                 ),
               ],
             ),
@@ -597,7 +631,18 @@ class ChatListController extends State<ChatList>
       case ChatContextAction.favorite:
         await showFutureLoadingDialog(
           context: context,
-          future: () => room.setFavourite(!room.isFavourite),
+          future: () => runSwipeAction(
+            room.client,
+            room.id,
+            SwipeAction.pin,
+            publicReceipts: AppSettings.sendPublicReadReceipts.value,
+          ),
+        );
+        return;
+      case ChatContextAction.archive:
+        await showFutureLoadingDialog(
+          context: context,
+          future: () => room.setArchivedChat(!room.isArchivedChat),
         );
         return;
       case ChatContextAction.markUnread:
@@ -860,6 +905,7 @@ enum EditBundleAction { addToBundle, removeFromBundle }
 enum ChatContextAction {
   goToSpace,
   favorite,
+  archive,
   lowPriority,
   addTag,
   removeTag,

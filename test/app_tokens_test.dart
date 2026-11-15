@@ -308,6 +308,33 @@ void main() {
     });
   });
 
+  group('okS / onOkS (swipe Pin, DESIGN 15 decision 17)', () {
+    test('values', () {
+      expectColor(AppTokens.light().okS, 0xFF008148, 'okS light');
+      expect(AppTokens.light().onOkS, Colors.white);
+      expect(AppTokens.dark().okS, AppTokens.dark().ok);
+      expect(AppTokens.dark().onOkS, oklchColor(0.18, 0.03, 155));
+    });
+
+    test('white on ok would fail in light, okS passes in both themes', () {
+      expect(wcagContrast8(Colors.white, AppTokens.light().ok), lessThan(4.5));
+      for (final t in [AppTokens.light(), AppTokens.dark()]) {
+        expect(wcagContrast8(t.onOkS, t.okS), greaterThanOrEqualTo(4.5));
+      }
+    });
+
+    test('copyWith, lerp and equality carry both', () {
+      final light = AppTokens.light();
+      final dark = AppTokens.dark();
+      expect(light.copyWith(okS: Colors.black).okS, Colors.black);
+      expect(light.copyWith(okS: Colors.black), isNot(light));
+      expect(light.copyWith(onOkS: Colors.black).onOkS, Colors.black);
+      expect(light.copyWith(onOkS: Colors.black), isNot(light));
+      expect(light.lerp(dark, 1).okS, dark.okS);
+      expect(light.lerp(dark, 1).onOkS, dark.onOkS);
+    });
+  });
+
   group('ThemeExtension', () {
     test('copyWith replaces only the given field', () {
       final base = AppTokens.light();
@@ -373,6 +400,8 @@ void main() {
             'fg/accs': (t.fg, t.accs),
             'onRed/red': (t.onRed, t.red),
             'white/mbad': (Colors.white, t.mbad),
+            'onOkS/okS': (t.onOkS, t.okS),
+            'red/bg': (t.red, t.bg),
             'white/avatar': (Colors.white, avatarColorForHue(hue.toDouble())),
           };
           for (final entry in pairs.entries) {

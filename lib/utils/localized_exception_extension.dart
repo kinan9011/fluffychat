@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/archive_guard.dart';
 import 'package:fluffychat/utils/backup_dump_validator.dart';
+import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
 import 'package:flutter/services.dart';
@@ -51,6 +52,9 @@ extension LocalizedExceptionExtension on Object {
         ArchiveGuardError.unsafePaths => l10n.archiveUnsafePaths,
         ArchiveGuardError.invalid => l10n.archiveInvalid,
       };
+    }
+    if (this is FolderTooLargeException) {
+      return L10n.of(context).foldersTooLarge;
     }
     if (this is InvalidBackupException) {
       return (this as InvalidBackupException).tooLarge
