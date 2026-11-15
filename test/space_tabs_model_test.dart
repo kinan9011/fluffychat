@@ -18,8 +18,37 @@ void main() {
 
   String nameOf(Room room) => room.id;
 
-  SpaceTabsModel build(Iterable<Room> rooms) =>
+  SpaceTabsModel buildRaw(Iterable<Room> rooms) =>
       SpaceTabsModel.build(rooms, nameOf: nameOf);
+
+  /// Spaces nested in the other tests agree to it, like the ones the app
+  /// links itself (`setSpaceChild` writes both events).
+  SpaceTabsModel build(Iterable<Room> rooms) {
+    final spaces = {
+      for (final room in rooms)
+        if (room.isSpace) room.id: room,
+    };
+    for (final parent in spaces.values) {
+      for (final child in parent.spaceChildren) {
+        final target = spaces[child.roomId];
+        if (target == null) continue;
+        target.setState(
+          Event(
+            type: EventTypes.SpaceParent,
+            stateKey: parent.id,
+            content: {
+              'via': ['example.org'],
+            },
+            room: target,
+            eventId: '\$link${parent.id}${target.id}',
+            senderId: '@admin:example.org',
+            originServerTs: DateTime(2030),
+          ),
+        );
+      }
+    }
+    return buildRaw(rooms);
+  }
 
   Room space(String id, List<String> children) =>
       testSpace(client, children, id: id);
@@ -36,6 +65,65 @@ void main() {
     membership: membership,
     tags: tags,
   );
+
+  group('a space only nests when it agrees (W03-1 L1)', () {
+    Room admin(
+      String id,
+      List<String> children, {
+      List<String> parents = const [],
+    }) => testSpace(client, children, id: id, userPower: 100, parents: parents);
+
+    test('a one-sided claim does not take the tab of our own space', () {
+      final model = buildRaw([
+        space('!hostile:x', ['!mine:x', '!h1:x']),
+        admin('!mine:x', ['!r1:x']),
+        room('!r1:x'),
+        room('!h1:x'),
+      ]);
+      expect(model.tabs.map((t) => t.spaceId), ['!hostile:x', '!mine:x']);
+      expect(model.roomsBySpace['!mine:x'], {'!r1:x'});
+      expect(model.roomsBySpace['!hostile:x'], {'!h1:x'});
+    });
+
+    test('a space that links back is nested', () {
+      final model = buildRaw([
+        admin('!parent:x', ['!sub:x']),
+        admin('!sub:x', ['!r1:x'], parents: ['!parent:x']),
+        room('!r1:x'),
+      ]);
+      expect(model.tabs.map((t) => t.spaceId), ['!parent:x']);
+      expect(model.roomsBySpace['!parent:x'], {'!r1:x'});
+    });
+
+    test('a link back to another space does not vouch for this parent', () {
+      final model = buildRaw([
+        space('!hostile:x', ['!mine:x']),
+        admin('!mine:x', ['!r1:x'], parents: ['!other:x']),
+        room('!r1:x'),
+      ]);
+      expect(model.tabs.map((t) => t.spaceId), ['!hostile:x', '!mine:x']);
+    });
+
+    test('a space we cannot edit is nested by the claim alone', () {
+      final model = buildRaw([
+        space('!parent:x', ['!theirs:x']),
+        testSpace(client, ['!r1:x'], id: '!theirs:x', userPower: 0),
+        room('!r1:x'),
+      ]);
+      expect(model.tabs.map((t) => t.spaceId), ['!parent:x']);
+      expect(model.roomsBySpace['!parent:x'], {'!r1:x'});
+    });
+
+    test('rooms and spaces we are not in are not affected', () {
+      final model = buildRaw([
+        space('!a:x', ['!r1:x', '!unknown:x', '!invited:x']),
+        testSpace(client, [], id: '!invited:x', membership: Membership.invite),
+        room('!r1:x'),
+      ]);
+      expect(model.tabs.map((t) => t.spaceId), ['!a:x']);
+      expect(model.roomsBySpace['!a:x'], {'!r1:x', '!unknown:x', '!invited:x'});
+    });
+  });
 
   test('two top-level spaces and a subspace give two tabs', () {
     final model = build([

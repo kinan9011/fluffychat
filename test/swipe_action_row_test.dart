@@ -32,6 +32,7 @@ void main() {
     openRow: openRow,
     run: (id, action) async => runs.add((id, action)),
     more: (_, _) {},
+    peek: (_, _) {},
   );
 
   Widget swipeRow(
@@ -246,7 +247,7 @@ void main() {
       size: const Size(400, 400),
     ).then((_) => tester.pump(const Duration(seconds: 35)));
 
-    testWidgets('the row exposes the five actions and runs them', (
+    testWidgets('the row exposes the six actions and runs them', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
@@ -280,6 +281,7 @@ void main() {
         'Pin',
         'Archive',
         'Mark as read',
+        'Peek',
         'More options',
       });
       tester.semantics.performAction(

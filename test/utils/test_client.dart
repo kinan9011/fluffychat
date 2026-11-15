@@ -6,6 +6,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
@@ -20,6 +21,10 @@ const pickledOlmAccount =
 
 class _FakeNotifications extends FlutterLocalNotificationsPlatform {}
 
+/// Fake clients have no key backup state worth showing: no banner in tests
+/// unless a test brings its own answer.
+Future<bool?> noCryptoIdentity(Client client) async => null;
+
 /// More than one test client needs its own database and its own name.
 Future<Client> prepareTestClient({
   bool loggedIn = false,
@@ -31,6 +36,7 @@ Future<Client> prepareTestClient({
   SharedPreferences.setMockInitialValues({});
   FlutterLocalNotificationsPlatform.instance = _FakeNotifications();
   await AppSettings.init(loadWebConfigFile: false);
+  crypto_identity.loadCryptoIdentityConnected = noCryptoIdentity;
 
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
   final client = Client(

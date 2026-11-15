@@ -85,6 +85,7 @@ class ChatListController extends State<ChatList>
     context,
     openSwipeRow,
     chatContextAction,
+    leaveChat,
   );
 
   Future<void> spaceTabAction(String spaceId) async {
@@ -368,6 +369,20 @@ class ChatListController extends State<ChatList>
     openSwipeRow.dispose();
     _clientStream.close();
     super.dispose();
+  }
+
+  Future<void> leaveChat(Room room) async {
+    final confirmed = await showOkCancelAlertDialog(
+      context: context,
+      title: L10n.of(context).areYouSure,
+      message: L10n.of(context).archiveRoomDescription,
+      okLabel: L10n.of(context).leave,
+      cancelLabel: L10n.of(context).cancel,
+      isDestructive: true,
+    );
+    if (confirmed == OkCancelResult.cancel) return;
+    if (!mounted) return;
+    await showFutureLoadingDialog(context: context, future: room.leave);
   }
 
   Future<void> chatContextAction(
@@ -669,19 +684,7 @@ class ChatListController extends State<ChatList>
           extra: inviteEvent?.senderId,
         );
       case ChatContextAction.leave:
-        final confirmed = await showOkCancelAlertDialog(
-          context: context,
-          title: L10n.of(context).areYouSure,
-          message: L10n.of(context).archiveRoomDescription,
-          okLabel: L10n.of(context).leave,
-          cancelLabel: L10n.of(context).cancel,
-          isDestructive: true,
-        );
-        if (confirmed == OkCancelResult.cancel) return;
-        if (!mounted) return;
-
-        await showFutureLoadingDialog(context: context, future: room.leave);
-
+        await leaveChat(room);
         return;
       case ChatContextAction.addToSpace:
         final space = await showModalActionPopup(

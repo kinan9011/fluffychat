@@ -101,6 +101,7 @@ enum AppSettings<T> {
   spaceNavigation<String>('chat.fluffy.space_navigation', 'tabs'),
   showFoldersAfterSpaces<bool>('chat.fluffy.show_folders_after_spaces', true),
   showTabUnreadCounts<bool>('chat.fluffy.show_tab_unread_counts', true),
+  unarchiveOnMention<bool>('chat.fluffy.unarchive_on_mention', false),
   showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true),
   doubleTapToReact<bool>('chat.fluffy.double_tap_to_react', false),
   doubleTapReaction<String>('chat.fluffy.double_tap_reaction', '❤️'),
@@ -257,6 +258,7 @@ const webDeniedSettings = <AppSettings<Object?>>{
   AppSettings.spaceNavigation,
   AppSettings.showFoldersAfterSpaces,
   AppSettings.showTabUnreadCounts,
+  AppSettings.unarchiveOnMention,
 };
 
 bool _isHttpsUrl(Object? value) =>

@@ -11,8 +11,41 @@ Room testSpace(
   String id = '!space:example.org',
   Membership membership = Membership.join,
   String? name,
+  List<String> parents = const [],
+  int? userPower,
 }) {
   final space = Room(id: id, client: client, membership: membership);
+  if (userPower != null) {
+    space.setState(
+      Event(
+        type: EventTypes.RoomPowerLevels,
+        stateKey: '',
+        content: {
+          'users': {client.userID!: userPower},
+          'state_default': 50,
+        },
+        room: space,
+        eventId: '\$power$id',
+        senderId: '@admin:example.org',
+        originServerTs: DateTime(2030),
+      ),
+    );
+  }
+  for (final parent in parents) {
+    space.setState(
+      Event(
+        type: EventTypes.SpaceParent,
+        stateKey: parent,
+        content: {
+          'via': ['example.org'],
+        },
+        room: space,
+        eventId: '\$parent$parent',
+        senderId: '@admin:example.org',
+        originServerTs: DateTime(2030),
+      ),
+    );
+  }
   space.setState(
     Event(
       type: EventTypes.RoomCreate,

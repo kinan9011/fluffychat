@@ -45,11 +45,22 @@ class SpaceTabsModel {
     final joinedSpaces = rooms.where((room) => room.isJoinedSpace).toList();
     if (joinedSpaces.isEmpty) return empty;
 
+    // A joined space only counts as nested when it agrees (m.space.parent) or
+    // when the user could not have made the link themselves. Otherwise any
+    // space admin could take over the tab of a space of ours.
+    bool isNested(Room parent, String childId) {
+      final child = byId[childId];
+      if (child == null || !child.isJoinedSpace) return true;
+      return child.spaceParents.any((link) => link.roomId == parent.id) ||
+          !child.canChangeStateEvent(EventTypes.SpaceParent);
+    }
+
     final children = {
       for (final space in joinedSpaces)
         space.id: space.spaceChildren
             .map((child) => child.roomId)
             .nonNulls
+            .where((id) => isNested(space, id))
             .toList(),
     };
     final childOfAnother = {

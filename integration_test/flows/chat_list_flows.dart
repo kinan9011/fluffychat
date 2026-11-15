@@ -27,8 +27,18 @@ Future<void> chatListSwipeArchive(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
     .then((tester) => tester._chatListSwipeArchive());
 
+Future<void> chatListPeek(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._chatListPeek());
+
+Future<void> chatListDraft(WidgetTester widgetTester) => widgetTester
+    .startFluffyChatTest()
+    .then((tester) => tester._chatListDraft());
+
 extension on FluffyChatTester {
   static const _spaceName = 'Test Space 01';
+  static const _peekRoomName = 'Peek flow room';
+  static const _peekMessage = 'peek me';
+  static const _draftText = 'draft text kept for later';
   static const _folderName = 'Work';
 
   Finder get _groupRow =>
@@ -65,6 +75,10 @@ extension on FluffyChatTester {
     await waitFor(ChatFlows.groupChatName);
 
     await longPressOn(ChatFlows.groupChatName);
+    await waitFor(
+      "Peeking: ${ChatFlows.groupChatName} won't see that you read this",
+    );
+    await tapOn('More options');
     await tapOn('More');
     await tapOn('Add to space');
     await tapOn(
@@ -132,6 +146,13 @@ extension on FluffyChatTester {
     await waitForGone(_groupRow);
     expect(_groupRow, findsNothing, reason: 'a Personal folder drops groups');
 
+    await tester.ensureVisible(tab);
+    await tester.pumpAndSettle();
+    await longPressOn(tab);
+    await waitFor('Delete folder');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
     await openTab('Settings');
     await tapOn('Chat');
     await tapOn('Folders');
@@ -162,5 +183,99 @@ extension on FluffyChatTester {
     await tapOn('Unarchive');
     await waitFor(_groupRow);
     await waitForGone('Archived chats');
+  }
+
+  Future<void> _chatListPeek() async {
+    await ensureLoggedIn();
+    await openTab('Chats');
+
+    final bob = await SynapseUser.login(user2Name, user2Pw);
+    final alice = await SynapseUser.login(user1Name, user1Pw);
+    final roomId = await bob.createRoom(_peekRoomName, invite: [alice.userId]);
+    await alice.join(roomId);
+    final eventId = await bob.sendText(roomId, _peekMessage);
+
+    final row = find.widgetWithText(ChatListItem, _peekRoomName);
+    final badge = find.descendant(of: row, matching: find.text('1'));
+    const notice = "Peeking: $_peekRoomName won't see that you read this";
+    await waitFor(row);
+    await waitFor(badge);
+    final fullyReadBefore = await alice.getRoomAccountData(
+      roomId,
+      'm.fully_read',
+    );
+
+    await longPressOn(row);
+    await waitFor(notice);
+    await waitFor(_peekMessage);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 6));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    await waitForGone(notice);
+    await tester.pump(const Duration(seconds: 6));
+
+    expect(
+      await alice.getRoomAccountData(roomId, 'm.fully_read'),
+      fullyReadBefore,
+      reason: 'peeking does not move the fully read marker',
+    );
+    expect(
+      await bob.receiptUsers(roomId, eventId),
+      isNot(contains(alice.userId)),
+      reason: 'bob sees no receipt of alice',
+    );
+    expect(
+      await alice.receiptUsers(roomId, eventId),
+      isNot(contains(alice.userId)),
+      reason: 'alice has no private receipt either',
+    );
+    expect(badge, findsOneWidget, reason: 'the chat is still unread');
+
+    // The row takes taps after a peek (the Navigator's pointer cancel arrives).
+    // Opening the chat is the control: it sends the receipt, so the checks
+    // above would have noticed one.
+    await tapOn(row);
+    await waitFor(find.byKey(const Key('chat_input_field')));
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    var seen = false;
+    while (!seen && DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(seconds: 1));
+      seen = (await bob.receiptUsers(roomId, eventId)).contains(alice.userId);
+    }
+    expect(seen, isTrue, reason: 'opening the chat sends the receipt');
+    expect(
+      await alice.getRoomAccountData(roomId, 'm.fully_read'),
+      isNot(fullyReadBefore),
+    );
+    await goBack();
+
+    // Second peek, "Mark as read" in its menu is the one explicit way too.
+    await bob.sendText(roomId, 'second');
+    await waitFor(badge);
+    await longPressOn(row);
+    await waitFor(notice);
+    await tapOn('Mark as read');
+    await waitForGone(badge);
+    await bob.logout();
+    await alice.logout();
+  }
+
+  Future<void> _chatListDraft() async {
+    await ensureLoggedIn();
+    await ensureGroupChatCreated();
+    await openTab('Chats');
+
+    await tapOn(ChatFlows.groupChatName);
+    await enterText(const Key('chat_input_field'), _draftText);
+    await tester.pump(const Duration(seconds: 2));
+    await goBack();
+    await waitFor(find.textContaining('Draft: $_draftText'));
+
+    await tapOn(ChatFlows.groupChatName);
+    await tapOn(const Key('send_button'));
+    await waitFor(_draftText);
+    await goBack();
+    await waitForGone(find.textContaining('Draft:'));
   }
 }

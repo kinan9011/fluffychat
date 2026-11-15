@@ -23,15 +23,6 @@ extension ShellFlows on FluffyChatTester {
   Future<void> openTab(String label) async {
     final inBar = find.descendant(of: _visibleBar, matching: find.text(label));
     final inRail = find.byTooltip(label).hitTestable();
-    // After an account was added or removed the shell hides the bar and
-    // ignores pointers for several frames while it resets the tabs, so a
-    // missing target is only final once that window has passed.
-    final end = DateTime.now().add(const Duration(seconds: 5));
-    while (inBar.evaluate().isEmpty &&
-        inRail.evaluate().isEmpty &&
-        DateTime.now().isBefore(end)) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
     if (inBar.evaluate().isEmpty && inRail.evaluate().isEmpty) await goBack();
     await tapOn(inBar.evaluate().isNotEmpty ? inBar : inRail);
   }

@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
 import 'package:fluffychat/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
@@ -323,8 +324,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void _loadDraft() {
-    final prefs = Matrix.of(context).store;
-    final draft = prefs.getString('draft_$roomId');
+    final draft = DraftStore(Matrix.of(context).store).read(roomId);
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
     }
@@ -619,6 +619,16 @@ class ChatController extends State<ChatPageWithRoom>
 
   String? scrollToEventIdMarker;
 
+  bool _wasVisible = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible = TickerMode.valuesOf(context).enabled;
+    if (visible && !_wasVisible) setReadMarker();
+    _wasVisible = visible;
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
@@ -631,6 +641,13 @@ class ChatController extends State<ChatPageWithRoom>
   void setReadMarker({String? eventId}) {
     // Do not send read markers when app is not in foreground
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return;
+    }
+
+    // A chat that is hidden behind another tab, or that belongs to an account
+    // that is no longer the active one, shows nothing: nothing was read.
+    if (!TickerMode.valuesOf(context).enabled ||
+        !identical(Matrix.of(context).activeClientOrNull, sendingClient)) {
       return;
     }
 
@@ -757,8 +774,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted || !proceed) return;
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
-    final prefs = Matrix.of(context).store;
-    prefs.remove('draft_$roomId');
+    DraftStore(Matrix.of(context).store).remove(roomId);
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
@@ -1607,8 +1623,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
-      final prefs = Matrix.of(context).store;
-      await prefs.setString('draft_$roomId', text);
+      await DraftStore(Matrix.of(context).store).write(roomId, text);
     });
     if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
       final clients = currentRoomBundle;

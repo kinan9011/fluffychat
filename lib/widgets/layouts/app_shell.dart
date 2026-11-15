@@ -15,6 +15,7 @@ import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -77,10 +78,59 @@ class _AppShellState extends State<AppShell> {
 
   AppTab get _selected => AppTab.values[widget.navigationShell.currentIndex];
 
-  void _select(AppTab tab) => widget.navigationShell.goBranch(
-    tab.index,
-    initialLocation: tab == _selected,
-  );
+  final Set<int> _stale = {};
+  final FocusNode _navFocus = FocusNode(debugLabel: 'shell navigation');
+  FocusNode? _returnFocus;
+
+  void _select(AppTab tab) {
+    final holdsOldAccount = _stale.remove(tab.index);
+    widget.navigationShell.goBranch(
+      tab.index,
+      initialLocation: holdsOldAccount || tab == _selected,
+    );
+  }
+
+  void _markAllStale() => _stale
+    ..clear()
+    ..addAll(AppTab.values.map((tab) => tab.index));
+
+  // A destination that comes with a switch navigates right after it, and the
+  // shell only learns about that in the next frame: until then the branch we
+  // were on must count as stale too, or it would keep the old account's page.
+  Future<void> _markOthersStale() async {
+    _markAllStale();
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) _stale.remove(widget.navigationShell.currentIndex);
+  }
+
+  void _onActiveClientChanged() {
+    if (widget.chatsUnread == null) _watchUnread();
+    unawaited(_markOthersStale());
+  }
+
+  Future<void> _onAccountSwitched() async {
+    final location = widget.location;
+    await _markOthersStale();
+    if (!mounted || widget.location != location) return;
+    widget.navigationShell.goBranch(
+      widget.navigationShell.currentIndex,
+      initialLocation: true,
+    );
+  }
+
+  void _toggleNavigationFocus() {
+    if (!_navFocus.hasFocus) {
+      _returnFocus = FocusManager.instance.primaryFocus;
+      _navFocus.requestFocus();
+      return;
+    }
+    final back = _returnFocus;
+    if (back != null && back.context != null) {
+      back.requestFocus();
+      return;
+    }
+    FocusManager.instance.primaryFocus?.nextFocus();
+  }
 
   @override
   void initState() {
@@ -88,50 +138,20 @@ class _AppShellState extends State<AppShell> {
     _watchUnread();
     _accountSubscription =
         (widget.accountSwitched ?? Matrix.of(context).onAccountSwitched).listen(
-          (_) => _resetTabs(keepCurrent: false),
+          (_) => _onAccountSwitched(),
         );
     _clientSubscription =
         (widget.activeClientChanged ?? Matrix.of(context).onActiveClientChanged)
-            .listen((_) {
-              if (widget.chatsUnread == null) _watchUnread();
-              _resetTabs(keepCurrent: true);
-            });
+            .listen((_) => _onActiveClientChanged());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) widget.onFirstShown?.call();
     });
   }
 
-  bool _resetting = false;
-  bool _keepCurrentTab = true;
-
-  // go_router only applies the last navigation of a frame, hence one frame
-  // per tab, hidden meanwhile. A destination switch navigates right after
-  // switching, so wait for that navigation before reading the current tab.
-  Future<void> _resetTabs({required bool keepCurrent}) async {
-    _keepCurrentTab = _keepCurrentTab && keepCurrent;
-    if (_resetting) return;
-    setState(() => _resetting = true);
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
-    final path = GoRouter.of(context).routeInformationProvider.value.uri.path;
-    if (AppTab.forPath(path) != null) {
-      final current = widget.navigationShell.currentIndex;
-      final tabs = AppTab.visible(callsEnabled: AppSettings.callsEnabled.value);
-      for (final tab in tabs) {
-        if (tab.index == current) continue;
-        widget.navigationShell.goBranch(tab.index, initialLocation: true);
-        await WidgetsBinding.instance.endOfFrame;
-        if (!mounted) return;
-      }
-      widget.navigationShell.goBranch(
-        current,
-        initialLocation: !_keepCurrentTab,
-      );
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-    }
-    _keepCurrentTab = true;
-    setState(() => _resetting = false);
+  @override
+  void didUpdateWidget(AppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _stale.remove(widget.navigationShell.currentIndex);
   }
 
   @override
@@ -140,6 +160,7 @@ class _AppShellState extends State<AppShell> {
     _clientSubscription?.cancel();
     _unreadSubscription?.cancel();
     _chatsUnread.dispose();
+    _navFocus.dispose();
     super.dispose();
   }
 
@@ -154,66 +175,79 @@ class _AppShellState extends State<AppShell> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _select(AppTab.chats);
       },
-      child: ExcludeSemantics(
-        excluding: _resetting,
-        child: IgnorePointer(
-          ignoring: _resetting,
-          child: Opacity(
-            opacity: _resetting ? 0 : 1,
-            child: mode == ShellMode.mobile
-                ? _MobileShell(
-                    navigationShell: widget.navigationShell,
-                    showBar:
-                        AppTab.isRoot(widget.location) &&
-                        mq.viewInsets.bottom == 0,
-                    bar: _ChatsUnread(
-                      count: _chatsUnread,
-                      builder: (badge) => AppBottomBar(
-                        tabs: tabs,
-                        selected: selected,
-                        onSelect: _select,
-                        profileAvatar: widget.profileAvatar(25),
-                        chatsBadge: badge,
-                      ),
+      child: Shortcuts(
+        shortcuts: const {
+          SingleActivator(LogicalKeyboardKey.f6): _FocusNavigationIntent(),
+        },
+        child: Actions(
+          actions: {
+            _FocusNavigationIntent: CallbackAction<_FocusNavigationIntent>(
+              onInvoke: (_) {
+                _toggleNavigationFocus();
+                return null;
+              },
+            ),
+          },
+          child: mode == ShellMode.mobile
+              ? _MobileShell(
+                  navigationShell: widget.navigationShell,
+                  showBar:
+                      AppTab.isRoot(widget.location) &&
+                      mq.viewInsets.bottom == 0,
+                  bar: _ChatsUnread(
+                    count: _chatsUnread,
+                    builder: (badge) => AppBottomBar(
+                      tabs: tabs,
+                      selected: selected,
+                      onSelect: _select,
+                      profileAvatar: widget.profileAvatar(25),
+                      chatsBadge: badge,
+                      selectedFocus: _navFocus,
                     ),
-                  )
-                : TwoColumnLayout(
-                    rail: mode.hasRail
+                  ),
+                )
+              : TwoColumnLayout(
+                  rail: mode.hasRail
+                      ? _ChatsUnread(
+                          count: _chatsUnread,
+                          builder: (badge) => AppNavRail(
+                            tabs: tabs,
+                            selected: selected,
+                            onSelect: _select,
+                            profileAvatar: widget.profileAvatar(42),
+                            accountCount: widget.accountCount,
+                            chatsBadge: badge,
+                            selectedFocus: _navFocus,
+                          ),
+                        )
+                      : null,
+                  mainView: _LeftColumns(
+                    selected: selected,
+                    builder: widget.leftColumn,
+                    header: mode == ShellMode.twoPane
                         ? _ChatsUnread(
                             count: _chatsUnread,
-                            builder: (badge) => AppNavRail(
+                            builder: (badge) => AppTabStrip(
                               tabs: tabs,
                               selected: selected,
                               onSelect: _select,
-                              profileAvatar: widget.profileAvatar(42),
-                              accountCount: widget.accountCount,
+                              profileAvatar: widget.profileAvatar(26),
                               chatsBadge: badge,
+                              selectedFocus: _navFocus,
                             ),
                           )
                         : null,
-                    mainView: _LeftColumns(
-                      selected: selected,
-                      builder: widget.leftColumn,
-                      header: mode == ShellMode.twoPane
-                          ? _ChatsUnread(
-                              count: _chatsUnread,
-                              builder: (badge) => AppTabStrip(
-                                tabs: tabs,
-                                selected: selected,
-                                onSelect: _select,
-                                profileAvatar: widget.profileAvatar(26),
-                                chatsBadge: badge,
-                              ),
-                            )
-                          : null,
-                    ),
-                    sideView: widget.navigationShell,
                   ),
-          ),
+                  sideView: widget.navigationShell,
+                ),
         ),
       ),
     );
   }
+}
+
+class _FocusNavigationIntent extends Intent {
+  const _FocusNavigationIntent();
 }
 
 /// Only the widgets that show the badge rebuild when the count changes.

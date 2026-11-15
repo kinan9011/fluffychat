@@ -12,6 +12,7 @@ import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
 import 'package:fluffychat/widgets/layouts/app_shell.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -251,10 +252,9 @@ void main() {
     });
   });
 
-  group('account switch', () {
-    testWidgets('every tab goes back to its root, the current one stays', (
-      tester,
-    ) async {
+  group('account switch (lazy reset)', () {
+    testWidgets('a user switch resets the current tab at once and every other '
+        'tab when it is selected', (tester) async {
       await pumpShell(tester, 400);
       router.go('/settings/style');
       await tester.pumpAndSettle();
@@ -263,7 +263,7 @@ void main() {
       router.go('/profile');
       await tester.pumpAndSettle();
       accountChanges.add(Object());
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(find.text('PAGE /profile'), findsOneWidget);
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
@@ -273,54 +273,153 @@ void main() {
       expect(find.text('PAGE /rooms'), findsOneWidget);
     });
 
-    testWidgets('a destination switch resets every other tab and keeps the '
-        'current page', (tester) async {
+    testWidgets('a destination switch keeps the current page and resets every '
+        'other tab when it is selected', (tester) async {
       await pumpShell(tester, 400);
       router.go('/settings/style');
       await tester.pumpAndSettle();
       router.go('/rooms/abc');
       await tester.pumpAndSettle();
       clientChanges.add(Object());
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(find.text('PAGE /rooms/abc'), findsOneWidget);
-      tester
-          .state<StatefulNavigationShellState>(
-            find.byType(StatefulNavigationShell),
-          )
-          .goBranch(2);
+      router.go('/rooms');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
       expect(find.text('PAGE /settings'), findsOneWidget);
     });
 
-    testWidgets('the bar is not hit-testable until the reset has finished', (
+    testWidgets('a user switch resets the page you are on, a destination '
+        'switch does not', (tester) async {
+      await pumpShell(tester, 1000);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings/style'), findsOneWidget);
+      accountChanges.add(Object());
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings'), findsOneWidget);
+    });
+
+    testWidgets('a destination in another tab resets the tab you leave', (
+      tester,
+    ) async {
+      await pumpShell(tester, 1000);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      router.go('/rooms/abc');
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /rooms/abc'), findsOneWidget);
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings'), findsOneWidget);
+    });
+
+    testWidgets('a destination switch that arrives a frame later still wins', (
+      tester,
+    ) async {
+      await pumpShell(tester, 1000);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      await tester.pump();
+      router.go('/calls');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings'), findsOneWidget);
+    });
+
+    testWidgets('a tab that was reset once is not reset again', (tester) async {
+      await pumpShell(tester, 1000);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      router.go('/rooms');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      await tester.pump();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings'), findsOneWidget);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Chats'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /rooms'), findsOneWidget);
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings/style'), findsOneWidget);
+    });
+
+    testWidgets('a destination in a stale tab keeps its page', (tester) async {
+      await pumpShell(tester, 1000);
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      router.go('/rooms');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      await tester.pump();
+      router.go('/settings/style');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Chats'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /rooms'), findsOneWidget);
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings/style'), findsOneWidget);
+    });
+
+    testWidgets('two switches in a row: the last destination wins', (
       tester,
     ) async {
       await pumpShell(tester, 400);
-      final bar = find.byType(AppBottomBar).hitTestable();
-      expect(bar, findsOneWidget);
-      accountChanges.add(Object());
-      await tester.pump();
-      await tester.pump();
-      expect(bar, findsNothing);
+      router.go('/settings/style');
       await tester.pumpAndSettle();
-      expect(bar, findsOneWidget);
+      router.go('/rooms');
+      await tester.pumpAndSettle();
+      clientChanges.add(Object());
+      accountChanges.add(Object());
+      router.go('/calls');
+      await tester.pump();
+      clientChanges.add(Object());
+      router.go('/rooms/xyz');
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /rooms/xyz'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the hidden reset is excluded from semantics', (tester) async {
+    testWidgets('the shell is never hidden during a switch', (tester) async {
       await pumpShell(tester, 400);
       accountChanges.add(Object());
       await tester.pump();
-      await tester.pump();
+      final bar = find.byType(AppBottomBar);
+      expect(bar.hitTestable(), findsOneWidget);
       expect(
         find.ancestor(
-          of: find.byType(AppBottomBar),
+          of: bar,
           matching: find.byWidgetPredicate(
-            (w) => w is ExcludeSemantics && w.excluding,
+            (w) =>
+                (w is Opacity && w.opacity == 0) ||
+                (w is IgnorePointer && w.ignoring) ||
+                (w is ExcludeSemantics && w.excluding),
           ),
         ),
-        findsOneWidget,
+        findsNothing,
       );
+    });
+
+    testWidgets('a disabled calls tab is left alone', (tester) async {
+      await AppSettings.callsEnabled.setItem(false);
+      await pumpShell(tester, 400);
+      router.go('/settings/style');
       await tester.pumpAndSettle();
+      accountChanges.add(Object());
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.text('PAGE /settings/style'), findsOneWidget);
     });
   });
 
@@ -354,6 +453,61 @@ void main() {
       router.go('/rooms/abc');
       await tester.pumpAndSettle();
       expect(barCanTakeFocus(), isFalse);
+    });
+
+    bool focusIn<T extends Widget>() =>
+        FocusManager.instance.primaryFocus?.context
+            ?.findAncestorWidgetOfExactType<T>() !=
+        null;
+
+    for (final (width, host) in [
+      (400.0, AppBottomBar),
+      (700.0, AppTabStrip),
+      (1280.0, AppNavRail),
+    ]) {
+      testWidgets('F6 moves focus to the selected item of the $host and back '
+          'at $width px', (tester) async {
+        await pumpShell(tester, width);
+        router.go('/settings');
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.f6);
+        await tester.pump();
+        final focus = FocusManager.instance.primaryFocus!;
+        final inHost = switch (host) {
+          const (AppBottomBar) => focusIn<AppBottomBar>(),
+          const (AppTabStrip) => focusIn<AppTabStrip>(),
+          _ => focusIn<AppNavRail>(),
+        };
+        expect(inHost, isTrue, reason: '${focus.debugLabel}');
+        expect(
+          find.descendant(
+            of: find.byWidgetPredicate((w) => w.runtimeType == host),
+            matching: find.byWidgetPredicate(
+              (w) => w is InkWell && w.focusNode == focus,
+            ),
+          ),
+          findsOneWidget,
+        );
+        await tester.sendKeyEvent(LogicalKeyboardKey.f6);
+        await tester.pump();
+        final back = switch (host) {
+          const (AppBottomBar) => focusIn<AppBottomBar>(),
+          const (AppTabStrip) => focusIn<AppTabStrip>(),
+          _ => focusIn<AppNavRail>(),
+        };
+        expect(back, isFalse);
+      });
+    }
+
+    testWidgets('F6 does nothing while the bar is hidden', (tester) async {
+      await pumpShell(tester, 400);
+      router.go('/rooms/abc');
+      await tester.pumpAndSettle();
+      final before = FocusManager.instance.primaryFocus;
+      await tester.sendKeyEvent(LogicalKeyboardKey.f6);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, before);
+      expect(tester.takeException(), isNull);
     });
   });
 

@@ -226,6 +226,11 @@ class _SpaceNavigationSection extends StatelessWidget {
           title: l10n.showUnreadCountsOnTabs,
           setting: AppSettings.showTabUnreadCounts,
         ),
+        SettingsSwitchListTile.adaptive(
+          title: l10n.unarchiveOnMention,
+          subtitle: l10n.unarchiveOnMentionDescription,
+          setting: AppSettings.unarchiveOnMention,
+        ),
       ],
     );
   }

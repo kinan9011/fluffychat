@@ -74,6 +74,26 @@ void main() {
     await tester.pump(const Duration(seconds: 35));
   });
 
+  testWidgets('Unarchive on mention is off and the switch writes it', (
+    tester,
+  ) async {
+    await AppSettings.unarchiveOnMention.setItem(false);
+    await pumpChatSettings(tester);
+    final tile = find.widgetWithText(
+      SwitchListTile,
+      'Unarchive a chat when someone mentions me',
+    );
+    await tester.ensureVisible(tile);
+    expect(find.text('Off: archived chats stay archived.'), findsOneWidget);
+    await tester.tap(tile);
+    await tester.pump();
+    expect(AppSettings.unarchiveOnMention.value, isTrue);
+    await tester.tap(tile);
+    await tester.pump();
+    expect(AppSettings.unarchiveOnMention.value, isFalse);
+    await tester.pump(const Duration(seconds: 35));
+  });
+
   test(
     'new settings default to tabs, folders shown and counts shown',
     () async {

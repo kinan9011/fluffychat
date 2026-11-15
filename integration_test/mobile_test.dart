@@ -24,6 +24,8 @@ void main() {
     testWidgets('Chat list tabs', chatListTabs);
     testWidgets('Chat list folders', chatListFolders);
     testWidgets('Chat list swipe and archive', chatListSwipeArchive);
+    testWidgets('Chat list peek', chatListPeek);
+    testWidgets('Chat list draft', chatListDraft);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

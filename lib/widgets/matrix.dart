@@ -8,8 +8,10 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
 import 'package:fluffychat/utils/account_hooks.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
+import 'package:fluffychat/utils/chat_list/archive_policy.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
@@ -276,6 +278,7 @@ class MatrixState extends State<Matrix> {
   final onKeyVerificationRequestSub = <String, StreamSubscription>{};
   final onNotification = <String, StreamSubscription>{};
   final onReceipts = <String, StreamSubscription>{};
+  final onUnarchiveSub = <String, StreamSubscription<SyncUpdate>>{};
   final onLogoutSub = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
 
@@ -381,6 +384,9 @@ class MatrixState extends State<Matrix> {
           FluffyChatApp.router.go('/');
         });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
+    onUnarchiveSub[name] ??= c.onSync.stream.listen(
+      UnarchiveOnMention(c).handle,
+    );
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     if (PlatformInfos.isWeb || PlatformInfos.isDesktop) {
       c.onSync.stream.first.then((s) {
@@ -415,6 +421,9 @@ class MatrixState extends State<Matrix> {
     onNotification.remove(name);
     onReceipts[name]?.cancel();
     onReceipts.remove(name);
+    onUnarchiveSub[name]?.cancel();
+    onUnarchiveSub.remove(name);
+    KeyBackupBanner.forget(name);
   }
 
   Future<void> initMatrix() async {
@@ -509,6 +518,9 @@ class MatrixState extends State<Matrix> {
       sub.cancel();
     }
     for (final sub in onReceipts.values) {
+      sub.cancel();
+    }
+    for (final sub in onUnarchiveSub.values) {
       sub.cancel();
     }
     for (final sub in startupSubscriptions) {

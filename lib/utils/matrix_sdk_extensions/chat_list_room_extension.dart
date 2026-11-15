@@ -12,6 +12,8 @@ const archivedTag = 'im.fluffychat.archived';
 extension ChatListRoomExtension on Room {
   bool get isJoinedSpace => isSpace && membership == Membership.join;
 
+  bool get canSwipe => membership == Membership.join && !isSpace;
+
   bool get isArchivedChat =>
       membership == Membership.join && tags.containsKey(archivedTag);
 

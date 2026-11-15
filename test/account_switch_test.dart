@@ -14,6 +14,8 @@ import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/chat_list/unread_counts.dart';
+import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
@@ -28,11 +30,11 @@ import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/chat_row_fixtures.dart';
 import 'utils/space_fixtures.dart';
 import 'utils/test_client.dart';
 
@@ -41,6 +43,8 @@ void main() {
   late Client first;
   late Client second;
   late Client stranger;
+  late FakeMatrixApi firstApi;
+  late FakeMatrixApi secondApi;
 
   setUpAll(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -48,10 +52,18 @@ void main() {
           const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
           (_) async => null,
         );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMessageHandler(
+          'dev.flutter.pigeon.wakelock_plus_platform_interface.WakelockPlusApi.toggle',
+          (_) async =>
+              const StandardMessageCodec().encodeMessage(<Object?>[null]),
+        );
     first = await prepareTestClient();
     first.backgroundSync = false;
+    firstApi = FakeMatrixApi.currentApi!;
     second = await prepareTestClient(clientName: 'Second');
     second.backgroundSync = false;
+    secondApi = FakeMatrixApi.currentApi!;
     stranger = await prepareTestClient(clientName: 'Stranger');
   });
 
@@ -59,13 +71,9 @@ void main() {
     AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
     MatrixState.startupHooks = MatrixState.defaultStartupHooks;
     MatrixState.accountHooks = MatrixState.defaultAccountHooks;
-    SettingsController.loadCryptoIdentityConnected =
-        SettingsController.defaultLoadCryptoIdentityConnected;
+    crypto_identity.loadCryptoIdentityConnected = noCryptoIdentity;
     await AppSettings.callsEnabled.setItem(true);
   });
-
-  StatefulNavigationShellState shell(WidgetTester tester) =>
-      tester.state(find.byType(StatefulNavigationShell));
 
   /// Requests go through a real database isolate (real time) while their
   /// continuations run on the fake clock, so alternate between both.
@@ -119,6 +127,22 @@ void main() {
     FluffyChatApp.router.go(target);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  Future<void> tapTab(WidgetTester tester, String label, double width) async {
+    final path = Uri.parse(location()).path;
+    if (width < 600 && !AppTab.isRoot(path)) await goTo(tester, '/rooms');
+    await tester.tap(
+      width >= 900
+          ? find.byWidgetPredicate(
+              (w) => w is Tooltip && w.message?.startsWith(label) == true,
+            )
+          : find.descendant(
+              of: find.byType(AppBottomBar),
+              matching: find.text(label),
+            ),
+    );
+    await settle(tester);
   }
 
   group('startup hooks', () {
@@ -449,20 +473,20 @@ void main() {
     });
 
     for (final width in [400.0, 1280.0]) {
-      accountTest('a destination switch resets the other tabs at $width px', (
-        tester,
-        matrix,
-      ) async {
-        final roomId = second.rooms.first.id;
-        await goTo(tester, '/settings/style');
-        await goTo(tester, '/rooms/$roomId?client=Second');
-        await settle(tester);
-        expect(location(), '/rooms/$roomId?client=Second');
-        shell(tester).goBranch(AppTab.settings.index);
-        await settle(tester);
-        expect(location(), '/settings');
-        return matrix;
-      }, width: width);
+      accountTest(
+        'a destination switch resets the other tabs when selected at $width px',
+        (tester, matrix) async {
+          final roomId = second.rooms.first.id;
+          await goTo(tester, '/settings/style');
+          await goTo(tester, '/rooms/$roomId?client=Second');
+          await settle(tester);
+          expect(location(), '/rooms/$roomId?client=Second');
+          await tapTab(tester, 'Settings', width);
+          expect(location(), '/settings');
+          return matrix;
+        },
+        width: width,
+      );
     }
 
     accountTest('a disabled calls tab does not swallow the destination', (
@@ -488,8 +512,7 @@ void main() {
       await settle(tester);
       expect(matrix.client, second);
       expect(location(), '/rooms/!nothere:fakeServer.notExisting?action=call');
-      shell(tester).goBranch(AppTab.settings.index);
-      await settle(tester);
+      await tapTab(tester, 'Settings', 400);
       expect(location(), '/settings');
       return matrix;
     });
@@ -519,6 +542,63 @@ void main() {
       expect(location(), '/rooms/${first.rooms.first.id}');
       return matrix;
     });
+
+    for (final width in [400.0, 1280.0]) {
+      accountTest(
+        'a user switch opens the other tabs at their root at $width px',
+        (tester, matrix) async {
+          await goTo(tester, '/settings/style');
+          await goTo(tester, '/rooms');
+          matrix.setActiveClient(second);
+          await settle(tester);
+          expect(location(), '/rooms');
+          await tapTab(tester, 'Settings', width);
+          expect(location(), '/settings');
+          return matrix;
+        },
+        width: width,
+      );
+    }
+
+    accountTest('two switches before the next frame: the destination wins', (
+      tester,
+      matrix,
+    ) async {
+      await goTo(tester, '/settings/style');
+      await goTo(tester, '/rooms');
+      matrix.setActiveClient(second);
+      matrix.joinCall(first, '!nothere:fakeServer.notExisting');
+      await settle(tester);
+      expect(matrix.client, first);
+      expect(location(), '/rooms/!nothere:fakeServer.notExisting?action=call');
+      expect(tester.takeException(), isNull);
+      return matrix;
+    });
+
+    accountTest('a call joined from another tab leaves that tab at its root', (
+      tester,
+      matrix,
+    ) async {
+      await goTo(tester, '/settings/style');
+      matrix.joinCall(second, '!nothere:fakeServer.notExisting');
+      await settle(tester);
+      expect(location(), '/rooms/!nothere:fakeServer.notExisting?action=call');
+      await tapTab(tester, 'Settings', 1000);
+      expect(location(), '/settings');
+      return matrix;
+    }, width: 1000);
+
+    accountTest('a notification tap into another account resets the tab you '
+        'were on', (tester, matrix) async {
+      await goTo(tester, '/settings/style');
+      final roomId = second.rooms.first.id;
+      await goTo(tester, '/rooms/$roomId?client=Second');
+      await settle(tester);
+      expect(matrix.client, second);
+      await tapTab(tester, 'Settings', 1000);
+      expect(location(), '/settings');
+      return matrix;
+    }, width: 1000);
 
     accountTest('a user switch sends every tab back to its root', (
       tester,
@@ -559,7 +639,7 @@ void main() {
       matrix,
     ) async {
       final pending = <Client, Completer<bool?>>{};
-      SettingsController.loadCryptoIdentityConnected = (client) =>
+      crypto_identity.loadCryptoIdentityConnected = (client) =>
           (pending[client] = Completer<bool?>()).future;
       await goTo(tester, '/settings');
       await tester.pump();
@@ -711,7 +791,15 @@ void main() {
       },
       beforePump: () {
         addSpace();
-        first.rooms.add(testSpace(first, ['!r:x'], id: '!sub:x', name: 'Sub'));
+        first.rooms.add(
+          testSpace(
+            first,
+            ['!r:x'],
+            id: '!sub:x',
+            name: 'Sub',
+            parents: [spaceId],
+          ),
+        );
         first.rooms
             .firstWhere((r) => r.id == spaceId)
             .setState(
@@ -821,6 +909,297 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Open profile').first);
       await tester.pump(const Duration(milliseconds: 500));
       expect(location(), '/profile');
+      return matrix;
+    });
+  });
+
+  group('hidden chats stay silent (W03-3 T28)', () {
+    late String roomId;
+    late String markerPath;
+
+    List<String> markers() => FakeMatrixApi.calledEndpoints.keys
+        .where((path) => path.contains('/read_markers'))
+        .toList();
+
+    void prepare() {
+      FakeMatrixApi.currentApi = firstApi;
+      FakeMatrixApi.client = first;
+      final room = first.rooms.firstWhere(
+        (room) => room.membership == Membership.join,
+      );
+      room.prev_batch = null;
+      room.notificationCount = 2;
+      roomId = room.id;
+      markerPath =
+          '/client/v3/rooms/${Uri.encodeComponent(roomId)}/read_markers';
+      firstApi.api['POST']![markerPath] = (_) => {};
+      FakeMatrixApi.calledEndpoints.clear();
+    }
+
+    Future<void> newMessage(WidgetTester tester, int n) async {
+      await tester.runAsync(
+        () => first.handleSync(
+          SyncUpdate(
+            nextBatch: 'hidden$n',
+            rooms: RoomsUpdate(
+              join: {
+                roomId: JoinedRoomUpdate(
+                  timeline: TimelineUpdate(
+                    events: [
+                      MatrixEvent(
+                        type: EventTypes.Message,
+                        content: {'msgtype': MessageTypes.Text, 'body': 'm$n'},
+                        eventId: '\$hidden$n',
+                        senderId: '@anna:example.org',
+                        originServerTs: DateTime.now(),
+                      ),
+                    ],
+                  ),
+                  unreadNotifications: UnreadNotificationCounts(
+                    notificationCount: 2 + n,
+                  ),
+                ),
+              },
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+    }
+
+    Future<void> resume(WidgetTester tester) async {
+      for (final state in [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ]) {
+        tester.binding.handleAppLifecycleStateChanged(state);
+        await tester.pump();
+      }
+      await settle(tester);
+    }
+
+    accountTest('control: a visible chat sends its read marker', (
+      tester,
+      matrix,
+    ) async {
+      prepare();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await goTo(tester, '/rooms/$roomId');
+      await settle(tester);
+      await newMessage(tester, 1);
+      expect(markers(), isNotEmpty, reason: 'the control must be able to fail');
+      return matrix;
+    }, width: 1000);
+
+    accountTest('a chat behind another tab sends nothing until it is shown', (
+      tester,
+      matrix,
+    ) async {
+      prepare();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await goTo(tester, '/rooms/$roomId');
+      await settle(tester);
+      await tapTab(tester, 'Settings', 1000);
+      FakeMatrixApi.calledEndpoints.clear();
+      await newMessage(tester, 1);
+      await resume(tester);
+      expect(markers(), isEmpty, reason: 'hidden: nobody saw the message');
+      await tapTab(tester, 'Chats', 1000);
+      await settle(tester);
+      expect(markers(), isNotEmpty, reason: 'shown again: now it is read');
+      return matrix;
+    }, width: 1000);
+
+    accountTest('a shown chat of a client that is no longer active sends '
+        'nothing', (tester, matrix) async {
+      prepare();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await goTo(tester, '/rooms/$roomId');
+      await settle(tester);
+      matrix.setActiveClient(second, resetTabs: false);
+      await settle(tester);
+      expect(location(), '/rooms/$roomId');
+      FakeMatrixApi.calledEndpoints.clear();
+      await newMessage(tester, 1);
+      await resume(tester);
+      expect(markers(), isEmpty, reason: 'account A is not in use any more');
+      return matrix;
+    }, width: 1000);
+
+    accountTest('the chat of the previous account sends nothing after a '
+        'switch', (tester, matrix) async {
+      prepare();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await goTo(tester, '/rooms/$roomId');
+      await settle(tester);
+      await tapTab(tester, 'Settings', 1000);
+      matrix.setActiveClient(second);
+      await settle(tester);
+      FakeMatrixApi.calledEndpoints.clear();
+      await newMessage(tester, 1);
+      await resume(tester);
+      expect(markers(), isEmpty, reason: 'account A is not in use any more');
+      return matrix;
+    }, width: 1000);
+  });
+
+  group('drafts in the list (W03-3 L1)', () {
+    void room(Client client, String id, String name) => client.rooms.add(
+      testChat(
+        client,
+        id,
+        name: name,
+        lastBody: 'hello',
+        lastTime: DateTime.now(),
+      ),
+    );
+
+    tearDown(() {
+      for (final client in [first, second]) {
+        client.rooms.removeWhere((room) => room.id.startsWith('!dr'));
+      }
+    });
+
+    accountTest(
+      'a draft typed as another account is not shown for a shared chat',
+      (tester, matrix) async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('draft_!drs:x', 'typed as the other account');
+        await prefs.setString('draft_!dro:x', 'only in this account');
+        DraftStore.revision.value++;
+        await goTo(tester, '/rooms');
+        await settle(tester);
+        expect(find.text('Solo'), findsOneWidget);
+        expect(find.textContaining('only in this account'), findsOneWidget);
+        expect(find.text('Shared'), findsOneWidget);
+        expect(find.textContaining('typed as the other account'), findsNothing);
+        matrix.setActiveClient(second);
+        await settle(tester);
+        expect(find.text('Shared'), findsOneWidget);
+        expect(find.textContaining('typed as the other account'), findsNothing);
+        return matrix;
+      },
+      beforePump: () {
+        room(first, '!drs:x', 'Shared');
+        room(second, '!drs:x', 'Shared');
+        room(first, '!dro:x', 'Solo');
+      },
+    );
+  });
+
+  group('unarchive on mention (W03-3)', () {
+    const tagPath =
+        '/client/v3/user/%40test%3AfakeServer.notExisting/rooms/!unar%3Ax/tags/im.fluffychat.archived';
+
+    SyncUpdate mention(int count) => SyncUpdate(
+      nextBatch: 'unarchive$count',
+      rooms: RoomsUpdate(
+        join: {
+          '!unar:x': JoinedRoomUpdate(
+            unreadNotifications: UnreadNotificationCounts(
+              highlightCount: count,
+            ),
+          ),
+        },
+      ),
+    );
+
+    Room archived(Client client) => testSpaceChild(
+      client,
+      '!unar:x',
+      tags: const ['im.fluffychat.archived'],
+    );
+
+    tearDown(() async {
+      first.rooms.removeWhere((room) => room.id == '!unar:x');
+      second.rooms.removeWhere((room) => room.id == '!unar:x');
+      await AppSettings.unarchiveOnMention.setItem(false);
+    });
+
+    accountTest('a mention unarchives a chat of its own account only', (
+      tester,
+      matrix,
+    ) async {
+      FakeMatrixApi.currentApi = firstApi;
+      FakeMatrixApi.client = first;
+      firstApi.api['DELETE']![tagPath] = (_) => {};
+      await AppSettings.unarchiveOnMention.setItem(true);
+      first.rooms.add(archived(first));
+      FakeMatrixApi.calledEndpoints.clear();
+      await tester.runAsync(() => first.handleSync(mention(0)));
+      await tester.runAsync(() => second.handleSync(mention(0)));
+      await tester.runAsync(() => second.handleSync(mention(1)));
+      await tester.pump();
+      expect(FakeMatrixApi.calledEndpoints.keys, isNot(contains(tagPath)));
+      await tester.runAsync(() => first.handleSync(mention(1)));
+      await settle(tester);
+      expect(FakeMatrixApi.calledEndpoints[tagPath], hasLength(1));
+      return matrix;
+    });
+
+    accountTest('the first sighting of a room only records its mentions', (
+      tester,
+      matrix,
+    ) async {
+      FakeMatrixApi.currentApi = firstApi;
+      FakeMatrixApi.client = first;
+      firstApi.api['DELETE']![tagPath] = (_) => {};
+      await AppSettings.unarchiveOnMention.setItem(true);
+      first.rooms.add(archived(first));
+      FakeMatrixApi.calledEndpoints.clear();
+      await tester.runAsync(() => first.handleSync(mention(3)));
+      await settle(tester);
+      expect(FakeMatrixApi.calledEndpoints.keys, isNot(contains(tagPath)));
+      await tester.runAsync(() => first.handleSync(mention(4)));
+      await settle(tester);
+      expect(FakeMatrixApi.calledEndpoints[tagPath], hasLength(1));
+      return matrix;
+    });
+
+    accountTest('off by default: the same mention changes nothing', (
+      tester,
+      matrix,
+    ) async {
+      FakeMatrixApi.currentApi = firstApi;
+      FakeMatrixApi.client = first;
+      firstApi.api['DELETE']![tagPath] = (_) => {};
+      first.rooms.add(archived(first));
+      FakeMatrixApi.calledEndpoints.clear();
+      await tester.runAsync(() => first.handleSync(mention(1)));
+      await tester.pump();
+      expect(FakeMatrixApi.calledEndpoints.keys, isNot(contains(tagPath)));
+      return matrix;
+    });
+
+    accountTest('a logged out account stops listening', (tester, matrix) async {
+      FakeMatrixApi.currentApi = firstApi;
+      FakeMatrixApi.client = first;
+      firstApi.api['DELETE']![tagPath] = (_) => {};
+      await AppSettings.unarchiveOnMention.setItem(true);
+      expect(
+        matrix.onUnarchiveSub.keys,
+        containsAll([first.clientName, second.clientName]),
+      );
+      FakeMatrixApi.currentApi = secondApi;
+      FakeMatrixApi.client = second;
+      secondApi.api['DELETE']![tagPath] = (_) => {};
+      second.rooms.add(archived(second));
+      await tester.runAsync(() => second.handleSync(mention(0)));
+      second.onLoginStateChanged.add(LoginState.loggedOut);
+      await tester.pump();
+      expect(matrix.onUnarchiveSub.keys, [first.clientName]);
+      FakeMatrixApi.calledEndpoints.clear();
+      await tester.runAsync(() => second.handleSync(mention(1)));
+      await settle(tester);
+      expect(
+        FakeMatrixApi.calledEndpoints.keys,
+        isNot(contains(tagPath)),
+        reason: 'the subscription of a logged out account is cancelled',
+      );
       return matrix;
     });
   });

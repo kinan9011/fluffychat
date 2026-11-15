@@ -3110,5 +3110,59 @@
     "@muted": {
         "type": "String",
         "placeholders": {}
+    },
+    "peek": "Peek",
+    "@peek": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "peekNotice": "Peeking: {name} won't see that you read this",
+    "@peekNotice": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "leaveChat": "Leave chat",
+    "@leaveChat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "draftPrefix": "Draft:",
+    "@draftPrefix": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "keyBackupBannerTitle": "Back up your encryption keys",
+    "@keyBackupBannerTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "keyBackupBannerSubtitle": "So you can read old messages on new devices",
+    "@keyBackupBannerSubtitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "setUp": "Set up",
+    "@setUp": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "closeKeyBackupReminder": "Close key backup reminder",
+    "@closeKeyBackupReminder": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unarchiveOnMention": "Unarchive a chat when someone mentions me",
+    "@unarchiveOnMention": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unarchiveOnMentionDescription": "Off: archived chats stay archived.",
+    "@unarchiveOnMentionDescription": {
+        "type": "String",
+        "placeholders": {}
     }
 }

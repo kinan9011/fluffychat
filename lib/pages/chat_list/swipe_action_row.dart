@@ -8,20 +8,26 @@ import 'dart:ui';
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat_list/peek_sheet.dart';
+import 'package:fluffychat/utils/chat_list/peek_menu.dart';
 import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatRowActions {
   final Future<void> Function(String roomId, SwipeAction action) run;
   final void Function(String roomId, BuildContext context) more;
+  final void Function(String roomId, BuildContext context) peek;
   final ValueNotifier<String?> openRow;
 
   const ChatRowActions({
     required this.run,
     required this.more,
+    required this.peek,
     required this.openRow,
   });
 
@@ -29,23 +35,65 @@ class ChatRowActions {
     BuildContext context,
     ValueNotifier<String?> openRow,
     void Function(Room room, BuildContext rowContext) more,
+    void Function(Room room) leave,
   ) => ChatRowActions(
     openRow: openRow,
-    run: (roomId, action) async {
-      await showFutureLoadingDialog(
-        context: context,
-        future: () => runSwipeAction(
-          Matrix.of(context).client,
-          roomId,
-          action,
-          publicReceipts: AppSettings.sendPublicReadReceipts.value,
-        ),
-      );
-    },
+    run: (roomId, action) =>
+        _runRowAction(context, Matrix.of(context).client, roomId, action),
     more: (roomId, rowContext) {
       final room = Matrix.of(context).client.getRoomById(roomId);
-      if (room != null) more(room, rowContext);
+      if (room != null && rowContext.mounted) more(room, rowContext);
     },
+    peek: (roomId, rowContext) {
+      final room = Matrix.of(context).client.getRoomById(roomId);
+      if (room == null || !room.canSwipe) return;
+      showPeek(
+        rowContext,
+        room,
+        onOpenChat: () {
+          if (context.mounted) context.go('/rooms/${room.id}');
+        },
+        onSelect: (item, shown) {
+          if (!context.mounted || !peekStillShown(room, item, shown)) return;
+          switch (item) {
+            case PeekMenuItem.toggleRead:
+              _runRowAction(
+                context,
+                room.client,
+                room.id,
+                SwipeAction.toggleRead,
+              );
+            case PeekMenuItem.pin:
+              _runRowAction(context, room.client, room.id, SwipeAction.pin);
+            case PeekMenuItem.mute:
+              _runRowAction(context, room.client, room.id, SwipeAction.mute);
+            case PeekMenuItem.archive:
+              _runRowAction(context, room.client, room.id, SwipeAction.archive);
+            case PeekMenuItem.leave:
+              leave(room);
+            case PeekMenuItem.more:
+              if (rowContext.mounted) more(room, rowContext);
+          }
+        },
+      );
+    },
+  );
+}
+
+Future<void> _runRowAction(
+  BuildContext context,
+  Client client,
+  String roomId,
+  SwipeAction action,
+) async {
+  await showFutureLoadingDialog(
+    context: context,
+    future: () => runSwipeAction(
+      client,
+      roomId,
+      action,
+      publicReceipts: AppSettings.sendPublicReadReceipts.value,
+    ),
   );
 }
 

@@ -15,6 +15,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_top_bar.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/folder_tab_actions.dart';
+import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_switcher.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
@@ -22,6 +23,8 @@ import 'package:fluffychat/utils/chat_list/folder_filter.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
 import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
+import 'package:fluffychat/utils/draft_store.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
@@ -76,6 +79,8 @@ class ChatListViewBody extends StatelessWidget {
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
     final l10n = L10n.of(context);
+    final matrix = Matrix.of(context);
+    final drafts = DraftStore(matrix.store);
     return ListenableBuilder(
       listenable: Listenable.merge([
         AppSettings.spaceNavigation.listenable,
@@ -101,6 +106,13 @@ class ChatListViewBody extends StatelessWidget {
             spaces: spaceModel,
             userFolders: userFolders,
             hideRoomsInSpaces: AppSettings.hideRoomsInSpaces.value,
+          );
+          // Drafts are stored by room id only, so a draft typed as another
+          // account must not show up in this account's list.
+          bool sharedWithOtherAccount(Room room) => matrix.widget.clients.any(
+            (other) =>
+                !identical(other, client) &&
+                other.getRoomById(room.id)?.membership == Membership.join,
           );
           final scope = controller.scope;
           final items = FolderFilter.tabs(
@@ -193,6 +205,10 @@ class ChatListViewBody extends StatelessWidget {
                               showUserFolderTabMenu(context, client, folderId);
                             },
                           ),
+                        KeyBackupBanner(
+                          key: ValueKey(client.clientName),
+                          client: client,
+                        ),
                       ],
                     ),
                   ),
@@ -343,9 +359,14 @@ class ChatListViewBody extends StatelessWidget {
                         key: ValueKey('chat_list_item_${room.id}'),
                         filter: filter,
                         actions: controller.rowActions,
+                        drafts: sharedWithOtherAccount(room) ? null : drafts,
                         onTap: () => controller.onChatTap(room),
                         onLongPress: (context) =>
                             controller.chatContextAction(room, context, space),
+                        onPeek: room.canSwipe
+                            ? (context) =>
+                                  controller.rowActions.peek(room.id, context)
+                            : null,
                         activeChat: controller.activeChat == room.id,
                       );
                     },

@@ -9,6 +9,7 @@ import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -474,6 +475,94 @@ void main() {
     await settle(tester);
     expect(find.text('Delete folder'), findsOneWidget);
     await finish(tester);
+  });
+
+  group('the tab menu keeps working (W03-2 open question)', () {
+    Future<void> openFamily(WidgetTester tester) async {
+      first.rooms.add(testSpaceChild(first, '!foa:x'));
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!foa:x'], types: []),
+      ]);
+      FakeMatrixApi.currentApi = apiFirst;
+      await pumpAt(tester, '/rooms');
+      await tester.ensureVisible(find.text('Family'));
+    }
+
+    int barriers() => find.byType(ModalBarrier).evaluate().length;
+
+    testWidgets('a sync that rebuilds the tabs during the press does not '
+        'cancel it', (tester) async {
+      await openFamily(tester);
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('Family')),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.runAsync(
+        () => first.handleSync(
+          SyncUpdate(
+            nextBatch: 'press',
+            rooms: RoomsUpdate(
+              join: {
+                '!foa:x': JoinedRoomUpdate(
+                  unreadNotifications: UnreadNotificationCounts(
+                    notificationCount: 3,
+                  ),
+                ),
+              },
+            ),
+          ),
+        ),
+      );
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await gesture.up();
+      await settle(tester);
+      expect(find.text('Delete folder'), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('the real way back (Back twice, Chats tab) leaves no overlay '
+        'and the second press works', (tester) async {
+      await openFamily(tester);
+      final baseline = barriers();
+      await tester.longPress(find.text('Family'));
+      await settle(tester);
+      await tester.tap(find.text('Edit folder'));
+      await settle(tester);
+      await tester.enterText(find.byKey(const ValueKey('folder_name')), 'Kin');
+      await tester.tap(find.byKey(const ValueKey('save_folder')));
+      await settle(tester);
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byTooltip('Back').hitTestable());
+        await settle(tester);
+      }
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppBottomBar),
+          matching: find.text('Chats'),
+        ),
+      );
+      await settle(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(location(), '/rooms');
+      expect(barriers(), baseline, reason: 'no overlay is left behind');
+      await tester.longPress(find.text('Kin'));
+      await settle(tester);
+      expect(find.text('Delete folder'), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('a press right after selecting the tab (it scrolls into '
+        'view) still opens the menu', (tester) async {
+      await openFamily(tester);
+      await tester.tap(find.text('Family'));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.longPress(find.text('Family'));
+      await settle(tester);
+      expect(find.text('Delete folder'), findsOneWidget);
+      await finish(tester);
+    });
   });
 
   testWidgets('removing the selected folder falls back to All chats', (

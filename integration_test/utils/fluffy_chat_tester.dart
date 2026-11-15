@@ -92,12 +92,23 @@ extension type FluffyChatTester(WidgetTester tester) {
     if (pumpAndSettle) await tester.pumpAndSettle();
   }
 
+  /// Opening a menu or sheet on a long press makes the Navigator cancel the
+  /// pressed pointer. The live binding drops that cancel unless device events
+  /// propagate, which leaves the pressed widget's recognizers stuck on the old
+  /// pointer (every later tap or long press on it is dead). A phone delivers
+  /// the cancel, so let it through here.
   Future<void> longPressOn(Object object, {int? index}) async {
     final finder = await _ensureVisible(object, index: index);
 
     _print('👆 Long pressing on "$object"');
-    await tester.longPress(finder);
-    await tester.pumpAndSettle();
+    final binding = tester.binding;
+    binding.shouldPropagateDevicePointerEvents = true;
+    try {
+      await tester.longPress(finder);
+      await tester.pumpAndSettle();
+    } finally {
+      binding.shouldPropagateDevicePointerEvents = false;
+    }
   }
 
   Future<void> goBack() => tapOn(find.byTooltip('Back'));

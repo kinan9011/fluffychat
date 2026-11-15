@@ -21,6 +21,7 @@ class SynapseUser {
     String path, {
     String? token,
     Map<String, Object?>? body,
+    bool allow404 = false,
   }) async {
     final client = HttpClient();
     try {
@@ -33,6 +34,7 @@ class SynapseUser {
       if (method != 'GET') request.write(jsonEncode(body ?? {}));
       final response = await request.close();
       final text = await response.transform(utf8.decoder).join();
+      if (allow404 && response.statusCode == 404) return null;
       if (response.statusCode >= 300) {
         throw Exception('$method $path failed: ${response.statusCode}');
       }
@@ -78,13 +80,56 @@ class SynapseUser {
   Future<void> join(String roomId) =>
       _request('POST', '/join/${Uri.encodeComponent(roomId)}', token: _token);
 
-  Future<void> sendText(String roomId, String text) => _request(
-    'PUT',
-    '/rooms/${Uri.encodeComponent(roomId)}/send/m.room.message/'
-        '${DateTime.now().microsecondsSinceEpoch}',
+  Future<String> sendText(String roomId, String text) async {
+    final json =
+        await _request(
+              'PUT',
+              '/rooms/${Uri.encodeComponent(roomId)}/send/m.room.message/'
+                  '${DateTime.now().microsecondsSinceEpoch}',
+              token: _token,
+              body: {'msgtype': 'm.text', 'body': text},
+            )
+            as Map<String, Object?>;
+    return json['event_id']! as String;
+  }
+
+  Future<Object?> getRoomAccountData(String roomId, String type) => _request(
+    'GET',
+    '/user/${Uri.encodeComponent(userId)}/rooms/${Uri.encodeComponent(roomId)}'
+        '/account_data/$type',
     token: _token,
-    body: {'msgtype': 'm.text', 'body': text},
+    allow404: true,
   );
+
+  /// Users with a read receipt (public or own private) on [eventId], as the
+  /// homeserver reports them to this user in a fresh initial sync.
+  Future<Set<String>> receiptUsers(String roomId, String eventId) async {
+    // Synapse caches identical sync requests for a while: vary the filter.
+    final limit = 1 + DateTime.now().microsecondsSinceEpoch % 9973;
+    final filter = jsonEncode({
+      'room': {
+        'timeline': {'limit': limit},
+      },
+    });
+    final json =
+        await _request(
+              'GET',
+              '/sync?timeout=0&filter=${Uri.encodeComponent(filter)}',
+              token: _token,
+            )
+            as Map<String, Object?>;
+    final rooms = (json['rooms'] as Map?)?['join'] as Map?;
+    final events = (rooms?[roomId] as Map?)?['ephemeral'] as Map?;
+    final users = <String>{};
+    for (final event in (events?['events'] as List? ?? const [])) {
+      if (event is! Map || event['type'] != 'm.receipt') continue;
+      final byType = (event['content'] as Map?)?[eventId] as Map?;
+      for (final receipt in (byType ?? const {}).values) {
+        users.addAll(((receipt as Map).keys).cast<String>());
+      }
+    }
+    return users;
+  }
 
   Future<Object?> getAccountData(String type) => _request(
     'GET',

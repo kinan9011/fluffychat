@@ -6,11 +6,14 @@
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/utils/chat_list/chat_row_model.dart';
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/widgets/avatar.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/golden.dart';
@@ -53,8 +56,8 @@ void main() {
     tags: tags,
   );
 
-  Widget row(Room room, {bool active = false}) =>
-      ChatListItem(room, activeChat: active, onTap: () {});
+  Widget row(Room room, {bool active = false, DraftStore? drafts}) =>
+      ChatListItem(room, activeChat: active, drafts: drafts, onTap: () {});
 
   Future<void> pumpRow(
     WidgetTester tester,
@@ -62,6 +65,7 @@ void main() {
     bool rtl = false,
     double textScale = 1,
     bool active = false,
+    DraftStore? drafts,
   }) => pumpGoldenWidget(
     tester,
     Builder(
@@ -71,7 +75,7 @@ void main() {
         ).copyWith(textScaler: TextScaler.linear(textScale)),
         child: Align(
           alignment: Alignment.topCenter,
-          child: row(room, active: active),
+          child: row(room, active: active, drafts: drafts),
         ),
       ),
     ),
@@ -79,6 +83,11 @@ void main() {
     locale: rtl ? const Locale('ar') : const Locale('en'),
     size: const Size(400, 600),
   ).then((_) => tester.pump(const Duration(seconds: 35)));
+
+  Future<DraftStore> draftStore(Map<String, Object> values) async {
+    SharedPreferences.setMockInitialValues(values);
+    return DraftStore(await SharedPreferences.getInstance());
+  }
 
   String rowLabel(WidgetTester tester) => tester
       .getSemantics(
@@ -258,6 +267,14 @@ void main() {
     expect(labelStarting(tester, 'Invited'), contains('Unread'));
     await pumpRow(tester, anna(unread: 3));
     expect(labelStarting(tester, 'Anna'), isNot(contains(', Unread')));
+    handle.dispose();
+  });
+
+  testWidgets('semantics announce the draft', (tester) async {
+    final handle = await semanticsOn(tester);
+    final drafts = await draftStore({'draft_!anna:example.org': 'hello'});
+    await pumpRow(tester, anna(unread: 3), drafts: drafts);
+    expect(rowLabel(tester), contains('last message Draft: hello'));
     handle.dispose();
   });
 
@@ -454,6 +471,111 @@ void main() {
     expect(tickFor(event(EventTypes.Sticker), own), RowTick.sent);
   });
 
+  Color? runColor(WidgetTester tester, String text) {
+    final rich = tester.widget<RichText>(
+      find.byWidgetPredicate(
+        (w) => w is RichText && w.text.toPlainText().startsWith(text),
+      ),
+    );
+    Color? color;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text?.startsWith(text) == true) {
+        color = span.style?.color;
+      }
+      return true;
+    });
+    return color;
+  }
+
+  group('draft (W03-3)', () {
+    const draftKey = 'draft_!anna:example.org';
+
+    testWidgets('a draft shows Draft: in red, then the text', (tester) async {
+      final drafts = await draftStore({draftKey: 'see you  at\n8'});
+      await pumpRow(tester, anna(), drafts: drafts);
+      final tokens = AppTokens.of(tester.element(find.byType(ChatListItem)));
+      expect(find.textContaining('Draft: see you at 8'), findsOneWidget);
+      expect(runColor(tester, 'Draft: '), tokens.red);
+      expect(find.textContaining('Hi'), findsNothing);
+    });
+
+    testWidgets('the active row hides its draft (it is in the composer)', (
+      tester,
+    ) async {
+      final drafts = await draftStore({draftKey: 'x'});
+      await pumpRow(tester, anna(), drafts: drafts, active: true);
+      expect(find.textContaining('Draft:'), findsNothing);
+      expect(find.textContaining('Hi'), findsOneWidget);
+    });
+
+    testWidgets('on hover the prefix switches to the text colour', (
+      tester,
+    ) async {
+      final drafts = await draftStore({draftKey: 'x'});
+      await pumpRow(tester, anna(), drafts: drafts);
+      final tokens = AppTokens.of(tester.element(find.byType(ChatListItem)));
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(tester.getCenter(find.byType(ChatListItem)));
+      await tester.pump();
+      expect(runColor(tester, 'Draft: '), tokens.fg);
+      await mouse.moveTo(const Offset(399, 599));
+      await tester.pump();
+      expect(runColor(tester, 'Draft: '), tokens.red);
+    });
+
+    testWidgets('a blank draft and no draft show the last message', (
+      tester,
+    ) async {
+      final drafts = await draftStore({draftKey: '  \n '});
+      await pumpRow(tester, anna(), drafts: drafts);
+      expect(find.textContaining('Draft:'), findsNothing);
+      expect(find.textContaining('Hi'), findsOneWidget);
+    });
+
+    testWidgets('typing beats the draft', (tester) async {
+      final drafts = await draftStore({draftKey: 'x'});
+      final room = anna();
+      room.ephemerals['m.typing'] = BasicEvent(
+        type: 'm.typing',
+        content: {
+          'user_ids': ['@anna:example.org'],
+        },
+      );
+      await pumpRow(tester, room, drafts: drafts);
+      expect(find.textContaining('Draft:'), findsNothing);
+    });
+
+    testWidgets('a long draft is cut to 120 characters', (tester) async {
+      final drafts = await draftStore({draftKey: 'a' * 300});
+      await pumpRow(tester, anna(), drafts: drafts);
+      expect(find.textContaining('Draft: ${'a' * 120}'), findsOneWidget);
+      expect(find.textContaining('a' * 121), findsNothing);
+    });
+
+    testWidgets('a change of the draft updates the row without a sync', (
+      tester,
+    ) async {
+      final drafts = await draftStore({});
+      await pumpRow(tester, anna(), drafts: drafts);
+      expect(find.textContaining('Draft:'), findsNothing);
+      await drafts.write('!anna:example.org', 'later');
+      await tester.pump();
+      expect(find.textContaining('Draft: later'), findsOneWidget);
+      await drafts.remove('!anna:example.org');
+      await tester.pump();
+      expect(find.textContaining('Draft:'), findsNothing);
+    });
+
+    testWidgets('RTL keeps the draft readable', (tester) async {
+      final drafts = await draftStore({draftKey: 'مرحبا'});
+      await pumpRow(tester, anna(), drafts: drafts);
+      await pumpRow(tester, anna(), drafts: drafts, rtl: true);
+      expect(find.textContaining('مرحبا'), findsOneWidget);
+    });
+  });
+
   testWidgets('goldens: normal, unread, muted, mention, pinned, active', (
     tester,
   ) async {
@@ -480,8 +602,10 @@ void main() {
       named('Eve', unread: 120),
       named('Finn'),
       named('Gus', unread: 2),
+      named('Hal'),
     ];
     muteRoom('!Gus:example.org');
+    final drafts = await draftStore({'draft_!Hal:example.org': 'On my way'});
     final column = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -489,6 +613,7 @@ void main() {
           ChatListItem(
             room,
             activeChat: room.id.contains('Finn'),
+            drafts: drafts,
             onTap: () {},
           ),
       ],
@@ -498,7 +623,7 @@ void main() {
       tester,
       'chat_row',
       Align(alignment: Alignment.topCenter, child: column),
-      size: const Size(400, 620),
+      size: const Size(400, 700),
     );
   });
 }

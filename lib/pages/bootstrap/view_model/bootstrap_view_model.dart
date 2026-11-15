@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/crypto_identity.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -39,6 +40,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     newPassphraseController.dispose();
     repeatPassphraseController.dispose();
     devicesScrollController.dispose();
+    cryptoIdentityRevision.value++;
     super.dispose();
   }
 

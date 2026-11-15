@@ -26,6 +26,7 @@ class AppBottomBar extends StatelessWidget {
   final ValueChanged<AppTab> onSelect;
   final Widget profileAvatar;
   final int chatsBadge;
+  final FocusNode? selectedFocus;
 
   const AppBottomBar({
     required this.tabs,
@@ -33,6 +34,7 @@ class AppBottomBar extends StatelessWidget {
     required this.onSelect,
     required this.profileAvatar,
     this.chatsBadge = 0,
+    this.selectedFocus,
     super.key,
   });
 
@@ -89,6 +91,7 @@ class AppBottomBar extends StatelessWidget {
                             onTap: () => onSelect(tab),
                             profileAvatar: profileAvatar,
                             badge: tab == AppTab.chats ? chatsBadge : 0,
+                            focusNode: tab == selected ? selectedFocus : null,
                           ),
                         ),
                     ],
@@ -109,6 +112,7 @@ class _BarItem extends StatelessWidget {
   final VoidCallback onTap;
   final Widget profileAvatar;
   final int badge;
+  final FocusNode? focusNode;
 
   const _BarItem({
     required this.tab,
@@ -116,6 +120,7 @@ class _BarItem extends StatelessWidget {
     required this.onTap,
     required this.profileAvatar,
     required this.badge,
+    required this.focusNode,
   });
 
   @override
@@ -136,6 +141,7 @@ class _BarItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(29),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
+          focusNode: focusNode,
           onTap: onTap,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

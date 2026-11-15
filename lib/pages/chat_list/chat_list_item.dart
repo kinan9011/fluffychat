@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat_list/active_call_indicator.dart';
 import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
 import 'package:fluffychat/utils/chat_list/chat_row_model.dart';
 import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -31,20 +32,24 @@ class ChatListItem extends StatelessWidget {
   final Room? space;
   final bool activeChat;
   final void Function(BuildContext context)? onLongPress;
+  final void Function(BuildContext context)? onPeek;
   final void Function()? onForget;
   final void Function() onTap;
   final String? filter;
   final ChatRowActions? actions;
+  final DraftStore? drafts;
 
   const ChatListItem(
     this.room, {
     this.activeChat = false,
     required this.onTap,
     this.onLongPress,
+    this.onPeek,
     this.onForget,
     this.filter,
     this.space,
     this.actions,
+    this.drafts,
     super.key,
   });
 
@@ -80,30 +85,39 @@ class ChatListItem extends StatelessWidget {
             : RowPreview.fallback(lastEvent, locals, withSenderPrefix),
         builder: (context, snapshot) {
           final preview = _previewText(context, snapshot.data);
-          final row = _RowBody(
-            room: room,
-            space: space,
-            displayname: displayname,
-            directChatMatrixId: directChatMatrixId,
-            activeChat: activeChat,
-            preview: snapshot.data,
-            previewText: preview,
-            onTap: onTap,
-            onLongPress: onLongPress,
-            onForget: onForget,
-            actions: actions,
-          );
           final rowActions = actions;
-          if (rowActions == null || !room.canSwipe) return row;
-          return SwipeActionRow(
-            key: ValueKey('swipe_${room.id}'),
-            roomId: room.id,
-            actions: rowActions,
-            unread: room.isUnread,
-            muted: room.pushRuleState != PushRuleState.notify,
-            pinned: room.isFavourite,
-            archived: room.isArchivedChat,
-            child: row,
+          return ValueListenableBuilder<int>(
+            valueListenable: DraftStore.revision,
+            builder: (context, _, _) {
+              final row = _RowBody(
+                room: room,
+                space: space,
+                displayname: displayname,
+                directChatMatrixId: directChatMatrixId,
+                activeChat: activeChat,
+                preview: snapshot.data,
+                previewText: preview,
+                draft: activeChat || room.membership != Membership.join
+                    ? null
+                    : drafts?.readForDisplay(room.id),
+                onTap: onTap,
+                onLongPress: onLongPress,
+                onPeek: onPeek,
+                onForget: onForget,
+                actions: actions,
+              );
+              if (rowActions == null || !room.canSwipe) return row;
+              return SwipeActionRow(
+                key: ValueKey('swipe_${room.id}'),
+                roomId: room.id,
+                actions: rowActions,
+                unread: room.isUnread,
+                muted: room.pushRuleState != PushRuleState.notify,
+                pinned: room.isFavourite,
+                archived: room.isArchivedChat,
+                child: row,
+              );
+            },
           );
         },
       ),
@@ -123,10 +137,6 @@ class ChatListItem extends StatelessWidget {
     }
     return preview?.text ?? l10n.noMessagesYet;
   }
-}
-
-extension on Room {
-  bool get canSwipe => membership == Membership.join && !isSpace;
 }
 
 class RowPreview {
@@ -183,8 +193,10 @@ class _RowBody extends StatelessWidget {
   final bool activeChat;
   final RowPreview? preview;
   final String previewText;
+  final String? draft;
   final void Function() onTap;
   final void Function(BuildContext context)? onLongPress;
+  final void Function(BuildContext context)? onPeek;
   final void Function()? onForget;
   final ChatRowActions? actions;
 
@@ -196,8 +208,10 @@ class _RowBody extends StatelessWidget {
     required this.activeChat,
     required this.preview,
     required this.previewText,
+    required this.draft,
     required this.onTap,
     required this.onLongPress,
+    required this.onPeek,
     required this.onForget,
     required this.actions,
   });
@@ -219,7 +233,9 @@ class _RowBody extends StatelessWidget {
       l10n,
       name: displayname,
       unread: room.notificationCount,
-      preview: previewText,
+      preview: draft == null
+          ? previewText
+          : '${l10n.draftPrefix} ${DraftStore.preview(draft!)}',
       time: time,
       pinned: pinned,
       muted: isMuted,
@@ -241,6 +257,8 @@ class _RowBody extends StatelessWidget {
           label: room.isUnread ? l10n.markAsRead : l10n.markAsUnread,
         ): () =>
             actions.run(room.id, SwipeAction.toggleRead),
+        CustomSemanticsAction(label: l10n.peek): () =>
+            actions.peek(room.id, context),
         CustomSemanticsAction(label: l10n.moreOptions): () =>
             actions.more(room.id, context),
       },
@@ -264,7 +282,7 @@ class _RowBody extends StatelessWidget {
             color: background,
             child: InkWell(
               onTap: onTap,
-              onLongPress: () => onLongPress?.call(context),
+              onLongPress: () => (onPeek ?? onLongPress)?.call(context),
               onSecondaryTapUp: (_) => onLongPress?.call(context),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
@@ -349,11 +367,12 @@ class _RowBody extends StatelessWidget {
                                     typingText: typingText,
                                     preview: preview,
                                     previewText: previewText,
+                                    draft: draft,
+                                    hovered: hovered,
                                     redacted: lastEvent?.redacted == true,
                                     isThread:
                                         lastEvent?.relationshipType ==
                                         RelationshipTypes.thread,
-                                    active: activeChat,
                                   ),
                                 ),
                                 _Badges(room: room, muted: isMuted),
@@ -512,17 +531,19 @@ class _Line2 extends StatelessWidget {
   final String typingText;
   final RowPreview? preview;
   final String previewText;
+  final String? draft;
+  final bool hovered;
   final bool redacted;
   final bool isThread;
-  final bool active;
 
   const _Line2({
     required this.typingText,
     required this.preview,
     required this.previewText,
+    required this.draft,
+    required this.hovered,
     required this.redacted,
     required this.isThread,
-    required this.active,
   });
 
   @override
@@ -543,6 +564,23 @@ class _Line2 extends StatelessWidget {
             ),
           ),
         ],
+      );
+    }
+    final draft = this.draft;
+    if (draft != null) {
+      return Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '${L10n.of(context).draftPrefix} ',
+              style: TextStyle(color: hovered ? tokens.fg : tokens.red),
+            ),
+            TextSpan(text: DraftStore.preview(draft)),
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: style,
       );
     }
     final prefix = preview?.prefix ?? '';

@@ -18,6 +18,7 @@ class AppNavRail extends StatelessWidget {
   final Widget profileAvatar;
   final int accountCount;
   final int chatsBadge;
+  final FocusNode? selectedFocus;
 
   const AppNavRail({
     required this.tabs,
@@ -26,6 +27,7 @@ class AppNavRail extends StatelessWidget {
     required this.profileAvatar,
     this.accountCount = 1,
     this.chatsBadge = 0,
+    this.selectedFocus,
     super.key,
   });
 
@@ -51,6 +53,9 @@ class AppNavRail extends StatelessWidget {
                     label: AppTab.profile.label(l10n),
                     selected: selected == AppTab.profile,
                     ring: true,
+                    focusNode: selected == AppTab.profile
+                        ? selectedFocus
+                        : null,
                     onTap: () => onSelect(AppTab.profile),
                     child: Badge(
                       isLabelVisible: accountCount > 1,
@@ -69,6 +74,7 @@ class AppNavRail extends StatelessWidget {
                           l10n,
                         ),
                         selected: tab == selected,
+                        focusNode: tab == selected ? selectedFocus : null,
                         onTap: () => onSelect(tab),
                         child: ChatsBadge(
                           count: tab == AppTab.chats ? chatsBadge : 0,
@@ -93,6 +99,7 @@ class _RailButton extends StatelessWidget {
   final String label;
   final bool selected;
   final bool ring;
+  final FocusNode? focusNode;
   final VoidCallback onTap;
   final Widget child;
 
@@ -102,6 +109,7 @@ class _RailButton extends StatelessWidget {
     required this.onTap,
     required this.child,
     this.ring = false,
+    this.focusNode,
   });
 
   @override
@@ -127,6 +135,7 @@ class _RailButton extends StatelessWidget {
               : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
+            focusNode: focusNode,
             onTap: onTap,
             child: SizedBox.square(dimension: 48, child: Center(child: child)),
           ),
@@ -142,6 +151,7 @@ class AppTabStrip extends StatelessWidget {
   final ValueChanged<AppTab> onSelect;
   final Widget profileAvatar;
   final int chatsBadge;
+  final FocusNode? selectedFocus;
 
   const AppTabStrip({
     required this.tabs,
@@ -149,6 +159,7 @@ class AppTabStrip extends StatelessWidget {
     required this.onSelect,
     required this.profileAvatar,
     this.chatsBadge = 0,
+    this.selectedFocus,
     super.key,
   });
 
@@ -189,6 +200,7 @@ class AppTabStrip extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
+                            focusNode: tab == selected ? selectedFocus : null,
                             onTap: () => onSelect(tab),
                             child: SizedBox(
                               height: 44,

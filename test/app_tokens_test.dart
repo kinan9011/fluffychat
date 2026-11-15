@@ -402,6 +402,8 @@ void main() {
             'white/mbad': (Colors.white, t.mbad),
             'onOkS/okS': (t.onOkS, t.okS),
             'red/bg': (t.red, t.bg),
+            'fg/warnS': (t.fg, t.warnS),
+            'mut/warnS': (t.mut, t.warnS),
             'white/avatar': (Colors.white, avatarColorForHue(hue.toDouble())),
           };
           for (final entry in pairs.entries) {

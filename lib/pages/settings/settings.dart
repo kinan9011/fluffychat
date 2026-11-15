@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -15,7 +16,6 @@ import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../widgets/matrix.dart';
@@ -151,25 +151,9 @@ class SettingsController extends State<Settings> {
     super.dispose();
   }
 
-  static const defaultLoadCryptoIdentityConnected =
-      _loadCryptoIdentityConnected;
-
-  @visibleForTesting
-  static Future<bool?> Function(Client client) loadCryptoIdentityConnected =
-      defaultLoadCryptoIdentityConnected;
-
-  static Future<bool?> _loadCryptoIdentityConnected(Client client) async {
-    if (!client.encryptionEnabled || !client.isLogged()) return null;
-    await client.accountDataLoading;
-    await client.userDeviceKeysLoading;
-    if (client.prevBatch == null) await client.onSync.stream.first;
-    final state = await client.getCryptoIdentityState();
-    return state.initialized && state.connected;
-  }
-
   Future<void> checkBootstrap() async {
     final client = Matrix.of(context).client;
-    final connected = await loadCryptoIdentityConnected(client);
+    final connected = await crypto_identity.cryptoIdentityConnected(client);
     if (!mounted || !identical(Matrix.of(context).client, client)) return;
     setState(() => cryptoIdentityConnected = connected);
   }
@@ -198,7 +182,10 @@ class SettingsController extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    profileFuture ??= client.getProfileFromUserId(client.userID!);
+    final userId = client.userID;
+    if (userId != null) {
+      profileFuture ??= client.getProfileFromUserId(userId);
+    }
     return SettingsView(this);
   }
 }

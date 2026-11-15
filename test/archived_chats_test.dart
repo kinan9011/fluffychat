@@ -5,10 +5,13 @@
 
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
+import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -48,6 +51,7 @@ void main() {
   });
 
   tearDown(() {
+    KeyBackupBanner.resetForTest();
     AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
     client.rooms.removeWhere((room) => room.id.startsWith('!ar'));
   });
@@ -235,11 +239,36 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets(
+    'the key backup banner is on the list, not in search or archive',
+    (tester) async {
+      KeyBackupBanner.resetForTest();
+      crypto_identity.loadCryptoIdentityConnected = (_) async => false;
+      addTearDown(
+        () => crypto_identity.loadCryptoIdentityConnected = noCryptoIdentity,
+      );
+      chat('!ar1:x', 'Anna', tags: _archived);
+      chat('!arn:x', 'Ben');
+      await pumpList(tester);
+      expect(find.text('Back up your encryption keys'), findsOneWidget);
+      await tester.tap(find.byTooltip('Search'));
+      await settle(tester);
+      expect(find.text('Back up your encryption keys'), findsNothing);
+      await tester.tap(find.byTooltip('Cancel'));
+      await settle(tester);
+      expect(find.text('Back up your encryption keys'), findsOneWidget);
+      await tester.tap(archivedRow);
+      await settle(tester);
+      expect(find.text('Back up your encryption keys'), findsNothing);
+      await finish(tester);
+    },
+  );
+
   testWidgets('the context menu archives a chat', (tester) async {
     chat('!arn:x', 'Ben');
     FakeMatrixApi.calledEndpoints.clear();
     await pumpList(tester);
-    await tester.longPress(item('!arn:x'));
+    await tester.tap(item('!arn:x'), buttons: kSecondaryButton);
     await settle(tester);
     await tester.tap(find.text('Archive'));
     await settle(tester);
