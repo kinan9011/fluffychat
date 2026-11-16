@@ -13,11 +13,30 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/golden.dart';
 import 'utils/test_client.dart';
+
+class _MemoryDatabase implements DatabaseApi {
+  final _objects = <String, Map<String, Object?>>{};
+
+  @override
+  Future<void> cacheCustomObject(
+    String cacheKey,
+    Map<String, Object?> object,
+  ) async => _objects[cacheKey] = object;
+
+  @override
+  Future<({Map<String, Object?> content, DateTime savedAt})?>
+  getCustomCacheObject(String cacheKey) async {
+    final content = _objects[cacheKey];
+    return content == null ? null : (content: content, savedAt: DateTime.now());
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
 
 void main() {
   late Client client;
@@ -85,8 +104,12 @@ void main() {
   ).then((_) => tester.pump(const Duration(seconds: 35)));
 
   Future<DraftStore> draftStore(Map<String, Object> values) async {
-    SharedPreferences.setMockInitialValues(values);
-    return DraftStore(await SharedPreferences.getInstance());
+    final database = _MemoryDatabase();
+    final store = DraftStore.forTesting(() => database);
+    for (final entry in values.entries) {
+      await store.write(entry.key.substring('draft_'.length), '${entry.value}');
+    }
+    return store;
   }
 
   String rowLabel(WidgetTester tester) => tester

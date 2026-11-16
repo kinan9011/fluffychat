@@ -1058,6 +1058,19 @@ void main() {
       ),
     );
 
+    setUp(() {
+      for (final client in [first, second]) {
+        for (final id in ['!drs:x', '!dro:x']) {
+          unawaited(DraftStore.of(client).remove(id));
+        }
+      }
+      unawaited(
+        DraftStore.of(first).write('!drs:x', 'typed as the first account'),
+      );
+      unawaited(DraftStore.of(first).write('!dro:x', 'only in this account'));
+      unawaited(DraftStore.of(second).write('!drs:x', 'typed as the second'));
+    });
+
     tearDown(() {
       for (final client in [first, second]) {
         client.rooms.removeWhere((room) => room.id.startsWith('!dr'));
@@ -1065,22 +1078,23 @@ void main() {
     });
 
     accountTest(
-      'a draft typed as another account is not shown for a shared chat',
+      'a draft is shown only for the account that typed it',
       (tester, matrix) async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('draft_!drs:x', 'typed as the other account');
-        await prefs.setString('draft_!dro:x', 'only in this account');
-        DraftStore.revision.value++;
         await goTo(tester, '/rooms');
         await settle(tester);
         expect(find.text('Solo'), findsOneWidget);
         expect(find.textContaining('only in this account'), findsOneWidget);
         expect(find.text('Shared'), findsOneWidget);
-        expect(find.textContaining('typed as the other account'), findsNothing);
+        expect(
+          find.textContaining('typed as the first account'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('typed as the second'), findsNothing);
         matrix.setActiveClient(second);
         await settle(tester);
         expect(find.text('Shared'), findsOneWidget);
-        expect(find.textContaining('typed as the other account'), findsNothing);
+        expect(find.textContaining('typed as the second'), findsOneWidget);
+        expect(find.textContaining('typed as the first account'), findsNothing);
         return matrix;
       },
       beforePump: () {

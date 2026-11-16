@@ -9,6 +9,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/edit_history_sheet.dart';
 import 'package:fluffychat/pages/chat/encryption_info.dart';
 import 'package:fluffychat/pages/chat/events/message.dart';
 import 'package:fluffychat/pages/chat/message_menu.dart';
@@ -271,6 +272,8 @@ class ChatEventList extends StatelessWidget {
                       animateIn: animateIn,
                       onSwipe: () => controller.replyAction(replyTo: event),
                       onInfoTab: controller.showEventInfo,
+                      onEditHistory: (event) =>
+                          showEditHistorySheet(context, controller, event),
                       onMention: () => controller.sendController.text +=
                           '${event.senderFromMemoryOrFallback.mention} ',
                       highlightMarker:

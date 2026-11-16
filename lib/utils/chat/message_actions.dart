@@ -13,6 +13,7 @@ enum MessageAction {
   unpin,
   forward,
   select,
+  editHistory,
   info,
   report,
   delete,
@@ -28,6 +29,7 @@ class MessageActionContext {
   final bool canPin;
   final bool isPinned;
   final bool canForward;
+  final bool canViewHistory;
   final bool canReport;
   final bool canRedact;
 
@@ -41,6 +43,7 @@ class MessageActionContext {
     this.canPin = false,
     this.isPinned = false,
     this.canForward = false,
+    this.canViewHistory = false,
     this.canReport = false,
     this.canRedact = false,
   });
@@ -57,6 +60,7 @@ List<MessageAction> availableMessageActions(MessageActionContext c) => [
   if (c.canPin) c.isPinned ? MessageAction.unpin : MessageAction.pin,
   if (c.canForward) MessageAction.forward,
   if (c.canSelect) MessageAction.select,
+  if (c.canViewHistory) MessageAction.editHistory,
   MessageAction.info,
   if (c.canReport) MessageAction.report,
   if (c.canRedact) MessageAction.delete,

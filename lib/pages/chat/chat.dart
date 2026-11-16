@@ -14,6 +14,9 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat/composer/attachment_type_bar.dart';
+import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
+import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/start_poll_bottom_sheet.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
@@ -31,6 +34,12 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/ogg_opus_remuxer.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/rich_text/edit_prefill.dart';
+import 'package:fluffychat/utils/rich_text/format_state.dart';
+import 'package:fluffychat/utils/rich_text/html_serializer.dart';
+import 'package:fluffychat/utils/rich_text/outgoing_message.dart';
+import 'package:fluffychat/utils/rich_text/rich_document.dart';
+import 'package:fluffychat/utils/rich_text/send_rich_message.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -87,7 +96,9 @@ class ChatPage extends StatelessWidget {
     }
 
     return ChatPageWithRoom(
-      key: Key('chat_page_${roomId}_${eventId}_$action'),
+      key: Key(
+        'chat_page_${room.client.clientName}_${roomId}_${eventId}_$action',
+      ),
       room: room,
       shareItems: shareItems,
       eventId: eventId,
@@ -282,6 +293,7 @@ class ChatController extends State<ChatPageWithRoom>
   final int _loadHistoryCount = 100;
 
   String pendingText = '';
+  FormatState? pendingFormat;
 
   bool showEmojiPicker = false;
 
@@ -411,10 +423,52 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void _loadDraft() {
-    final draft = DraftStore(Matrix.of(context).store).read(roomId);
-    if (draft != null && draft.isNotEmpty) {
-      sendController.text = draft;
+  /// The draft belongs to the account that opened this page, not to the
+  /// active account (which can change while the page stays) and not to the
+  /// sending account.
+  late final DraftStore _drafts = DraftStore.of(widget.room.client);
+
+  int _composerHash = 0;
+
+  void _scheduleDraft() {
+    _storeInputTimeoutTimer?.cancel();
+    _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
+      if (editEvent != null) return;
+      await _drafts.write(
+        roomId,
+        sendController.text,
+        format: sendController.draftFormat(),
+      );
+    });
+  }
+
+  /// Undo, redo, block and mark changes edit the controller without the text
+  /// field's `onChanged`: keep the send button and the draft in step.
+  void _composerChanged() {
+    final hash = Object.hash(
+      sendController.text,
+      Object.hashAll(sendController.format.ranges),
+    );
+    if (hash == _composerHash) return;
+    _composerHash = hash;
+    final empty = sendController.text.isEmpty;
+    if (_inputTextIsEmpty != empty) {
+      _inputTextIsEmpty = empty;
+      setState(() {});
+    }
+    _scheduleDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    final store = _drafts;
+    await store.ready;
+    if (!mounted || sendController.text.isNotEmpty) return;
+    final draft = store.read(roomId);
+    if (draft != null && draft.text.isNotEmpty) {
+      sendController.resetTo(
+        draft.text,
+        state: FormatState.fromJson(draft.format, draft.text.length),
+      );
     }
   }
 
@@ -485,15 +539,15 @@ class ChatController extends State<ChatPageWithRoom>
         send();
       }
       return KeyEventResult.handled;
-    } else if (evt.logicalKey.keyLabel == 'Enter' && evt is KeyDownEvent) {
-      final currentLineNum =
-          sendController.text
-              .substring(0, sendController.selection.baseOffset)
-              .split('\n')
-              .length -
-          1;
-      final currentLine = sendController.text.split('\n')[currentLineNum];
-
+    } else if (evt.logicalKey.keyLabel == 'Enter' &&
+        evt is KeyDownEvent &&
+        !sendController.format.richIntent &&
+        sendController.selection.isValid) {
+      final caret = sendController.selection.baseOffset;
+      final currentLine = sendController.text
+          .substring(0, caret)
+          .split('\n')
+          .last;
       for (final pattern in [
         '- [ ] ',
         '- [x] ',
@@ -503,15 +557,16 @@ class ChatController extends State<ChatPageWithRoom>
         '* ',
         '+ ',
       ]) {
-        if (currentLine.startsWith(pattern)) {
-          if (currentLine == pattern) {
-            return KeyEventResult.ignored;
-          }
-          sendController.text += '\n$pattern';
-          return KeyEventResult.handled;
-        }
+        if (!currentLine.startsWith(pattern)) continue;
+        if (currentLine == pattern) return KeyEventResult.ignored;
+        sendController.value = sendController.value.copyWith(
+          text: sendController.text.replaceRange(caret, caret, '\n$pattern'),
+          selection: TextSelection.collapsed(
+            offset: caret + 1 + pattern.length,
+          ),
+        );
+        return KeyEventResult.handled;
       }
-
       return KeyEventResult.ignored;
     } else {
       return KeyEventResult.ignored;
@@ -523,6 +578,7 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus = FocusNode(onKeyEvent: _customEnterKeyHandling);
 
     scrollController.addListener(_updateScrollController);
+    sendController.addListener(_composerChanged);
     inputFocus.addListener(_inputFocusListener);
 
     _loadDraft();
@@ -828,6 +884,7 @@ class ChatController extends State<ChatPageWithRoom>
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
     sendController.dispose();
+    composerPanel.dispose();
     scrollController.dispose();
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
@@ -838,7 +895,8 @@ class ChatController extends State<ChatPageWithRoom>
     super.dispose();
   }
 
-  TextEditingController sendController = TextEditingController();
+  final sendController = RichTextEditingController();
+  final composerPanel = ComposerPanelModel();
 
   void setSendingClient(Client c) {
     // first cancel typing with the old sending client
@@ -870,12 +928,31 @@ class ChatController extends State<ChatPageWithRoom>
     final proceed = await showTrustUserInRoomDialog(context, room);
     if (!mounted || !proceed) return;
     if (sendController.text.trim().isEmpty) return;
+    final OutgoingText outgoing;
+    try {
+      outgoing = planOutgoing(
+        sendController.text,
+        sendController.format,
+        edit: editEvent != null,
+        encrypted: room.encrypted,
+      );
+    } on RichTextTooLong {
+      await showOkAlertDialog(
+        context: context,
+        title: L10n.of(context).oopsSomethingWentWrong,
+        message: L10n.of(context).formattedMessageTooLong,
+        okLabel: L10n.of(context).ok,
+      );
+      return;
+    }
+    if (!mounted) return;
     _storeInputTimeoutTimer?.cancel();
-    DraftStore(Matrix.of(context).store).remove(roomId);
+    unawaited(_drafts.remove(roomId));
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
-    if (commandMatch != null &&
+    if (outgoing is PlainOutgoing &&
+        commandMatch != null &&
         !sendingClient.commands.keys.contains(commandMatch[1]!.toLowerCase())) {
       final l10n = L10n.of(context);
       final dialogResult = await showOkCancelAlertDialog(
@@ -895,21 +972,32 @@ class ChatController extends State<ChatPageWithRoom>
       room.setTyping(false);
     }
 
-    // ignore: unawaited_futures
-    room.sendTextEvent(
-      sendController.text,
-      inReplyTo: replyEvent,
-      editEventId: editEvent?.eventId,
-      parseCommands: parseCommands,
-      threadRootEventId: activeThreadId,
-    );
-    sendController.value = TextEditingValue(
-      text: pendingText,
-      selection: const TextSelection.collapsed(offset: 0),
-    );
+    switch (outgoing) {
+      case RichOutgoing():
+        unawaited(
+          sendRichMessage(
+            room,
+            outgoing,
+            inReplyTo: replyEvent,
+            editEventId: editEvent?.eventId,
+            threadRootEventId: activeThreadId,
+          ),
+        );
+      case PlainOutgoing():
+        // ignore: unawaited_futures
+        room.sendTextEvent(
+          sendController.text,
+          inReplyTo: replyEvent,
+          editEventId: editEvent?.eventId,
+          parseCommands: parseCommands,
+          threadRootEventId: activeThreadId,
+        );
+    }
+    composerPanel.close();
 
     setState(() {
-      sendController.text = pendingText;
+      sendController.resetTo(pendingText, state: pendingFormat);
+      pendingFormat = null;
       _inputTextIsEmpty = pendingText.isEmpty;
       replyEvent = null;
       editEvent = null;
@@ -1156,7 +1244,41 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => showEmojiPicker = false);
   }
 
+  void toggleFormatPanel() {
+    if (showEmojiPicker) setState(() => showEmojiPicker = false);
+    composerPanel.toggle(ComposerPanel.format);
+  }
+
+  void onAttachmentSelected(AttachmentType type) {
+    switch (type) {
+      case AttachmentType.gallery:
+        PlatformInfos.isMobile
+            ? openGalleryAction()
+            : sendFileAction(type: FileType.media);
+      case AttachmentType.file:
+        onAddPopupMenuButtonSelected(AddPopupMenuActions.file);
+      case AttachmentType.richText:
+        composerPanel.value = ComposerPanel.format;
+        return;
+      case AttachmentType.poll:
+        onAddPopupMenuButtonSelected(AddPopupMenuActions.poll);
+      case AttachmentType.checklist:
+        composerPanel.value = ComposerPanel.format;
+        sendController.toggleBlock(BlockKind.checklist);
+        inputFocus.requestFocus();
+        return;
+      case AttachmentType.location:
+        onAddPopupMenuButtonSelected(AddPopupMenuActions.location);
+      case AttachmentType.photoCamera:
+        onAddPopupMenuButtonSelected(AddPopupMenuActions.photoCamera);
+      case AttachmentType.videoCamera:
+        onAddPopupMenuButtonSelected(AddPopupMenuActions.videoCamera);
+    }
+    composerPanel.close();
+  }
+
   void emojiPickerAction() {
+    composerPanel.close();
     if (showEmojiPicker) {
       inputFocus.requestFocus();
     } else {
@@ -1533,16 +1655,27 @@ class ChatController extends State<ChatPageWithRoom>
     if (client == null) return;
 
     setSendingClient(client);
+    _storeInputTimeoutTimer?.cancel();
+    if (editEvent == null) {
+      unawaited(
+        _drafts.write(
+          roomId,
+          sendController.text,
+          format: sendController.draftFormat(),
+        ),
+      );
+    }
     setState(() {
-      pendingText = sendController.text;
+      if (editEvent == null) {
+        pendingText = sendController.text;
+        pendingFormat = sendController.format.copy();
+      }
       editEvent = event;
-      sendController.text = event
-          .getDisplayEvent(timeline)
-          .calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)),
-            withSenderNamePrefix: false,
-            hideReply: true,
-          );
+      final prefill = EditPrefill.of(
+        event.getDisplayEvent(timeline),
+        MatrixLocals(L10n.of(context)),
+      );
+      sendController.resetTo(prefill.text, state: prefill.format);
       if (clearSelection) selectedEvents.clear();
     });
     inputFocus.requestFocus();
@@ -1729,16 +1862,16 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onInputBarChanged(String text) {
+    if (text.isNotEmpty && composerPanel.value == ComposerPanel.attach) {
+      composerPanel.close();
+    }
     if (_inputTextIsEmpty != text.isEmpty) {
       setState(() {
         _inputTextIsEmpty = text.isEmpty;
       });
     }
 
-    _storeInputTimeoutTimer?.cancel();
-    _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
-      await DraftStore(Matrix.of(context).store).write(roomId, text);
-    });
+    _scheduleDraft();
     if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
       final clients = currentRoomBundle;
       for (final client in clients) {
@@ -1746,9 +1879,7 @@ class ChatController extends State<ChatPageWithRoom>
         if ((prefix.isNotEmpty) &&
             text.toLowerCase() == '${prefix.toLowerCase()} ') {
           setSendingClient(client);
-          setState(() {
-            sendController.clear();
-          });
+          setState(() => sendController.resetTo(''));
           return;
         }
       }
@@ -1785,8 +1916,9 @@ class ChatController extends State<ChatPageWithRoom>
 
   void cancelReplyEventAction() => setState(() {
     if (editEvent != null) {
-      sendController.text = pendingText;
+      sendController.resetTo(pendingText, state: pendingFormat);
       pendingText = '';
+      pendingFormat = null;
     }
     replyEvent = null;
     editEvent = null;
@@ -1799,15 +1931,16 @@ class ChatController extends State<ChatPageWithRoom>
   bool supportLiveKitCalls = false;
 
   Future<void> _cancelEditWithConfirmation() async {
-    final originalText = editEvent!
-        .getDisplayEvent(timeline!)
-        .calcLocalizedBodyFallback(
-          MatrixLocals(L10n.of(context)),
-          withSenderNamePrefix: false,
-          hideReply: true,
-        );
+    final original = EditPrefill.of(
+      editEvent!.getDisplayEvent(timeline!),
+      MatrixLocals(L10n.of(context)),
+    );
 
-    if (sendController.text != originalText) {
+    if (sendController.text != original.text ||
+        !listEquals(
+          sendController.format.ranges,
+          original.format?.ranges ?? const [],
+        )) {
       final result = await showOkCancelAlertDialog(
         context: context,
         title: L10n.of(context).areYouSure,

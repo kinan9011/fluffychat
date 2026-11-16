@@ -79,8 +79,7 @@ class ChatListViewBody extends StatelessWidget {
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
     final l10n = L10n.of(context);
-    final matrix = Matrix.of(context);
-    final drafts = DraftStore(matrix.store);
+    final drafts = DraftStore.of(client);
     return ListenableBuilder(
       listenable: Listenable.merge([
         AppSettings.spaceNavigation.listenable,
@@ -106,13 +105,6 @@ class ChatListViewBody extends StatelessWidget {
             spaces: spaceModel,
             userFolders: userFolders,
             hideRoomsInSpaces: AppSettings.hideRoomsInSpaces.value,
-          );
-          // Drafts are stored by room id only, so a draft typed as another
-          // account must not show up in this account's list.
-          bool sharedWithOtherAccount(Room room) => matrix.widget.clients.any(
-            (other) =>
-                !identical(other, client) &&
-                other.getRoomById(room.id)?.membership == Membership.join,
           );
           final scope = controller.scope;
           final items = FolderFilter.tabs(
@@ -360,7 +352,7 @@ class ChatListViewBody extends StatelessWidget {
                         key: ValueKey('chat_list_item_${room.id}'),
                         filter: filter,
                         actions: controller.rowActions,
-                        drafts: sharedWithOtherAccount(room) ? null : drafts,
+                        drafts: drafts,
                         onTap: () => controller.onChatTap(room),
                         onLongPress: (context) =>
                             controller.chatContextAction(room, context, space),

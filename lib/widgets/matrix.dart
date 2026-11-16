@@ -13,6 +13,7 @@ import 'package:fluffychat/utils/account_hooks.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/chat_list/archive_policy.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/draft_migration.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -155,8 +156,17 @@ class MatrixState extends State<Matrix> {
 
   final Set<String> _hookedClients = {};
 
+  Future<void> _migrateDrafts() async {
+    try {
+      await migrateLegacyDrafts(prefs: store, clients: widget.clients);
+    } catch (_) {
+      Logs().w('[Drafts] migration failed');
+    }
+  }
+
   Future<void> _runAccountHooks(Client client) async {
     if (!_hookedClients.add(client.clientName)) return;
+    unawaited(_migrateDrafts());
     try {
       await accountHooks(this, client, _hookContext);
     } catch (e, s) {

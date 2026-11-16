@@ -10,6 +10,7 @@ import 'flows/auth_flows.dart';
 import 'flows/basic_messaging.dart';
 import 'flows/chat_flows.dart';
 import 'flows/chat_list_flows.dart';
+import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
@@ -30,6 +31,8 @@ void main() {
     testWidgets('Conversation shell', conversationShell);
     testWidgets('Conversation bubbles', conversationBubbles);
     testWidgets('Conversation jump buttons', conversationJumpButtons);
+    testWidgets('Composer rich text', composerRichText);
+    testWidgets('Edit history', editHistory);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

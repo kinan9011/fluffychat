@@ -268,6 +268,16 @@ void main() {
       expect(parsed.folders.single.rooms, ['!abc:example.org']);
     });
 
+    test('room version 12 ids (no server part) are kept', () {
+      final v12 = '!${'a1_-' * 10}abc';
+      final parsed = FolderStore.parse(
+        doc([
+          folder(rooms: [v12, '!${'a' * 42}', '!${'a' * 44}', roomId(1)]),
+        ]),
+      );
+      expect(parsed.folders.single.rooms, [v12, roomId(1)]);
+    });
+
     test('flags accept only real booleans', () {
       final parsed = FolderStore.parse(
         doc([folder(excludeMuted: 'yes', excludeRead: 1)]),
@@ -574,6 +584,19 @@ void main() {
         FakeMatrixApi.calledEndpoints[putPath(a)]!.single,
       );
       expect(body['folders'].single['rooms'], [roomId(1), roomId(2)]);
+    });
+
+    test('save keeps a room version 12 id', () async {
+      FakeMatrixApi.currentApi = apis[a];
+      FakeMatrixApi.calledEndpoints.clear();
+      final v12 = '!${'a1_-' * 10}abc';
+      await FolderStore.save(a, [
+        UserFolder(id: 'zz', name: 'Rooms', rooms: [v12, roomId(1)]),
+      ]);
+      final body = jsonDecode(
+        FakeMatrixApi.calledEndpoints[putPath(a)]!.single,
+      );
+      expect(body['folders'].single['rooms'], [v12, roomId(1)]);
     });
 
     test('save cleans the name and caps the rooms', () async {

@@ -45,6 +45,7 @@ Future<void> pumpGoldenWidget(
   bool rtl = false,
   Locale locale = const Locale('en'),
   Size size = const Size(400, 300),
+  bool settle = true,
 }) async {
   SharedPreferences.setMockInitialValues({});
   await AppSettings.init(loadWebConfigFile: false);
@@ -72,7 +73,11 @@ Future<void> pumpGoldenWidget(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
   await tester.loadAssets();
   await tester.pump();
 }

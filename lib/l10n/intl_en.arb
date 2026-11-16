@@ -2327,6 +2327,68 @@
     "boldText": "Bold text",
     "italicText": "Italic text",
     "strikeThrough": "Strikethrough",
+    "formatting": "Formatting",
+    "underlineText": "Underline",
+    "inlineCode": "Inline code",
+    "heading": "Heading",
+    "quote": "Quote",
+    "bulletedList": "Bulleted list",
+    "numberedList": "Numbered list",
+    "codeBlock": "Code block",
+    "maths": "Maths",
+    "redo": "Redo",
+    "richText": "Rich text",
+    "attachmentTypes": "Attachment types",
+    "formattedMessageTooLong": "This formatted message is too long. Shorten it or remove some formatting.",
+    "attachFile": "File",
+    "attachPoll": "Poll",
+    "attachLocation": "Location",
+    "attachPhoto": "Photo",
+    "attachVideo": "Video",
+    "headingLevel": "Heading {level}",
+    "@headingLevel": {
+        "type": "String",
+        "placeholders": {
+            "level": {
+                "type": "int"
+            }
+        }
+    },
+    "editHistory": "Edit history",
+    "editHistoryCurrent": "CURRENT · {time}",
+    "@editHistoryCurrent": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "editHistoryEdited": "EDITED · {time}",
+    "@editHistoryEdited": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "editHistoryOriginal": "ORIGINAL · {time}",
+    "@editHistoryOriginal": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "editHistoryRemoved": "Removed",
+    "editHistoryAdded": "Added",
+    "editHistoryEmpty": "No earlier versions are available.",
+    "editHistoryLoading": "Loading earlier versions…",
+    "editAgain": "Edit again",
+    "spoiler": "Spoiler",
+    "mathsFormula": "Formula",
     "pleaseFillOut": "Please fill out",
     "invalidUrl": "Invalid url",
     "addLink": "Add link",

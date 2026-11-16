@@ -3,9 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_input_row.dart';
+import 'package:fluffychat/pages/chat/composer/attachment_type_bar.dart';
+import 'package:fluffychat/pages/chat/composer/format_panel.dart';
+import 'package:fluffychat/utils/rich_text/format_range.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -39,6 +45,142 @@ void main() {
     await harness.settle(tester, rounds: 2);
     expect(find.byKey(const Key('send_button')), findsOneWidget);
     expect(find.byIcon(Icons.send_rounded), findsOneWidget);
+    await harness.finish(tester);
+  });
+
+  testWidgets('Aa opens the format panel, the attach button the type bar', (
+    tester,
+  ) async {
+    await harness.open(tester);
+    expect(find.byType(FormatPanel), findsNothing);
+    expect(find.byType(AttachmentTypeBar), findsNothing);
+    await tester.tap(find.byKey(const Key('composer_format_toggle')));
+    await harness.settle(tester, rounds: 2);
+    expect(find.byType(FormatPanel), findsOneWidget);
+    await tester.tap(find.byKey(const Key('composer_attach_button')));
+    await harness.settle(tester, rounds: 2);
+    expect(find.byType(FormatPanel), findsNothing);
+    expect(find.byType(AttachmentTypeBar), findsOneWidget);
+    await tester.tap(find.byKey(const Key('composer_attach_button')));
+    await harness.settle(tester, rounds: 2);
+    expect(find.byType(AttachmentTypeBar), findsNothing);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the panel fits a landscape screen with the keyboard open', (
+    tester,
+  ) async {
+    await harness.open(tester, width: 640, height: 360);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.tap(find.byKey(const Key('composer_format_toggle')));
+    await harness.settle(tester, rounds: 3);
+    expect(find.byType(FormatPanel), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    final panel = tester.getRect(find.byType(FormatPanel));
+    expect(panel.top, greaterThanOrEqualTo(0));
+    expect(panel.height, AppChat.formatPanelMinHeight);
+    final scroll = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byType(FormatPanel),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scroll.position.maxScrollExtent, greaterThan(0));
+    final field = tester.getRect(find.byKey(const Key('chat_input_field')));
+    expect(field.top, greaterThanOrEqualTo(0));
+    expect(field.bottom, lessThanOrEqualTo(360 - 200));
+    expect(find.byKey(const Key('chat_input_field')).hitTestable(), findsOne);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the Aa and attach buttons tell screen readers if open', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await harness.open(tester);
+    const aa = Key('composer_format_toggle');
+    const attach = Key('composer_attach_button');
+    expect(
+      tester.getSemantics(find.byKey(aa)),
+      isSemantics(hasSelectedState: true, isSelected: false),
+    );
+    await tester.tap(find.byKey(aa));
+    await harness.settle(tester, rounds: 2);
+    expect(
+      tester.getSemantics(find.byKey(aa)),
+      isSemantics(hasSelectedState: true, isSelected: true),
+    );
+    expect(
+      tester.getSemantics(find.byKey(attach)),
+      isSemantics(hasSelectedState: true, isSelected: false),
+    );
+    await tester.tap(find.byKey(attach));
+    await harness.settle(tester, rounds: 2);
+    expect(
+      tester.getSemantics(find.byKey(attach)),
+      isSemantics(hasSelectedState: true, isSelected: true),
+    );
+    handle.dispose();
+    await harness.finish(tester);
+  });
+
+  testWidgets('Ctrl+B, Ctrl+I and Ctrl+U format the selection', (tester) async {
+    await harness.open(tester);
+    await tester.enterText(find.byKey(const Key('chat_input_field')), 'hello');
+    final composer = tester
+        .state<ChatController>(find.byType(ChatPageWithRoom))
+        .sendController;
+    composer.value = composer.value.copyWith(
+      selection: const TextSelection(baseOffset: 0, extentOffset: 5),
+    );
+    for (final key in [
+      LogicalKeyboardKey.keyB,
+      LogicalKeyboardKey.keyI,
+      LogicalKeyboardKey.keyU,
+    ]) {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(key);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    }
+    expect(composer.format.ranges.map((r) => r.kind).toSet(), {
+      RangeKind.bold,
+      RangeKind.italic,
+      RangeKind.underline,
+    });
+    await harness.finish(tester);
+  });
+
+  testWidgets('the old attach popup menu is gone', (tester) async {
+    await harness.open(tester);
+    expect(find.byType(PopupMenuButton<AddPopupMenuActions>), findsNothing);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the emoji picker closes the panels', (tester) async {
+    await harness.open(tester);
+    await tester.tap(find.byKey(const Key('composer_format_toggle')));
+    await harness.settle(tester, rounds: 2);
+    await tester.tap(find.byIcon(Icons.sticky_note_2_rounded));
+    await harness.settle(tester, rounds: 2);
+    expect(find.byType(FormatPanel), findsNothing);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the checklist entry puts a check prefix on the line', (
+    tester,
+  ) async {
+    await harness.open(tester);
+    await tester.tap(find.byKey(const Key('composer_attach_button')));
+    await harness.settle(tester, rounds: 2);
+    await tester.tap(find.byKey(const ValueKey('attach_checklist')));
+    await harness.settle(tester, rounds: 2);
+    final composer = tester
+        .state<ChatController>(find.byType(ChatPageWithRoom))
+        .sendController;
+    expect(composer.text, '☐ ');
+    expect(composer.format.richIntent, isTrue);
+    expect(find.byType(FormatPanel), findsOneWidget);
     await harness.finish(tester);
   });
 

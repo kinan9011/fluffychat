@@ -8,14 +8,18 @@ import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
+import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
 import 'package:fluffychat/pages/chat/recording_input_row.dart';
 import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/rich_text/format_range.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:fluffychat/widgets/hover_builder.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -180,56 +184,84 @@ class ChatInputRow extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 2.0,
                                 ),
-                                child: InputBar(
-                                  room: controller.room,
-                                  minLines: 1,
-                                  maxLines: 8,
-                                  autofocus: !PlatformInfos.isMobile,
-                                  keyboardType: TextInputType.multiline,
-                                  textInputAction:
-                                      AppSettings.sendOnEnter.value == true &&
-                                          PlatformInfos.isMobile
-                                      ? TextInputAction.send
-                                      : null,
-                                  onSubmitted: controller.onInputBarSubmitted,
-                                  onSubmitImage:
-                                      controller.sendImageFromClipBoard,
-                                  focusNode: controller.inputFocus,
-                                  controller: controller.sendController,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.only(
-                                      left: 6.0,
-                                      right: 6.0,
-                                      bottom: 6.0,
-                                      top: 3.0,
-                                    ),
-                                    counter: const SizedBox.shrink(),
-                                    hintText: controller.room.encrypted
-                                        ? L10n.of(context).encryptedMessage
-                                        : L10n.of(context).unencryptedMessage,
-                                    hintMaxLines: 1,
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    filled: false,
+                                child: CallbackShortcuts(
+                                  bindings: _formatShortcuts(
+                                    controller.sendController,
                                   ),
-                                  onChanged: controller.onInputBarChanged,
-                                  suggestionEmojis:
-                                      getDefaultEmojiLocale(
-                                        AppSettings
-                                                .emojiSuggestionLocale
-                                                .value
-                                                .isNotEmpty
-                                            ? Locale(
-                                                AppSettings
-                                                    .emojiSuggestionLocale
-                                                    .value,
-                                              )
-                                            : Localizations.localeOf(context),
-                                      ).fold(
-                                        [],
-                                        (emojis, category) =>
-                                            emojis..addAll(category.emoji),
+                                  child: InputBar(
+                                    room: controller.room,
+                                    minLines: 1,
+                                    maxLines: 8,
+                                    autofocus: !PlatformInfos.isMobile,
+                                    keyboardType: TextInputType.multiline,
+                                    textInputAction:
+                                        AppSettings.sendOnEnter.value == true &&
+                                            PlatformInfos.isMobile
+                                        ? TextInputAction.send
+                                        : null,
+                                    onSubmitted: controller.onInputBarSubmitted,
+                                    onSubmitImage:
+                                        controller.sendImageFromClipBoard,
+                                    focusNode: controller.inputFocus,
+                                    controller: controller.sendController,
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.only(
+                                        left: 6.0,
+                                        right: 6.0,
+                                        bottom: 6.0,
+                                        top: 3.0,
                                       ),
+                                      counter: const SizedBox.shrink(),
+                                      hintText: controller.room.encrypted
+                                          ? L10n.of(context).encryptedMessage
+                                          : L10n.of(context).unencryptedMessage,
+                                      hintMaxLines: 1,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      filled: false,
+                                    ),
+                                    onChanged: controller.onInputBarChanged,
+                                    suggestionEmojis:
+                                        getDefaultEmojiLocale(
+                                          AppSettings
+                                                  .emojiSuggestionLocale
+                                                  .value
+                                                  .isNotEmpty
+                                              ? Locale(
+                                                  AppSettings
+                                                      .emojiSuggestionLocale
+                                                      .value,
+                                                )
+                                              : Localizations.localeOf(context),
+                                        ).fold(
+                                          [],
+                                          (emojis, category) =>
+                                              emojis..addAll(category.emoji),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 48,
+                              height: height,
+                              child: ValueListenableBuilder(
+                                valueListenable: controller.composerPanel,
+                                builder: (context, panel, _) => IconButton(
+                                  key: const Key('composer_format_toggle'),
+                                  tooltip: L10n.of(context).formatting,
+                                  isSelected: panel == ComposerPanel.format,
+                                  onPressed: controller.toggleFormatPanel,
+                                  icon: Text(
+                                    'Aa',
+                                    style: TextStyle(
+                                      color: panel == ComposerPanel.format
+                                          ? tokens.acc
+                                          : tokens.mut,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -241,141 +273,21 @@ class ChatInputRow extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: const BoxDecoration(),
                               clipBehavior: Clip.hardEdge,
-                              child: PopupMenuButton<AddPopupMenuActions>(
-                                useRootNavigator: true,
-                                icon: const Icon(Icons.attach_file_rounded),
-                                iconColor: tokens.mut,
-                                onSelected:
-                                    controller.onAddPopupMenuButtonSelected,
-                                itemBuilder: (BuildContext context) => [
-                                  if (PlatformInfos.isMobile)
-                                    PopupMenuItem(
-                                      value: AddPopupMenuActions.location,
-                                      child: ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundColor: theme
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                          foregroundColor: theme
-                                              .colorScheme
-                                              .primaryContainer,
-                                          child: const Icon(
-                                            Icons.gps_fixed_outlined,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          L10n.of(context).shareLocation,
-                                        ),
-                                        contentPadding: const EdgeInsets.all(0),
-                                      ),
-                                    ),
-                                  PopupMenuItem(
-                                    value: AddPopupMenuActions.poll,
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        foregroundColor:
-                                            theme.colorScheme.primaryContainer,
-                                        child: const Icon(Icons.poll_outlined),
-                                      ),
-                                      title: Text(L10n.of(context).startPoll),
-                                      contentPadding: const EdgeInsets.all(0),
-                                    ),
+                              child: ValueListenableBuilder(
+                                valueListenable: controller.composerPanel,
+                                builder: (context, panel, _) => IconButton(
+                                  key: const Key('composer_attach_button'),
+                                  tooltip: L10n.of(context).attachmentTypes,
+                                  isSelected: panel == ComposerPanel.attach,
+                                  icon: Icon(
+                                    Icons.attach_file_rounded,
+                                    color: panel == ComposerPanel.attach
+                                        ? tokens.acc
+                                        : tokens.mut,
                                   ),
-                                  PopupMenuDivider(),
-                                  if (PlatformInfos.isMobile) ...[
-                                    PopupMenuItem(
-                                      value: AddPopupMenuActions.videoCamera,
-                                      child: ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundColor: theme
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                          foregroundColor: theme
-                                              .colorScheme
-                                              .primaryContainer,
-                                          child: const Icon(
-                                            Icons.videocam_outlined,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          L10n.of(context).recordAVideo,
-                                        ),
-                                        contentPadding: const EdgeInsets.all(0),
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: AddPopupMenuActions.photoCamera,
-                                      child: ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundColor: theme
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                          foregroundColor: theme
-                                              .colorScheme
-                                              .primaryContainer,
-                                          child: const Icon(
-                                            Icons.camera_alt_outlined,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          L10n.of(context).takeAPhoto,
-                                        ),
-                                        contentPadding: const EdgeInsets.all(0),
-                                      ),
-                                    ),
-                                    PopupMenuDivider(),
-                                  ],
-                                  PopupMenuItem(
-                                    value: AddPopupMenuActions.video,
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        foregroundColor:
-                                            theme.colorScheme.primaryContainer,
-                                        child: const Icon(Icons.movie_outlined),
-                                      ),
-                                      title: Text(L10n.of(context).sendVideo),
-                                      contentPadding: const EdgeInsets.all(0),
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: AddPopupMenuActions.image,
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        foregroundColor:
-                                            theme.colorScheme.primaryContainer,
-                                        child: const Icon(Icons.image_outlined),
-                                      ),
-                                      title: Text(L10n.of(context).sendImage),
-                                      contentPadding: const EdgeInsets.all(0),
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: AddPopupMenuActions.file,
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        foregroundColor:
-                                            theme.colorScheme.primaryContainer,
-                                        child: const Icon(
-                                          Icons.attachment_outlined,
-                                        ),
-                                      ),
-                                      title: Text(L10n.of(context).sendFile),
-                                      contentPadding: const EdgeInsets.all(0),
-                                    ),
-                                  ),
-                                ],
+                                  onPressed: () => controller.composerPanel
+                                      .toggle(ComposerPanel.attach),
+                                ),
                               ),
                             ),
                           ],
@@ -518,3 +430,19 @@ class _ChatAccountPicker extends StatelessWidget {
     );
   }
 }
+
+Map<ShortcutActivator, VoidCallback> _formatShortcuts(
+  RichTextEditingController composer,
+) => {
+  for (final (key, kind) in [
+    (LogicalKeyboardKey.keyB, RangeKind.bold),
+    (LogicalKeyboardKey.keyI, RangeKind.italic),
+    (LogicalKeyboardKey.keyU, RangeKind.underline),
+  ])
+    SingleActivator(
+      key,
+      control: !PlatformInfos.isMacOS,
+      meta: PlatformInfos.isMacOS,
+    ): () =>
+        composer.toggleInline(kind),
+};

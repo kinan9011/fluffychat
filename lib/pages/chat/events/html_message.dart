@@ -5,12 +5,14 @@
 
 import 'package:collection/collection.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/code_highlight_theme.dart';
 import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/utils/html_image_size.dart';
+import 'package:fluffychat/utils/html_limits.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -179,6 +181,19 @@ class HtmlMessage extends StatelessWidget {
         linkStyle: linkStyle,
         onOpen: onOpen,
       );
+    }
+
+    if (isMathsElement(node)) {
+      final tex = node.attributes['data-mx-maths']!;
+      final maths = _renderMaths(
+        context,
+        tex.length > RichLimits.maxRenderMathsUnits
+            ? tex.substring(0, RichLimits.maxRenderMathsUnits)
+            : tex,
+        block: node.localName == 'div',
+      );
+      if (!node.attributes.containsKey('data-mx-spoiler')) return maths;
+      return _renderSpoiler(tex, [maths]);
     }
 
     switch (node.localName) {
@@ -526,30 +541,9 @@ class HtmlMessage extends StatelessWidget {
         if (!node.attributes.containsKey('data-mx-spoiler')) {
           continue block;
         }
-        var obscure = true;
-        return WidgetSpan(
-          child: StatefulBuilder(
-            builder: (context, setState) => InkWell(
-              splashColor: Colors.transparent,
-              onTap: () => setState(() {
-                obscure = !obscure;
-              }),
-              child: Text.rich(
-                TextSpan(
-                  children: _renderWithLineBreaks(
-                    node.nodes,
-                    context,
-                    depth: depth,
-                  ),
-                ),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: textColor,
-                  backgroundColor: obscure ? textColor : null,
-                ),
-              ),
-            ),
-          ),
+        return _renderSpoiler(
+          node.text,
+          _renderWithLineBreaks(node.nodes, context, depth: depth),
         );
       block:
       default:
@@ -587,10 +581,79 @@ class HtmlMessage extends StatelessWidget {
     }
   }
 
+  /// Until tapped, none of the content is built: code, maths and other
+  /// widgets would ignore a text background, and a built secret can still be
+  /// selected or copied.
+  InlineSpan _renderSpoiler(String text, List<InlineSpan> revealed) {
+    var obscure = true;
+    return WidgetSpan(
+      child: StatefulBuilder(
+        builder: (context, setState) => Semantics(
+          label: obscure ? L10n.of(context).spoiler : null,
+          button: obscure,
+          excludeSemantics: obscure,
+          child: InkWell(
+            splashColor: Colors.transparent,
+            onTap: () => setState(() {
+              obscure = !obscure;
+            }),
+            child: Text.rich(
+              TextSpan(
+                text: obscure ? maskSpoilerText(text) : null,
+                children: obscure ? null : revealed,
+              ),
+              style: TextStyle(
+                fontSize: fontSize,
+                color: textColor,
+                backgroundColor: obscure ? textColor : null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  InlineSpan _renderMaths(
+    BuildContext context,
+    String tex, {
+    required bool block,
+  }) {
+    final style = AppTypography.mono.copyWith(
+      fontSize: fontSize * 0.95,
+      color: textColor,
+    );
+    if (!block) {
+      return TextSpan(
+        text: tex,
+        style: style.copyWith(backgroundColor: textColor.withAlpha(32)),
+      );
+    }
+    return WidgetSpan(
+      child: Semantics(
+        label: L10n.of(context).mathsFormula,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: textColor.withAlpha(32),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Text(tex, style: style),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final element = parser.parse(html).body ?? dom.Element.html('');
     limitHtmlImages(element);
+    limitHtmlElements(element);
     final configuredMaxLines = AppSettings.messagePreviewMaxLines.value;
     final maxLines = configuredMaxLines <= 0 ? null : configuredMaxLines;
     final span = _renderHtml(element, context);

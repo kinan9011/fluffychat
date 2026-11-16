@@ -60,6 +60,31 @@ void main() {
     return (ratio: worst, where: 'outFg, outMut on outS');
   });
 
+  expectAll('text on the edit history diff colours', 4.5, (t) {
+    final removed = Color.alphaBlend(t.red.withValues(alpha: .22), t.surf2);
+    final added = Color.alphaBlend(t.ok.withValues(alpha: .25), t.surf2);
+    final worst = [
+      wcagContrast8(t.fg, removed),
+      wcagContrast8(t.fg, added),
+    ].reduce((a, b) => a < b ? a : b);
+    return (ratio: worst, where: 'fg on removed and added tint');
+  });
+
+  Color deleteFill(AppTokens t) =>
+      Color.alphaBlend(t.red.withValues(alpha: .14), t.surf);
+
+  expectAll(
+    'the delete action label on its red tint',
+    4.5,
+    (t) => pair(t.fg, deleteFill(t), 'fg on red 14% over surf'),
+  );
+
+  expectAll(
+    'the delete action icon on its red tint',
+    3,
+    (t) => pair(t.red, deleteFill(t), 'red icon on red 14% over surf'),
+  );
+
   expectAll(
     'text on the accent button',
     4.5,

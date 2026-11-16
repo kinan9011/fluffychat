@@ -80,6 +80,23 @@ abstract class AppChat {
   static const double mapBubbleWidth = 280;
   static const double menuGap = 8;
   static const double groupGap = 6;
+  static const double formatCell = 38;
+  static const double formatCellRadius = 12;
+  static const double formatPanelRadius = 22;
+  static const double formatPanelPadding = 10;
+  static const double formatGap = 6;
+  static const double formatPanelMinHeight = 80;
+  static const double formatPanelMaxHeight = 220;
+  static const double formatPanelReserve = 160;
+  static const double quickBarHeight = 46;
+  static const double quickBarButton = 36;
+  static const double quickBarRadius = 23;
+  static const double quickBarButtonRadius = 12;
+  static const double attachBarHeight = 66;
+  static const double attachItemWidth = 72;
+  static const double attachBarRadius = 33;
+  static const double attachItemRadius = 28;
+  static const double historyBubbleRadius = 18;
   static const double wallpaperGrid = 18;
   static const double wallpaperDotRadius = 1.4;
   static const double menuWidth = 246;
@@ -112,4 +129,33 @@ abstract class AppTypography {
 
   /// Keeps Matrix IDs and server names left-to-right inside RTL text.
   static String ltr(String text) => '\u2066$text\u2069';
+}
+
+/// Bounds for composing, parsing and rendering formatted messages.
+abstract class RichLimits {
+  static const int maxBlocks = 500;
+  static const int maxLinks = 100;
+  static const int maxMaths = 50;
+  static const int maxMathsUnits = 2048;
+  static const int maxTextUnits = 16000;
+  static const int maxBodyBytes = 24000;
+  static const int maxHtmlBytes = 24000;
+  static const int maxEventBytes = 60000;
+  static const int eventOverheadBytes = 1024;
+  static const int encryptionOverheadBytes = 512;
+  static const int maxLinkUnits = 2048;
+  static const int maxRanges = 500;
+  static const int maxUndo = 100;
+  static const int maxEdits = 50;
+  static const int maxEditUnits = 16000;
+  static const int maxDiffTokens = 400;
+  static const int maxParseNodes = 2000;
+  static const int maxParseDepth = 20;
+  static const int maxParseInputUnits = 65536;
+  static const int maxRenderElements = 3000;
+  static const int maxRenderDepth = 40;
+  static const int maxRenderHeadings = 100;
+  static const int maxRenderSpoilers = 100;
+  static const int maxRenderMaths = 50;
+  static const int maxRenderMathsUnits = 4096;
 }

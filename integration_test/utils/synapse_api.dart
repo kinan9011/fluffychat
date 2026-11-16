@@ -118,6 +118,29 @@ class SynapseUser {
     },
   });
 
+  /// Content of the newest `m.room.message` of [senderId] as the homeserver
+  /// stores it.
+  Future<Map<String, Object?>> latestMessageFrom(
+    String roomId,
+    String senderId,
+  ) async {
+    final json =
+        await _request(
+              'GET',
+              '/rooms/${Uri.encodeComponent(roomId)}/messages?dir=b&limit=30',
+              token: _token,
+            )
+            as Map<String, Object?>;
+    for (final event in json['chunk']! as List) {
+      if (event is Map &&
+          event['type'] == 'm.room.message' &&
+          event['sender'] == senderId) {
+        return Map<String, Object?>.from(event['content'] as Map);
+      }
+    }
+    throw StateError('The homeserver has no message of that sender');
+  }
+
   Future<void> sendMany(String roomId, int count, String prefix) async {
     for (var i = 1; i <= count; i++) {
       await sendText(roomId, '$prefix $i');

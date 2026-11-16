@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/edit_history_sheet.dart';
 import 'package:fluffychat/utils/chat/message_actions.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -24,6 +25,10 @@ MessageActionContext messageActionContext(ChatController c, Event event) {
     canPin: readable && c.canPinEvent(event),
     isPinned: room.pinnedEventIds.contains(event.eventId),
     canForward: readable && sent,
+    canViewHistory:
+        readable &&
+        c.timeline != null &&
+        event.hasAggregatedEvents(c.timeline!, RelationshipTypes.edit),
     canReport: sent,
     canRedact: c.canRedactEvents([event]),
   );
@@ -42,6 +47,8 @@ Future<void> runMessageAction(
       c.replyAction(replyTo: event);
     case MessageAction.replyInThread:
       c.enterThread(event.eventId);
+    case MessageAction.editHistory:
+      await showEditHistorySheet(c.context, c, event);
     case MessageAction.info:
       c.showEventInfo(event);
     case MessageAction.select:

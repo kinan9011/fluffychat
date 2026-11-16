@@ -8,6 +8,7 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' show BaseClient;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +32,8 @@ Future<Client> prepareTestClient({
   Uri? homeserver,
   String id = 'FluffyChat Widget Test',
   String? clientName,
+  BaseClient? httpClient,
+  bool waitForFirstSync = true,
 }) async {
   await setUpVodozemac();
   SharedPreferences.setMockInitialValues({});
@@ -41,7 +44,7 @@ Future<Client> prepareTestClient({
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
   final client = Client(
     clientName ?? 'FluffyChat Widget Tests',
-    httpClient: FakeMatrixApi(),
+    httpClient: httpClient ?? FakeMatrixApi(),
     verificationMethods: {
       KeyVerificationMethod.numbers,
       KeyVerificationMethod.emoji,
@@ -62,7 +65,9 @@ Future<Client> prepareTestClient({
       AuthenticationTypes.sso,
     },
   );
+  client.backgroundSync = waitForFirstSync;
   await client.init(
+    waitForFirstSync: waitForFirstSync,
     newHomeserver: Uri.parse('https://fakeServer.notExisting'),
     newDeviceID: 'ABCD1234',
     newDeviceName: 'Screenshot Tester',

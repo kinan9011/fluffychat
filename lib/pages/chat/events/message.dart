@@ -47,6 +47,7 @@ class Message extends StatelessWidget {
   final void Function(Event) onSelect;
   final void Function(Event event, Rect anchor) onOpenMenu;
   final void Function(Event) onInfoTab;
+  final void Function(Event)? onEditHistory;
   final void Function(String) scrollToEventId;
   final void Function() onSwipe;
   final void Function() onMention;
@@ -73,6 +74,7 @@ class Message extends StatelessWidget {
     required this.onSelect,
     required this.onOpenMenu,
     required this.onInfoTab,
+    this.onEditHistory,
     required this.scrollToEventId,
     required this.onSwipe,
     this.selected = false,
@@ -172,6 +174,13 @@ class Message extends StatelessWidget {
           ? event.originServerTs.localizedDetailedTime(context)
           : event.originServerTs.localizedTimeOfDay(context),
       edited: isEdited,
+      onEditedTap:
+          isEdited &&
+              onEditHistory != null &&
+              !event.redacted &&
+              !event.isUndecryptable
+          ? () => onEditHistory!(event)
+          : null,
       tick: ownMessage ? tick : Tick.none,
       color: noBubble ? Colors.white : colors.secondary,
     );

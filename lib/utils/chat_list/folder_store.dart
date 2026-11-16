@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -114,7 +115,6 @@ abstract class FolderStore {
   static const maxClusterUnits = 16;
 
   static final _idPattern = RegExp(r'^[a-z0-9_-]{1,32}$');
-  static final _roomIdPattern = RegExp(r'^![^:\s]{1,255}:[^\s]{1,255}$');
   static final _unsafeName = RegExp(
     r'[\u0000-\u001F\u007F-\u009F\u061C\u180E\u200B\u200E\u200F'
     r'\u2028\u2029\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF'
@@ -129,7 +129,7 @@ abstract class FolderStore {
   static final _cache = Expando<FolderDocument>('FolderStore');
 
   static bool _isRoomId(String id) =>
-      _roomIdPattern.hasMatch(id) && !_unsafeName.hasMatch(id);
+      isMatrixRoomId(id) && !_unsafeName.hasMatch(id);
 
   static bool isValidId(String? id) => id != null && _idPattern.hasMatch(id);
 

@@ -3,6 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
@@ -44,12 +47,14 @@ class ChatPageHarness {
     return room;
   }
 
-  void setUp() => MatrixState.accountHooks = (_, _, _) async {};
+  void setUp() {
+    DraftStore.forget(client);
+    MatrixState.accountHooks = (_, _, _) async {};
+  }
 
   Future<void> tearDown() async {
     MatrixState.accountHooks = MatrixState.defaultAccountHooks;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_${room.id}');
+    unawaited(DraftStore.of(client).remove(room.id));
   }
 
   Future<void> open(

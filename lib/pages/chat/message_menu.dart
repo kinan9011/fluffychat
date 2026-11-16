@@ -44,6 +44,10 @@ import 'package:matrix/matrix.dart';
     icon: Icons.check_circle_outline_rounded,
     label: l10n.select,
   ),
+  MessageAction.editHistory => (
+    icon: Icons.history_rounded,
+    label: l10n.editHistory,
+  ),
   MessageAction.info => (
     icon: Icons.info_outline_rounded,
     label: l10n.messageInfo,

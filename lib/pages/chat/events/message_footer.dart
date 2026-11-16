@@ -14,11 +14,15 @@ class MessageFooter extends StatelessWidget {
   final Tick tick;
   final Color color;
 
+  /// Makes the "(edited)" label a button that opens the edit history.
+  final VoidCallback? onEditedTap;
+
   const MessageFooter({
     required this.time,
     required this.edited,
     required this.tick,
     required this.color,
+    this.onEditedTap,
     super.key,
   });
 
@@ -32,29 +36,67 @@ class MessageFooter extends StatelessWidget {
       Tick.seen => l10n.messageSeen,
       Tick.error => l10n.couldNotBeSent,
     };
-    return Semantics(
-      container: true,
-      label: [time, if (edited) l10n.edited, ?status].join(', '),
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 3,
-        children: [
-          if (edited)
-            Text(l10n.edited, style: TextStyle(color: color, fontSize: 11)),
-          Text(time, style: TextStyle(color: color, fontSize: 11)),
-          switch (tick) {
-            Tick.none => const SizedBox.shrink(),
-            Tick.sending => SizedBox.square(
-              dimension: 11,
-              child: CircularProgressIndicator(strokeWidth: 1, color: color),
+    final tappable = edited && onEditedTap != null;
+    final inline = edited && !tappable;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (tappable)
+          Semantics(
+            button: true,
+            label: l10n.editHistory,
+            onTap: onEditedTap,
+            excludeSemantics: true,
+            child: InkResponse(
+              key: const ValueKey('edited_label'),
+              onTap: onEditedTap,
+              radius: 20,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 3, 7, 3),
+                child: Text(
+                  l10n.edited,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    decoration: TextDecoration.underline,
+                    decorationColor: color,
+                  ),
+                ),
+              ),
             ),
-            Tick.sent => Icon(Icons.done_rounded, size: 15, color: color),
-            Tick.seen => Icon(Icons.done_all_rounded, size: 15, color: color),
-            Tick.error => Icon(Icons.error_rounded, size: 15, color: color),
-          },
-        ],
-      ),
+          ),
+        Semantics(
+          container: true,
+          label: [time, if (inline) l10n.edited, ?status].join(', '),
+          excludeSemantics: true,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 3,
+            children: [
+              if (inline)
+                Text(l10n.edited, style: TextStyle(color: color, fontSize: 11)),
+              Text(time, style: TextStyle(color: color, fontSize: 11)),
+              switch (tick) {
+                Tick.none => const SizedBox.shrink(),
+                Tick.sending => SizedBox.square(
+                  dimension: 11,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1,
+                    color: color,
+                  ),
+                ),
+                Tick.sent => Icon(Icons.done_rounded, size: 15, color: color),
+                Tick.seen => Icon(
+                  Icons.done_all_rounded,
+                  size: 15,
+                  color: color,
+                ),
+                Tick.error => Icon(Icons.error_rounded, size: 15, color: color),
+              },
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

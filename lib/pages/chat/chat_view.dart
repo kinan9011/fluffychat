@@ -15,11 +15,16 @@ import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_header.dart';
 import 'package:fluffychat/pages/chat/chat_jump_buttons.dart';
 import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
+import 'package:fluffychat/pages/chat/composer/attachment_type_bar.dart';
+import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
+import 'package:fluffychat/pages/chat/composer/format_panel.dart';
+import 'package:fluffychat/pages/chat/composer/quick_format_bar.dart';
 import 'package:fluffychat/pages/chat/new_device_banner.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/chat/new_device_banner_model.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
@@ -117,153 +122,186 @@ class ChatView extends StatelessWidget {
                   child: SafeArea(
                     top: false,
                     child: BackdropGroup(
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned.fill(
-                            child: ChatWallpaper(config: accountConfig),
-                          ),
-                          GestureDetector(
-                            onTap: controller.clearSingleSelectedEvent,
-                            child: ChatEventList(
-                              controller: controller,
-                              topPadding: topPadding,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => Stack(
+                          children: <Widget>[
+                            Positioned.fill(
+                              child: ChatWallpaper(config: accountConfig),
                             ),
-                          ),
-                          PositionedDirectional(
-                            top: 0,
-                            start: 0,
-                            end: 0,
-                            child: SafeArea(
-                              bottom: false,
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: AppChat.headerTopGap),
-                                  ChatHeader(controller),
-                                  if (newDevice != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: AppSpacing.m,
-                                        right: AppSpacing.m,
-                                        top: AppSpacing.s,
-                                      ),
-                                      child: NewDeviceBanner(
-                                        name: controller.room
-                                            .unsafeGetUserFromMemoryOrFallback(
-                                              newDevice.userId,
-                                            )
-                                            .calcDisplayname(),
-                                        height: newDeviceHeight,
-                                        onVerify: () => context.go(
-                                          '/rooms/${controller.room.id}/encryption',
-                                        ),
-                                        onDismiss: () {
-                                          NewDeviceDismissals.dismiss(
-                                            newDevice,
-                                          );
-                                          controller.refresh();
-                                        },
-                                      ),
+                            GestureDetector(
+                              onTap: controller.clearSingleSelectedEvent,
+                              child: ChatEventList(
+                                controller: controller,
+                                topPadding: topPadding,
+                              ),
+                            ),
+                            PositionedDirectional(
+                              top: 0,
+                              start: 0,
+                              end: 0,
+                              child: SafeArea(
+                                bottom: false,
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: AppChat.headerTopGap,
                                     ),
-                                  if (activeThreadId != null)
-                                    _Banner(
-                                      child: Center(
-                                        child: TextButton.icon(
-                                          onPressed: () => controller
-                                              .scrollToEventId(activeThreadId),
-                                          icon: const Icon(Icons.message),
-                                          label: Text(
-                                            L10n.of(context).replyInThread,
+                                    ChatHeader(controller),
+                                    if (newDevice != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: AppSpacing.m,
+                                          right: AppSpacing.m,
+                                          top: AppSpacing.s,
+                                        ),
+                                        child: NewDeviceBanner(
+                                          name: controller.room
+                                              .unsafeGetUserFromMemoryOrFallback(
+                                                newDevice.userId,
+                                              )
+                                              .calcDisplayname(),
+                                          height: newDeviceHeight,
+                                          onVerify: () => context.go(
+                                            '/rooms/${controller.room.id}/encryption',
+                                          ),
+                                          onDismiss: () {
+                                            NewDeviceDismissals.dismiss(
+                                              newDevice,
+                                            );
+                                            controller.refresh();
+                                          },
+                                        ),
+                                      ),
+                                    if (activeThreadId != null)
+                                      _Banner(
+                                        child: Center(
+                                          child: TextButton.icon(
+                                            onPressed: () =>
+                                                controller.scrollToEventId(
+                                                  activeThreadId,
+                                                ),
+                                            icon: const Icon(Icons.message),
+                                            label: Text(
+                                              L10n.of(context).replyInThread,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  if (showPinned)
-                                    _Banner(child: PinnedEvents(controller)),
-                                  if (showScrollUp)
-                                    _Banner(
-                                      child: ChatAppBarListTile(
-                                        leading: IconButton(
-                                          color: theme
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                          icon: const Icon(Icons.close),
-                                          tooltip: L10n.of(context).close,
-                                          onPressed: () {
-                                            controller
-                                                .discardScrollUpBannerEventId();
-                                            controller.setReadMarker();
-                                          },
-                                        ),
-                                        title: L10n.of(
-                                          context,
-                                        ).jumpToLastReadMessage,
-                                        trailing: TextButton(
-                                          onPressed: () {
-                                            controller.scrollToEventId(
-                                              scrollUpBannerEventId,
-                                            );
-                                            controller
-                                                .discardScrollUpBannerEventId();
-                                          },
-                                          child: Text(L10n.of(context).jump),
+                                    if (showPinned)
+                                      _Banner(child: PinnedEvents(controller)),
+                                    if (showScrollUp)
+                                      _Banner(
+                                        child: ChatAppBarListTile(
+                                          leading: IconButton(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            icon: const Icon(Icons.close),
+                                            tooltip: L10n.of(context).close,
+                                            onPressed: () {
+                                              controller
+                                                  .discardScrollUpBannerEventId();
+                                              controller.setReadMarker();
+                                            },
+                                          ),
+                                          title: L10n.of(
+                                            context,
+                                          ).jumpToLastReadMessage,
+                                          trailing: TextButton(
+                                            onPressed: () {
+                                              controller.scrollToEventId(
+                                                scrollUpBannerEventId,
+                                              );
+                                              controller
+                                                  .discardScrollUpBannerEventId();
+                                            },
+                                            child: Text(L10n.of(context).jump),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          PositionedDirectional(
-                            end: AppSpacing.xl,
-                            bottom:
-                                (controller.inputBarHeight ??
-                                    AppChat.composerHeight) +
-                                AppSpacing.m,
-                            child: ChatJumpButtons(
-                              mentionCount: mentionCount,
-                              unreadCount: controller.unreadBadgeCount,
-                              showScrollDown:
-                                  controller.showScrollDownButton &&
-                                  controller.selectedEvents.isEmpty,
-                              onMention: controller.jumpToNextMention,
-                              onScrollDown: controller.scrollDown,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: SizeChangedLayoutNotifier(
-                              child: Container(
-                                key: controller.inputBarKey,
-                                alignment: Alignment.center,
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(
-                                    AppSpacing.m,
-                                    0,
-                                    AppSpacing.m,
-                                    bottomSheetPadding,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    maxWidth: FluffyThemes.maxTimelineWidth,
-                                  ),
-                                  child: _Composer(controller),
+                                  ],
                                 ),
                               ),
                             ),
-                          ),
-                          if (controller.dragging)
-                            Container(
-                              color: theme.scaffoldBackgroundColor.withAlpha(
-                                230,
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.upload_outlined,
-                                size: 100,
+                            PositionedDirectional(
+                              end: AppSpacing.xl,
+                              bottom:
+                                  (controller.inputBarHeight ??
+                                      AppChat.composerHeight) +
+                                  AppSpacing.m,
+                              child: ChatJumpButtons(
+                                mentionCount: mentionCount,
+                                unreadCount: controller.unreadBadgeCount,
+                                showScrollDown:
+                                    controller.showScrollDownButton &&
+                                    controller.selectedEvents.isEmpty,
+                                onMention: controller.jumpToNextMention,
+                                onScrollDown: controller.scrollDown,
                               ),
                             ),
-                        ],
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: SizeChangedLayoutNotifier(
+                                child: Container(
+                                  key: controller.inputBarKey,
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    margin: EdgeInsets.fromLTRB(
+                                      AppSpacing.m,
+                                      0,
+                                      AppSpacing.m,
+                                      bottomSheetPadding,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      maxWidth: FluffyThemes.maxTimelineWidth,
+                                    ),
+                                    child: _Composer(
+                                      controller,
+                                      availableHeight: constraints.maxHeight,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom:
+                                  (controller.inputBarHeight ??
+                                      AppChat.composerHeight) +
+                                  AppSpacing.s,
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: FluffyThemes.maxTimelineWidth,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.m,
+                                    ),
+                                    child: QuickFormatBar(
+                                      controller: controller.sendController,
+                                      focusNode: controller.inputFocus,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (controller.dragging)
+                              Container(
+                                color: theme.scaffoldBackgroundColor.withAlpha(
+                                  230,
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.upload_outlined,
+                                  size: 100,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -298,8 +336,9 @@ class _Banner extends StatelessWidget {
 
 class _Composer extends StatelessWidget {
   final ChatController controller;
+  final double availableHeight;
 
-  const _Composer(this.controller);
+  const _Composer(this.controller, {required this.availableHeight});
 
   @override
   Widget build(BuildContext context) {
@@ -366,7 +405,31 @@ class _Composer extends StatelessWidget {
       mainAxisSize: .min,
       children: [
         ReplyDisplay(controller),
+        ValueListenableBuilder(
+          valueListenable: controller.composerPanel,
+          builder: (context, panel, _) => panel == ComposerPanel.format
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.s),
+                  child: FormatPanel(
+                    controller: controller.sendController,
+                    availableHeight: availableHeight,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
         ChatInputRow(controller),
+        ValueListenableBuilder(
+          valueListenable: controller.composerPanel,
+          builder: (context, panel, _) => panel == ComposerPanel.attach
+              ? Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.s),
+                  child: AttachmentTypeBar(
+                    types: attachmentTypes(mobile: PlatformInfos.isMobile),
+                    onSelected: controller.onAttachmentSelected,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
         ChatEmojiPicker(controller),
       ],
     );
