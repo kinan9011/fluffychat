@@ -10,6 +10,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:fluffychat/utils/retention/default_retention.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -72,7 +73,8 @@ class NewGroupController extends State<NewGroup> {
 
   Future<void> _createGroup() async {
     if (!mounted) return;
-    final client = Matrix.of(context).client;
+    final matrix = Matrix.of(context);
+    final client = matrix.client;
 
     final roomId = await client.createGroupChat(
       visibility: groupCanBeFound
@@ -88,6 +90,10 @@ class NewGroupController extends State<NewGroup> {
               'events': {MatrixRtcCallMember.eventType: 0},
             },
       initialState: [
+        ...await DefaultRetention.initialStateFor(
+          matrix.serverCapabilities,
+          client,
+        ),
         if (avatar != null)
           sdk.StateEvent(
             type: sdk.EventTypes.RoomAvatar,

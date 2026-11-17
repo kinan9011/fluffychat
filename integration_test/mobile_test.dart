@@ -12,10 +12,12 @@ import 'flows/chat_flows.dart';
 import 'flows/chat_list_flows.dart';
 import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
+import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/privacy_topics_flows.dart';
 import 'flows/scheduling_flows.dart';
+import 'flows/settings_flows.dart';
 import 'flows/shell_navigation.dart';
 
 void main() {
@@ -44,6 +46,13 @@ void main() {
     testWidgets('Poll creation', pollFlow);
     testWidgets('Topics', topicFlow);
     testWidgets('Disappearing messages', disappearingFlow);
+    testWidgets('Direct chat with the default timer', directChatFlow);
+    testWidgets('Settings appearance', settingsAppearanceFlow);
+    testWidgets('Settings homeserver features', settingsHomeserverFlow);
+    testWidgets('Settings export chat', settingsExportFlow);
+    // Signs out every other session of the user: keep it after the flows that
+    // use sessions of their own.
+    testWidgets('Settings linked devices', settingsLinkedDevicesFlow);
     testWidgets('Final logout', finalLogout);
   });
 }

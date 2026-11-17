@@ -10,7 +10,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/pages/settings_style/settings_style.dart';
+import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -130,10 +130,10 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('900 px: settings left, style page right', (tester) async {
-    await pump(tester, 900, '/settings/style');
+  testWidgets('900 px: settings left, appearance page right', (tester) async {
+    await pump(tester, 900, '/settings/appearance');
     expect(find.byType(Settings), findsOneWidget);
-    expect(find.byType(SettingsStyle), findsOneWidget);
+    expect(find.byType(SettingsAppearance), findsOneWidget);
     expect(find.byType(AppNavRail), findsOneWidget);
     await finish(tester);
   });

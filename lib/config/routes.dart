@@ -21,6 +21,7 @@ import 'package:fluffychat/pages/chat_members/chat_members.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_page.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
+import 'package:fluffychat/pages/export/export_page.dart';
 import 'package:fluffychat/pages/intro/intro_page_presenter.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
@@ -29,18 +30,21 @@ import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/profile/profile_page.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
+import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
 import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
+import 'package:fluffychat/pages/settings_data/settings_data.dart';
 import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
 import 'package:fluffychat/pages/settings_folders/folder_editor.dart';
 import 'package:fluffychat/pages/settings_folders/settings_folders.dart';
+import 'package:fluffychat/pages/settings_homeserver/homeserver_details.dart';
 import 'package:fluffychat/pages/settings_homeserver/settings_homeserver.dart';
 import 'package:fluffychat/pages/settings_ignore_list/settings_ignore_list.dart';
 import 'package:fluffychat/pages/settings_notifications/settings_notifications.dart';
 import 'package:fluffychat/pages/settings_password/settings_password.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
-import 'package:fluffychat/pages/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_in/sign_in_page.dart';
 import 'package:fluffychat/pages/topics/topics_page.dart';
+import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:fluffychat/widgets/config_viewer.dart';
 import 'package:fluffychat/widgets/database_quarantine_banner.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
@@ -347,6 +351,18 @@ abstract class AppRoutes {
                       redirect: loggedOutRedirect,
                     ),
                     GoRoute(
+                      path: 'appearance',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        SettingsAppearance(
+                          key: ValueKey(state.pathParameters['roomid']),
+                          roomId: state.pathParameters['roomid'],
+                        ),
+                      ),
+                      redirect: loggedOutRedirect,
+                    ),
+                    GoRoute(
                       path: 'scheduled',
                       pageBuilder: (context, state) => defaultPageBuilder(
                         context,
@@ -477,6 +493,33 @@ abstract class AppRoutes {
               ),
               routes: [
                 GoRoute(
+                  path: 'data',
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, state, const SettingsData()),
+                  redirect: loggedOutRedirect,
+                  routes: [
+                    GoRoute(
+                      path: 'export',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        ExportPage(
+                          key: ValueKey(state.uri.queryParameters['room']),
+                          roomId: state.uri.queryParameters['room'] ?? '',
+                        ),
+                      ),
+                      redirect: (context, state) {
+                        final guarded = loggedOutRedirect(context, state);
+                        if (guarded != null) return guarded;
+                        final room = state.uri.queryParameters['room'];
+                        return room != null && isMatrixRoomId(room)
+                            ? null
+                            : '/settings/data';
+                      },
+                    ),
+                  ],
+                ),
+                GoRoute(
                   path: 'notifications',
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
@@ -486,10 +529,19 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'style',
-                  pageBuilder: (context, state) =>
-                      defaultPageBuilder(context, state, const SettingsStyle()),
+                  path: 'appearance',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    const SettingsAppearance(),
+                  ),
                   redirect: loggedOutRedirect,
+                ),
+                GoRoute(
+                  path: 'style',
+                  redirect: (context, state) =>
+                      loggedOutRedirect(context, state) ??
+                      '/settings/appearance',
                 ),
                 GoRoute(
                   path: 'devices',
@@ -589,6 +641,17 @@ abstract class AppRoutes {
                     );
                   },
                   redirect: loggedOutRedirect,
+                  routes: [
+                    GoRoute(
+                      path: 'details',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        const HomeserverDetails(),
+                      ),
+                      redirect: loggedOutRedirect,
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'security',

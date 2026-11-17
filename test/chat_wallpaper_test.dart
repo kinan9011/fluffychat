@@ -6,6 +6,7 @@
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
 import 'package:fluffychat/utils/account_config.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -73,6 +74,53 @@ void main() {
       ),
     );
     expect(find.byKey(ChatWallpaper.dotsKey), findsNothing);
+    expect(find.byType(ImageFiltered), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(minutes: 1));
+  });
+
+  testWidgets('a preset chosen for this chat beats a picture for all chats', (
+    tester,
+  ) async {
+    await pumpGoldenWidget(
+      tester,
+      ChatWallpaper(
+        client: client,
+        config: ApplicationAccountConfig(
+          wallpaperUrl: Uri.parse('mxc://example.org/abc'),
+        ),
+        appearance: const ResolvedAppearance(
+          preset: 'sunset',
+          accentHue: 220,
+          corners: BubbleCorners.standard,
+          hasRoomOverride: true,
+          hasRoomPreset: true,
+        ),
+      ),
+    );
+    expect(find.byType(ImageFiltered), findsNothing);
+    expect(find.byKey(ChatWallpaper.dotsKey), findsOneWidget);
+  });
+
+  testWidgets('without a preset of this chat the picture stays', (
+    tester,
+  ) async {
+    await pumpGoldenWidget(
+      tester,
+      ChatWallpaper(
+        client: client,
+        config: ApplicationAccountConfig(
+          wallpaperUrl: Uri.parse('mxc://example.org/abc'),
+        ),
+        appearance: const ResolvedAppearance(
+          preset: 'default',
+          accentHue: 220,
+          corners: BubbleCorners.standard,
+          hasRoomOverride: true,
+          hasRoomPreset: false,
+        ),
+      ),
+    );
     expect(find.byType(ImageFiltered), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 1));

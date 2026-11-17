@@ -6,6 +6,7 @@
 import 'package:fluffychat/pages/chat/events/message_bubble.dart';
 import 'package:fluffychat/pages/chat/events/poll.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
+import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -48,11 +49,13 @@ extension on FluffyChatTester {
   }
 
   Future<void> _setSwitch(String title, bool wanted) async {
-    final tile = find.widgetWithText(SwitchListTile, title);
-    await waitFor(tile);
-    if (tester.widget<SwitchListTile>(tile).value == wanted) return;
-    await tapOn(tile);
-    expect(tester.widget<SwitchListTile>(tile).value, wanted, reason: title);
+    final row = find.byWidgetPredicate(
+      (widget) => widget is SettingsToggleRow && widget.title == title,
+    );
+    await waitFor(row);
+    if (tester.widget<SettingsToggleRow>(row).value == wanted) return;
+    await tapOn(row);
+    expect(tester.widget<SettingsToggleRow>(row).value, wanted, reason: title);
   }
 
   Future<({SynapseUser alice, SynapseUser bob, String roomId})> _openRoom(
@@ -79,7 +82,7 @@ extension on FluffyChatTester {
     await ensureLoggedIn();
     final alice = await SynapseUser.login(user1Name, user1Pw);
     await openTab('Settings');
-    await tapOn('Security');
+    await tapOn('Privacy and security');
     await _setSwitch('Show online status', false);
     await _setSwitch('Appear offline', false);
     await _untilTrue(

@@ -48,7 +48,7 @@ class SdkServerCapabilitySource implements ServerCapabilitySource {
         'rtc transports',
         () => client.request(
           .GET,
-          '/_matrix/client/unstable/org.matrix.msc4143/rtc/transports',
+          '/client/unstable/org.matrix.msc4143/rtc/transports',
         ),
       ),
       _guard(

@@ -25,6 +25,7 @@ void main() {
     api = RecordingApi();
     SharedPreferences.setMockInitialValues({});
     await AppSettings.init(loadWebConfigFile: false);
+    await AppSettings.store.clear();
   });
 
   tearDown(() => client.dispose(closeDatabase: true));
@@ -85,6 +86,39 @@ void main() {
   test('a background client keeps offline even when the user shares the '
       'status', () async {
     await AppSettings.shareOnlineStatus.setItem(true);
+    await firstSync(background: true);
+    expect(
+      api.requests('/sync').first.url.queryParameters['set_presence'],
+      'offline',
+    );
+  });
+
+  test(
+    'Away while sharing: the very first sync asks for unavailable',
+    () async {
+      await AppSettings.shareOnlineStatus.setItem(true);
+      await AppSettings.presenceAway.setItem(true);
+      await firstSync();
+      expect(
+        api.requests('/sync').first.url.queryParameters['set_presence'],
+        'unavailable',
+      );
+      for (final put in api.requests('/presence/', method: 'PUT')) {
+        expect((put.json! as Map)['presence'], isNot('online'));
+      }
+    },
+  );
+
+  test('Away never makes a hidden user visible on the first sync', () async {
+    await AppSettings.presenceAway.setItem(true);
+    await firstSync();
+    expect(
+      api.requests('/sync').first.url.queryParameters['set_presence'],
+      'offline',
+    );
+    await AppSettings.shareOnlineStatus.setItem(true);
+    await AppSettings.appearOffline.setItem(true);
+    client.dispose(closeDatabase: true).ignore();
     await firstSync(background: true);
     expect(
       api.requests('/sync').first.url.queryParameters['set_presence'],

@@ -12,6 +12,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
 import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:fluffychat/utils/chat/message_ticks.dart';
@@ -167,6 +168,7 @@ class Message extends StatelessWidget {
     final radius = bubbleRadius(
       outgoing: ownMessage,
       tail: !previousEventSameSender,
+      corners: ChatAppearanceScope.cornersOf(context),
     );
     final direction = Directionality.of(context);
     final footer = MessageFooter(

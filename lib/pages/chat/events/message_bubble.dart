@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
 import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -112,7 +113,11 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final colors = BubbleColors.of(tokens, outgoing: outgoing, kind: kind);
-    final radius = bubbleRadius(outgoing: outgoing, tail: tail);
+    final radius = bubbleRadius(
+      outgoing: outgoing,
+      tail: tail,
+      corners: ChatAppearanceScope.cornersOf(context),
+    );
     final ring = ringColor(tokens);
     final shape = radius.resolve(Directionality.of(context));
     return ConstrainedBox(

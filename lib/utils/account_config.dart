@@ -49,15 +49,24 @@ class ApplicationAccountConfig {
     return opacity;
   }
 
+  static Uri? _mxcOnly(Object? value) {
+    if (value is! String || value.length > 2048) return null;
+    final uri = Uri.tryParse(value);
+    return uri != null && uri.isScheme('mxc') ? uri : null;
+  }
+
+  static double? _sanitizedBlur(double? blur) {
+    if (blur == null || !blur.isFinite) return null;
+    return blur.clamp(0, 50).toDouble();
+  }
+
   factory ApplicationAccountConfig.fromJson(Map<String, dynamic> json) =>
       ApplicationAccountConfig(
-        wallpaperUrl: json['wallpaper_url'] is String
-            ? Uri.tryParse(json['wallpaper_url'])
-            : null,
+        wallpaperUrl: _mxcOnly(json['wallpaper_url']),
         wallpaperOpacity: _sanitizedOpacity(
           json.tryGet<double>('wallpaper_opacity'),
         ),
-        wallpaperBlur: json.tryGet<double>('wallpaper_blur'),
+        wallpaperBlur: _sanitizedBlur(json.tryGet<double>('wallpaper_blur')),
       );
 
   Map<String, dynamic> toJson() => {

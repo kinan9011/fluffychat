@@ -150,12 +150,11 @@ void main() {
         'Appear offline': AppSettings.appearOffline,
       };
       for (final entry in titles.entries) {
-        final tile = find.widgetWithText(SwitchListTile, entry.key);
-        expect(tile, findsOneWidget, reason: entry.key);
-        expect(tester.widget<SwitchListTile>(tile).value, isFalse);
+        expect(find.text(entry.key), findsOneWidget, reason: entry.key);
+        expect(entry.value.value, isFalse, reason: entry.key);
       }
       for (final entry in titles.entries) {
-        await tester.tap(find.widgetWithText(SwitchListTile, entry.key));
+        await tester.tap(find.text(entry.key));
         await tester.pump();
         expect(entry.value.value, isTrue, reason: entry.key);
       }

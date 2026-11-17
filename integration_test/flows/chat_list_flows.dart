@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/space_switcher.dart';
+import 'package:fluffychat/widgets/settings/settings_row.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -51,7 +52,7 @@ extension on FluffyChatTester {
 
   Future<void> _setSpaceNavigation(String label) async {
     await openTab('Settings');
-    await tapOn('Chat');
+    await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
     await tapOn(label);
     await openTab('Chats');
   }
@@ -108,7 +109,7 @@ extension on FluffyChatTester {
     await ensureGroupChatCreated();
 
     await openTab('Settings');
-    await tapOn('Chat');
+    await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
     await tapOn('Folders');
     await tapOn('Create folder');
     await enterText(find.byKey(const ValueKey('folder_name')), _folderName);
@@ -154,7 +155,7 @@ extension on FluffyChatTester {
     await tester.pumpAndSettle();
 
     await openTab('Settings');
-    await tapOn('Chat');
+    await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
     await tapOn('Folders');
     await tapOn(find.widgetWithText(ListTile, _folderName));
     await tapOn(find.byKey(const ValueKey('delete_folder')));

@@ -7,6 +7,8 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/retention/default_retention.dart';
+import 'package:fluffychat/utils/status/status_policy.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -59,7 +61,7 @@ class UserDialog extends StatelessWidget {
         client: Matrix.of(context).client,
         builder: (context, presence) {
           if (presence == null) return const SizedBox.shrink();
-          final statusMsg = presence.statusMsg;
+          final statusMsg = displayStatus(presence.statusMsg);
           final lastActiveTimestamp = presence.lastActiveTimestamp;
           final presenceText = presence.currentlyActive == true
               ? L10n.of(context).currentlyActive
@@ -254,7 +256,14 @@ class UserDialog extends StatelessWidget {
                         final router = GoRouter.of(context);
                         final roomIdResult = await showFutureLoadingDialog(
                           context: context,
-                          future: () => client.startDirectChat(profile.userId),
+                          future: () async => client.startDirectChat(
+                            profile.userId,
+                            initialState:
+                                await DefaultRetention.initialStateFor(
+                                  Matrix.of(context).serverCapabilities,
+                                  client,
+                                ),
+                          ),
                         );
                         final roomId = roomIdResult.result;
                         if (roomId == null) return;

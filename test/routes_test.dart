@@ -30,8 +30,12 @@ const _guardedSubRoutes = [
   '/rooms/!abc:example.org/details',
   '/rooms/!abc:example.org/topics',
   '/settings/security',
+  '/settings/appearance',
   '/settings/style',
+  '/rooms/!abc:example.org/appearance',
   '/settings/devices',
+  '/settings/data',
+  '/settings/data/export?room=!abc:example.org',
   '/settings/addaccount',
   '/settings/homeserver',
   '/backup',
@@ -144,8 +148,16 @@ void main() {
       expect(find.byType(ChatList), findsOneWidget);
       expect(await goTo(tester, '/settings'), '/settings');
       expect(find.byType(Settings), findsOneWidget);
-      expect(await goTo(tester, '/rooms/settings/style'), '/settings/style');
+      expect(
+        await goTo(tester, '/rooms/settings/appearance'),
+        '/settings/appearance',
+      );
       expect(find.byType(Settings), findsOneWidget);
+      expect(
+        await goTo(tester, '/settings/style'),
+        '/settings/appearance',
+        reason: 'the old appearance path keeps working',
+      );
       expect(await goTo(tester, '/calls'), '/calls');
       expect(find.byType(CallsPage), findsOneWidget);
       expect(await goTo(tester, '/profile'), '/profile');
@@ -157,7 +169,7 @@ void main() {
       await pumpApp(tester);
       await goTo(tester, '/rooms');
       expect(find.byType(AppBottomBar).hitTestable(), findsOneWidget);
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       expect(find.byType(AppBottomBar).hitTestable(), findsNothing);
     });
 
@@ -165,14 +177,14 @@ void main() {
       tester,
     ) async {
       await pumpApp(tester);
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await goTo(tester, '/rooms');
       await tester.tap(find.text('Settings'));
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 400));
       expect(
         FluffyChatApp.router.routeInformationProvider.value.uri.path,
-        '/settings/style',
+        '/settings/appearance',
       );
       await goTo(tester, '/settings');
       await tester.tap(find.text('Profile'));

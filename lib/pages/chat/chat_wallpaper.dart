@@ -4,50 +4,135 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/account_config.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
+import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
-/// Gradient plus dot grid (DESIGN.md 6.1 `--wallG`, `--dot2`). A wallpaper the
-/// user picked is drawn over the gradient without the dots.
-class ChatWallpaper extends StatelessWidget {
+/// Gradient plus dot grid (DESIGN.md 6.1 `--wallG`, `--dot2`). A picture the
+/// user picked (local file, or the legacy account data one) is drawn over the
+/// gradient without the dots. A preset replaces the theme gradient.
+class ChatWallpaper extends StatefulWidget {
   @visibleForTesting
   static const dotsKey = ValueKey('chat_wallpaper_dots');
+  @visibleForTesting
+  static const localImageKey = ValueKey('chat_wallpaper_local_image');
 
   final ApplicationAccountConfig config;
   final Client? client;
+  final ResolvedAppearance? appearance;
+  final LocalWallpaperStore? store;
 
-  const ChatWallpaper({required this.config, this.client, super.key});
+  const ChatWallpaper({
+    required this.config,
+    this.client,
+    this.appearance,
+    this.store,
+    super.key,
+  });
+
+  @override
+  State<ChatWallpaper> createState() => _ChatWallpaperState();
+}
+
+class _ChatWallpaperState extends State<ChatWallpaper> {
+  Uint8List? _local;
+  int _loads = 0;
+
+  LocalWallpaperStore get _store => widget.store ?? LocalWallpaperStore();
+
+  @override
+  void initState() {
+    super.initState();
+    AppSettings.chatWallpaperLocal.listenable.addListener(_load);
+    _load();
+  }
+
+  @override
+  void dispose() {
+    AppSettings.chatWallpaperLocal.listenable.removeListener(_load);
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final load = ++_loads;
+    if (!AppSettings.chatWallpaperLocal.value) {
+      if (_local != null && mounted) setState(() => _local = null);
+      return;
+    }
+    Uint8List? bytes;
+    try {
+      bytes = await (await _store.current())?.readAsBytes();
+    } catch (_) {
+      bytes = null;
+    }
+    if (!mounted || load != _loads) return;
+    setState(() => _local = bytes);
+  }
 
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
-    final url = config.wallpaperUrl;
+    final config = widget.config;
     final size = MediaQuery.sizeOf(context);
+    final appearance =
+        widget.appearance ?? ChatAppearanceScope.maybeOf(context);
+    final presetWins = appearance?.hasRoomPreset ?? false;
+    final url = presetWins ? null : config.wallpaperUrl;
+    final local = presetWins ? null : _local;
+    final preset = wallpaperPresetById(appearance?.preset);
+    final colors = preset.colors;
+    final blur = config.wallpaperBlur ?? 0.0;
     return Stack(
       fit: StackFit.expand,
       children: [
-        DecoratedBox(decoration: BoxDecoration(gradient: tokens.wallG)),
-        if (url == null)
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: colors == null
+                ? tokens.wallG
+                : LinearGradient(
+                    begin: const Alignment(-0.34, -0.94),
+                    end: const Alignment(0.34, 0.94),
+                    colors: colors,
+                  ),
+          ),
+        ),
+        if (local != null)
+          Opacity(
+            opacity: config.wallpaperOpacity ?? 0.5,
+            child: ImageFiltered(
+              imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: Image.memory(
+                local,
+                key: ChatWallpaper.localImageKey,
+                fit: BoxFit.cover,
+                cacheWidth: math.min(size.width * 2, 2048).round(),
+                gaplessPlayback: true,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
+          )
+        else if (url == null)
           RepaintBoundary(
-            key: dotsKey,
+            key: ChatWallpaper.dotsKey,
             child: CustomPaint(painter: WallpaperDots(tokens.dot2)),
           )
         else
           Opacity(
             opacity: config.wallpaperOpacity ?? 0.5,
             child: ImageFiltered(
-              imageFilter: ui.ImageFilter.blur(
-                sigmaX: config.wallpaperBlur ?? 0.0,
-                sigmaY: config.wallpaperBlur ?? 0.0,
-              ),
+              imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
               child: MxcImage(
-                client: client,
+                client: widget.client,
                 cacheKey: url.toString(),
                 uri: url,
                 fit: BoxFit.cover,

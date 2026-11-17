@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/crypto_identity.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/app_lock.dart';
@@ -24,6 +25,38 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
+  bool? cryptoConnected;
+  bool capabilitiesLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    cryptoIdentityRevision.addListener(_loadCrypto);
+    _loadCrypto();
+    _loadCapabilities();
+  }
+
+  @override
+  void dispose() {
+    cryptoIdentityRevision.removeListener(_loadCrypto);
+    super.dispose();
+  }
+
+  Future<void> _loadCapabilities() async {
+    final matrix = Matrix.of(context);
+    final client = matrix.client;
+    await matrix.serverCapabilities.load(client);
+    if (!mounted || !identical(Matrix.of(context).client, client)) return;
+    setState(() => capabilitiesLoaded = true);
+  }
+
+  Future<void> _loadCrypto() async {
+    final client = Matrix.of(context).client;
+    final connected = await cryptoIdentityConnected(client);
+    if (!mounted || !identical(Matrix.of(context).client, client)) return;
+    setState(() => cryptoConnected = connected);
+  }
+
   Future<void> toggleBiometrics() async {
     AppLock.of(context).showLockScreen();
 

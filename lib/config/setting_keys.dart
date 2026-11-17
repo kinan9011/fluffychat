@@ -8,6 +8,7 @@ import 'dart:ui' show Color;
 
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -50,6 +51,8 @@ enum AppSettings<T> {
   sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', false),
   shareOnlineStatus<bool>('chat.fluffy.share_online_status', false),
   appearOffline<bool>('chat.fluffy.appear_offline', false),
+  presenceAway<bool>('chat.fluffy.presence_away', false),
+  defaultDisappearSeconds<int>('chat.fluffy.default_disappear_seconds', 0),
   swipeRightToLeftToReply<bool>('chat.fluffy.swipeRightToLeftToReply', true),
   sendOnEnter<bool>('chat.fluffy.send_on_enter', false),
   shareKeysWith<String>('chat.fluffy.share_keys_with_2', 'all'),
@@ -80,6 +83,9 @@ enum AppSettings<T> {
   ),
   accentHue<int>('chat.fluffy.accent_hue', 268),
   reduceTransparency<bool>('chat.fluffy.reduce_transparency', false),
+  chatWallpaperPreset<String>('chat.fluffy.chat_wallpaper_preset', 'default'),
+  chatWallpaperLocal<bool>('chat.fluffy.chat_wallpaper_local', false),
+  bubbleCorners<String>('chat.fluffy.bubble_corners', 'standard'),
   callsEnabled<bool>('chat.fluffy.calls_enabled', true),
   emojiSuggestionLocale<String>('emoji_suggestion_locale', ''),
   enableSoftLogout<bool>('chat.fluffy.enable_soft_logout', true),
@@ -261,6 +267,8 @@ const webDeniedSettings = <AppSettings<Object?>>{
   AppSettings.showFoldersAfterSpaces,
   AppSettings.showTabUnreadCounts,
   AppSettings.unarchiveOnMention,
+  AppSettings.presenceAway,
+  AppSettings.defaultDisappearSeconds,
 };
 
 bool _isHttpsUrl(Object? value) =>
@@ -283,6 +291,9 @@ final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
       ShareKeysWith.values.any((share) => share.name == value),
   AppSettings.fontSizeFactor: (value) =>
       value is double && value.isFinite && value >= 0.5 && value <= 3.0,
+  AppSettings.chatWallpaperPreset: isWallpaperPresetId,
+  AppSettings.chatWallpaperLocal: (value) => value == false,
+  AppSettings.bubbleCorners: (value) => BubbleCorners.byName(value) != null,
   AppSettings.textMessageMaxLength: (value) => _intIn(value, 1, 65536),
   AppSettings.messagePreviewMaxLines: (value) => _intIn(value, 0, 500),
   AppSettings.sendTimelineEventTimeout: (value) => _intIn(value, 5, 120),

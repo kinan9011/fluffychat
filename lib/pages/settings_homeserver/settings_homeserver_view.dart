@@ -3,301 +3,223 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:convert';
-
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/config/app_tokens.dart';
+import 'package:fluffychat/config/design_constants.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:fluffychat/pages/settings_homeserver/settings_homeserver.dart';
+import 'package:fluffychat/utils/server_capabilities/homeserver_report.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/settings/settings_group.dart';
+import 'package:fluffychat/widgets/settings/settings_row.dart';
+import 'package:fluffychat/widgets/settings/settings_scaffold.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../widgets/matrix.dart';
-import 'settings_homeserver.dart';
-
 class SettingsHomeserverView extends StatelessWidget {
+  const SettingsHomeserverView(this.controller, {super.key});
+
   final SettingsHomeserverController controller;
 
-  const SettingsHomeserverView(this.controller, {super.key});
+  static IconData featureIcon(ServerFeature feature) => switch (feature) {
+    ServerFeature.slidingSync => Icons.bolt_rounded,
+    ServerFeature.retention => Icons.timer_rounded,
+    ServerFeature.qrLogin => Icons.qr_code_2_rounded,
+    ServerFeature.threadNotifications => Icons.forum_rounded,
+    ServerFeature.delayedEvents => Icons.schedule_send_rounded,
+    ServerFeature.groupCalls => Icons.groups_rounded,
+    ServerFeature.serverSideSearchE2ee => Icons.search_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final l10n = L10n.of(context);
+    final tokens = AppTokens.of(context);
     final client = Matrix.of(context).client;
-
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !FluffyThemes.isColumnMode(context),
-        centerTitle: FluffyThemes.isColumnMode(context),
-        title: Text(
-          L10n.of(
-            context,
-          ).aboutHomeserver(client.userID?.domain ?? 'Homeserver'),
+    final info = controller.info;
+    final domain = client.userID?.domain ?? info?.domain ?? '';
+    final limit = formatUploadLimit(info?.uploadLimitBytes);
+    final software = info?.software == null
+        ? null
+        : '${info!.software} ${info.version ?? ''}'.trim();
+    final subtitle = [
+      ?software,
+      if (limit != null) l10n.homeserverUploadLimit(limit),
+    ].join(' · ');
+    final online = controller.online;
+    return SettingsScaffold(
+      title: l10n.settingsHomeserver,
+      actions: [
+        IconButton(
+          key: const ValueKey('homeserver_check_again'),
+          tooltip: l10n.checkAgain,
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          onPressed: controller.loading
+              ? null
+              : () => controller.refresh(force: true),
+          icon: const Icon(Icons.refresh_rounded),
         ),
-      ),
-      body: MaxWidthBody(
-        withScrolling: true,
-        child: SelectionArea(
-          child: Column(
-            mainAxisSize: .min,
+      ],
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.xxl),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: tokens.surf,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Row(
+            spacing: 14,
             children: [
-              ListTile(
-                title: Text(
-                  L10n.of(context).serverInformation,
-                  style: TextStyle(
-                    color: theme.colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: tokens.accs,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Icon(Icons.dns_rounded, size: 28, color: tokens.acc),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(
+                      domain,
+                      textDirection: TextDirection.ltr,
+                      style: AppTypography.mono.copyWith(
+                        color: tokens.fg,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: TextStyle(color: tokens.mut, fontSize: 13),
+                      ),
+                  ],
                 ),
               ),
-              FutureBuilder(
-                future: client.getWellknownSupport(),
-                builder: (context, snapshot) {
-                  final error = snapshot.error;
-                  final data = snapshot.data;
-                  if (error != null) {
-                    return ListTile(
-                      leading: const Icon(Icons.error_outlined),
-                      title: Text(
-                        error.toLocalizedString(
-                          context,
-                          ExceptionContext.checkServerSupportInfo,
-                        ),
-                        style: const TextStyle(fontSize: 14),
+              if (controller.loading && !online)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      size: 8,
+                      color: online ? tokens.ok : tokens.mut,
+                    ),
+                    Text(
+                      online ? l10n.homeserverOnline : l10n.homeserverOffline,
+                      style: TextStyle(
+                        color: online ? tokens.ok : tokens.mut,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
-                    );
-                  }
-                  if (data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  final supportPage = data.supportPage;
-                  final contacts = data.contacts;
-                  if (supportPage == null && contacts == null) {
-                    return ListTile(
-                      leading: const Icon(Icons.error_outlined),
-                      title: Text(
-                        L10n.of(context).noContactInformationProvided,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    );
-                  }
-                  return Column(
-                    mainAxisSize: .min,
-                    children: [
-                      if (supportPage != null)
-                        ListTile(
-                          title: Text(L10n.of(context).supportPage),
-                          subtitle: Text(supportPage.toString()),
-                        ),
-                      if (contacts != null)
-                        ...contacts.map((contact) {
-                          return ListTile(
-                            title: Text(
-                              contact.role.localizedString(L10n.of(context)),
-                            ),
-                            subtitle: Column(
-                              mainAxisSize: .min,
-                              children: [
-                                if (contact.emailAddress != null)
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text(contact.emailAddress!),
-                                  ),
-                                if (contact.matrixId != null)
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text(contact.matrixId!),
-                                  ),
-                              ],
-                            ),
-                          );
-                        }),
-                    ],
-                  );
-                },
-              ),
-              FutureBuilder(
-                future: controller.fetchServerInfo(),
-                builder: (context, snapshot) {
-                  final error = snapshot.error;
-                  if (error != null) {
-                    return Column(
-                      mainAxisAlignment: .center,
-                      children: [
-                        Icon(
-                          Icons.error_outlined,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          error.toLocalizedString(context),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                      ],
-                    );
-                  }
-                  final data = snapshot.data;
-                  if (data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  return Column(
-                    mainAxisSize: .min,
-                    children: [
-                      ListTile(
-                        title: Text(L10n.of(context).name),
-                        subtitle: Text(data.name),
-                      ),
-                      ListTile(
-                        title: Text(L10n.of(context).version),
-                        subtitle: Text(data.version),
-                      ),
-                      ListTile(
-                        title: Text(L10n.of(context).federationBaseUrl),
-                        subtitle: Linkify(
-                          text: data.federationBaseUrl.toString(),
-                          style: TextStyle(color: theme.colorScheme.onSurface),
-                          textScaleFactor: MediaQuery.textScalerOf(
-                            context,
-                          ).scale(1),
-                          options: const LinkifyOptions(humanize: false),
-                          linkStyle: TextStyle(
-                            color: theme.colorScheme.primary,
-                            decorationColor: theme.colorScheme.primary,
-                          ),
-                          onOpen: (link) => launchWebUrl(link.url),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              Divider(color: theme.dividerColor),
-              FutureBuilder(
-                future: client.getWellknown(),
-                builder: (context, snapshot) {
-                  final error = snapshot.error;
-                  if (error != null) {
-                    return Column(
-                      mainAxisAlignment: .center,
-                      children: [
-                        Icon(
-                          Icons.error_outlined,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          error.toLocalizedString(context),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                      ],
-                    );
-                  }
-                  final wellKnown = snapshot.data;
-                  if (wellKnown == null) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  final identityServer = wellKnown.mIdentityServer;
-                  return Column(
-                    mainAxisSize: .min,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          L10n.of(context).clientWellKnownInformation,
-                          style: TextStyle(
-                            color: theme.colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(L10n.of(context).baseUrl),
-                        subtitle: Linkify(
-                          text: wellKnown.mHomeserver.baseUrl.toString(),
-                          style: TextStyle(color: theme.colorScheme.onSurface),
-                          textScaleFactor: MediaQuery.textScalerOf(
-                            context,
-                          ).scale(1),
-                          options: const LinkifyOptions(humanize: false),
-                          linkStyle: TextStyle(
-                            color: theme.colorScheme.primary,
-                            decorationColor: theme.colorScheme.primary,
-                          ),
-                          onOpen: (link) => launchWebUrl(link.url),
-                        ),
-                      ),
-                      if (identityServer != null)
-                        ListTile(
-                          title: Text(L10n.of(context).identityServer),
-                          subtitle: Linkify(
-                            text: identityServer.baseUrl.toString(),
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            textScaleFactor: MediaQuery.textScalerOf(
-                              context,
-                            ).scale(1),
-                            options: const LinkifyOptions(humanize: false),
-                            linkStyle: TextStyle(
-                              color: theme.colorScheme.primary,
-                              decorationColor: theme.colorScheme.primary,
-                            ),
-                            onOpen: (link) => launchWebUrl(link.url),
-                          ),
-                        ),
-                      ...wellKnown.additionalProperties.entries.map(
-                        (entry) => ListTile(
-                          title: Text(entry.key),
-                          subtitle: Material(
-                            borderRadius: BorderRadius.circular(
-                              AppConfig.borderRadius,
-                            ),
-                            color: theme.colorScheme.surfaceContainer,
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.all(16),
-                              scrollDirection: Axis.horizontal,
-                              child: Text(
-                                const JsonEncoder.withIndent(
-                                  '    ',
-                                ).convert(entry.value),
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
-      ),
+        SettingsGroup(
+          header: l10n.homeserverFeatures,
+          rows: [
+            for (final feature in homeserverFeatureOrder)
+              _FeatureRow(
+                key: ValueKey('feature_${feature.name}'),
+                feature: feature,
+                support: controller.caps[feature],
+              ),
+          ],
+          footer: l10n.homeserverChecksNote(AppSettings.applicationName.value),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              key: const ValueKey('share_with_admin'),
+              onPressed: controller.shareWithAdmin,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(44, 44),
+                foregroundColor: tokens.acc,
+              ),
+              child: Text(
+                l10n.shareWithAdmin,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SettingsGroup(
+          rows: [
+            SettingsRow(
+              key: const ValueKey('homeserver_details'),
+              icon: Icons.info_rounded,
+              title: l10n.moreServerDetails,
+              onTap: () => context.go('/settings/homeserver/details'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
-extension on Role {
-  String localizedString(L10n l10n) {
-    switch (this) {
-      case Role.mRoleAdmin:
-        return l10n.contactServerAdmin;
-      case Role.mRoleSecurity:
-        return l10n.contactServerSecurity;
-    }
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({required this.feature, required this.support, super.key});
+
+  final ServerFeature feature;
+  final FeatureSupport support;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final tokens = AppTokens.of(context);
+    final (icon, color) = switch (support) {
+      FeatureSupport.supported => (Icons.check_circle_rounded, tokens.ok),
+      FeatureSupport.partial => (Icons.error_rounded, tokens.warn),
+      FeatureSupport.unsupported => (Icons.cancel_rounded, tokens.mut),
+      FeatureSupport.unknown => (Icons.help_outline_rounded, tokens.mut),
+    };
+    final label = supportLabel(l10n, support);
+    return SettingsRow(
+      icon: SettingsHomeserverView.featureIcon(feature),
+      neutralTile: true,
+      title: featureTitle(l10n, feature),
+      subtitle: featureDescription(l10n, feature),
+      showChevron: false,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 3,
+        children: [
+          Icon(icon, size: 16, color: color),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

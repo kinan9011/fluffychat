@@ -51,12 +51,17 @@ void main() {
     final sites = _callSites(RegExp(r'\.setPresence\('));
     expect(_files(sites), {
       'lib/utils/privacy/presence_policy.dart',
-      'lib/pages/chat_list/chat_list.dart',
+      'lib/utils/status/status_clear_store.dart',
+      'lib/pages/status/status_sheet.dart',
     });
-    final chatList = File(
-      'lib/pages/chat_list/chat_list.dart',
-    ).readAsStringSync();
-    expect(chatList, contains('PresencePolicy.fromSettings().statusPresence'));
+    expect(
+      File('lib/pages/status/status_sheet.dart').readAsStringSync(),
+      contains('PresencePolicy.fromSettings().statusPresence'),
+    );
+    expect(
+      File('lib/utils/status/status_clear_store.dart').readAsStringSync(),
+      contains('PresencePolicy.fromSettings().syncPresence('),
+    );
   });
 
   test('typing notifications are sent only through the notifier', () {

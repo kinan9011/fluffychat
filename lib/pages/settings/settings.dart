@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:fluffychat/utils/file_selector.dart';
+import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -68,14 +69,28 @@ class SettingsController extends State<Settings> {
     }
   }
 
+  Future<int> _serverHeldScheduledCount(Client client) async {
+    try {
+      final store = ScheduledStore.of(client);
+      await store.ready;
+      return store.serverHeldCount;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   Future<void> logoutAction() async {
     final l10n = L10n.of(context);
     final matrix = Matrix.of(context);
+    final held = await _serverHeldScheduledCount(matrix.client);
+    if (!mounted) return;
     final consent = await showOkCancelAlertDialog(
       useRootNavigator: false,
       context: context,
       title: l10n.areYouSureYouWantToLogout,
-      message: l10n.noBackupWarning,
+      message: held == 0
+          ? l10n.noBackupWarning
+          : '${l10n.noBackupWarning}\n\n${l10n.logoutScheduledWarning(held)}',
       isDestructive: cryptoIdentityConnected == false,
       okLabel: l10n.logout,
       cancelLabel: l10n.cancel,

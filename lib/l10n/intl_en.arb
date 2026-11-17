@@ -434,11 +434,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "changeTheme": "Change your style",
-    "@changeTheme": {
-        "type": "String",
-        "placeholders": {}
-    },
     "changeTheNameOfTheGroup": "Change the name of the group",
     "@changeTheNameOfTheGroup": {
         "type": "String",
@@ -855,11 +850,6 @@
             }
         }
     },
-    "fontSize": "Font size",
-    "@fontSize": {
-        "type": "String",
-        "placeholders": {}
-    },
     "forward": "Forward",
     "@forward": {
         "type": "String",
@@ -1131,7 +1121,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "messagesStyle": "Messages:",
     "moderator": "Moderator",
     "@moderator": {
         "type": "String",
@@ -1406,11 +1395,6 @@
                 "type": "String"
             }
         }
-    },
-    "removeAllOtherDevices": "Remove all other devices",
-    "@removeAllOtherDevices": {
-        "type": "String",
-        "placeholders": {}
     },
     "unbanFromChat": "Unban from chat",
     "@unbanFromChat": {
@@ -2054,7 +2038,6 @@
     "openLinkInBrowser": "Open link in browser",
     "reportErrorDescription": "😭 Oh no. Something went wrong. If you want, you can report this bug to the developers.",
     "report": "report",
-    "setColorTheme": "Set color theme:",
     "invite": "Invite",
     "inviteGroupChat": "📨 Group chat invite",
     "invalidInput": "Invalid input!",
@@ -2070,7 +2053,6 @@
     "pleaseEnterANumber": "Please enter a number greater than 0",
     "archiveRoomDescription": "The chat will be moved to the archive. Other users will be able to see that you have left the chat.",
     "roomUpgradeDescription": "The chat will then be recreated with the new room version. All participants will be notified that they need to switch to the new chat. You can find out more about room versions at https://spec.matrix.org/latest/rooms/",
-    "removeDevicesDescription": "You will be logged out of this device and will no longer be able to receive messages.",
     "banUserDescription": "The user will be banned from the chat and will not be able to enter the chat again until they are unbanned.",
     "unbanUserDescription": "The user will be able to enter the chat again if they try.",
     "kickUserDescription": "The user is kicked out of the chat but not banned. In public chats, the user can rejoin at any time.",
@@ -2119,7 +2101,6 @@
     "joinSpace": "Join space",
     "publicSpaces": "Public spaces",
     "addChatOrSubSpace": "Add chat or sub space",
-    "thisDevice": "This device:",
     "initAppError": "An error occured while init the app",
     "searchIn": "Search in chat \"{chat}\"...",
     "@searchIn": {
@@ -2238,11 +2219,6 @@
         }
     },
     "noDatabaseEncryption": "Database encryption is not supported on this platform",
-    "thereAreCountUsersBlocked": "Right now there are {count} users blocked.",
-    "@thereAreCountUsersBlocked": {
-        "type": "String",
-        "count": {}
-    },
     "goToSpace": "Go to space: {space}",
     "@goToSpace": {
         "type": "String",
@@ -2313,7 +2289,6 @@
     "continueText": "Continue",
     "blur": "Blur:",
     "opacity": "Opacity:",
-    "setWallpaper": "Set wallpaper",
     "manageAccount": "Manage account",
     "noContactInformationProvided": "Server does not provide any valid contact information",
     "contactServerAdmin": "Contact server admin",
@@ -2321,7 +2296,6 @@
     "supportPage": "Support page",
     "serverInformation": "Server information:",
     "name": "Name",
-    "version": "Version",
     "website": "Website",
     "compress": "Compress",
     "boldText": "Bold text",
@@ -2529,13 +2503,10 @@
             }
         }
     },
-    "startPoll": "Start poll",
     "endPoll": "End poll",
-    "answersVisible": "Answers visible",
     "pollQuestion": "Poll question",
     "answerOption": "Answer option",
     "addAnswerOption": "Add answer option",
-    "allowMultipleAnswers": "Allow multiple answers",
     "pollHasBeenEnded": "Poll has been ended",
     "countVotes": "{count, plural, =1{One vote} other{{count} votes}}",
     "@countVotes": {
@@ -2579,7 +2550,6 @@
             }
         }
     },
-    "federationBaseUrl": "Federation Base URL",
     "clientWellKnownInformation": "Client-Well-Known Information:",
     "baseUrl": "Base URL",
     "identityServer": "Identity Server:",
@@ -4029,6 +3999,665 @@
     },
     "retentionDaysFewer": "Fewer days",
     "@retentionDaysFewer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsAppearance": "Appearance",
+    "@settingsAppearance": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsChats": "Chats",
+    "@settingsChats": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsAccounts": "Accounts",
+    "@settingsAccounts": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsEmotesAndStickers": "Emotes and stickers",
+    "@settingsEmotesAndStickers": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsHomeserver": "Homeserver",
+    "@settingsHomeserver": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "privacyAndSecurity": "Privacy and security",
+    "@privacyAndSecurity": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionWallpaper": "Wallpaper",
+    "@sectionWallpaper": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionAccent": "Accent",
+    "@sectionAccent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionTextSize": "Text size",
+    "@sectionTextSize": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionBubbleCorners": "Bubble corners",
+    "@sectionBubbleCorners": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionTheme": "Theme",
+    "@sectionTheme": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "chatAppearance": "Chat appearance",
+    "@chatAppearance": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearanceScopeAll": "All chats",
+    "@appearanceScopeAll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearanceScopeChat": "Only {chat}",
+    "@appearanceScopeChat": {
+        "type": "String",
+        "placeholders": {
+            "chat": {
+                "type": "String"
+            }
+        }
+    },
+    "appearanceUseGlobal": "Use settings for all chats",
+    "@appearanceUseGlobal": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearanceLocalNote": "Appearance is stored on this device and, for a single chat, in your own account data. Nobody else sees it.",
+    "@appearanceLocalNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearancePreviewIncoming": "How does this look?",
+    "@appearancePreviewIncoming": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearancePreviewOutgoing": "Calm. Keep it.",
+    "@appearancePreviewOutgoing": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "bubbleCornersSharp": "Sharp",
+    "@bubbleCornersSharp": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "bubbleCornersStandard": "Standard",
+    "@bubbleCornersStandard": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "bubbleCornersRound": "Round",
+    "@bubbleCornersRound": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperPresetDefault": "Default",
+    "@wallpaperPresetDefault": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperPresetMeadow": "Meadow",
+    "@wallpaperPresetMeadow": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperPresetSunset": "Sunset",
+    "@wallpaperPresetSunset": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperPresetNight": "Night",
+    "@wallpaperPresetNight": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperPresetPaper": "Paper",
+    "@wallpaperPresetPaper": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperAddPhoto": "Add photo",
+    "@wallpaperAddPhoto": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperRemove": "Remove wallpaper",
+    "@wallpaperRemove": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperLocalNote": "Your photo stays on this device. It is not uploaded.",
+    "@wallpaperLocalNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperTooLarge": "That photo is too large. Pick one under 15 MB.",
+    "@wallpaperTooLarge": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "wallpaperNotAnImage": "That file isn't a photo this app can use.",
+    "@wallpaperNotAnImage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "textSizeValue": "{size} pt",
+    "@textSizeValue": {
+        "type": "String",
+        "placeholders": {
+            "size": {
+                "type": "int"
+            }
+        }
+    },
+    "sectionVisibility": "Visibility",
+    "@sectionVisibility": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionMessages": "Messages",
+    "@sectionMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sectionEncryption": "Encryption",
+    "@sectionEncryption": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "defaultDisappearTimer": "Default disappearing timer",
+    "@defaultDisappearTimer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "defaultRetentionNote": "Applies to chats you start from now on. Existing chats keep their setting. Your server decides whether it deletes messages.",
+    "@defaultRetentionNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "defaultRetentionUnsupported": "Your server doesn't support disappearing messages.",
+    "@defaultRetentionUnsupported": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "defaultRetentionUnknown": "We couldn't check whether your server supports disappearing messages.",
+    "@defaultRetentionUnknown": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "keyBackupOn": "On",
+    "@keyBackupOn": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "keyBackupOff": "Off",
+    "@keyBackupOff": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "crossSigningReady": "Ready",
+    "@crossSigningReady": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "crossSigningNotSet": "Not set up",
+    "@crossSigningNotSet": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "crossSigning": "Cross-signing",
+    "@crossSigning": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "linkedDevices": "Linked devices",
+    "@linkedDevices": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClear": "Clear",
+    "@statusClear": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSave": "Save status",
+    "@statusSave": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSuggestMeeting": "In a meeting",
+    "@statusSuggestMeeting": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSuggestCommuting": "Commuting",
+    "@statusSuggestCommuting": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSuggestFocusing": "Focusing",
+    "@statusSuggestFocusing": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSuggestSick": "Out sick",
+    "@statusSuggestSick": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearAfter": "Clear after",
+    "@statusClearAfter": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearHour": "1 hour",
+    "@statusClearHour": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearToday": "Today",
+    "@statusClearToday": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearWeek": "This week",
+    "@statusClearWeek": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearNever": "Never",
+    "@statusClearNever": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusClearNote": "Your status is cleared the next time the app is open after that time.",
+    "@statusClearNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusPresenceSection": "Presence",
+    "@statusPresenceSection": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "presenceOnline": "Online",
+    "@presenceOnline": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "presenceAway": "Away",
+    "@presenceAway": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "statusSharesPresenceNote": "This also shows when you're online.",
+    "@statusSharesPresenceNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "otherSessions": "Other sessions",
+    "@otherSessions": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signOutAllOthers": "Sign out all other sessions",
+    "@signOutAllOthers": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signOutAllOthersTitle": "Sign out other sessions?",
+    "@signOutAllOthersTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signOutAllOthersBody": "{count, plural, =1{1 other session will be signed out. You will need to sign in again on that device.} other{{count} other sessions will be signed out. You will need to sign in again on those devices.}}",
+    "@signOutAllOthersBody": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "signOutSession": "Sign out this session",
+    "@signOutSession": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signOutSessionTitle": "Sign out this session?",
+    "@signOutSessionTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signedOutSessions": "{count, plural, =1{1 session signed out} other{{count} sessions signed out}}",
+    "@signedOutSessions": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "linkDevice": "Link a device",
+    "@linkDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "linkDeviceUnsupportedBody": "Your server supports signing in with a QR code, but this version of {app} can't scan one yet. To add a device, sign in on it as usual.",
+    "@linkDeviceUnsupportedBody": {
+        "type": "String",
+        "placeholders": {
+            "app": {
+                "type": "String"
+            }
+        }
+    },
+    "linkDeviceAccountPageHint": "Your account page lists and manages your sessions.",
+    "@linkDeviceAccountPageHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "openAccountPage": "Open account page",
+    "@openAccountPage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "logoutScheduledWarning": "{count, plural, =1{1 scheduled message is held by your server and will still be sent after you log out. Cancel it in Scheduled messages first if you don't want that.} other{{count} scheduled messages are held by your server and will still be sent after you log out. Cancel them in Scheduled messages first if you don't want that.}}",
+    "@logoutScheduledWarning": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "thisDeviceSection": "This device",
+    "@thisDeviceSection": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "homeserverFeatures": "Features on this server",
+    "@homeserverFeatures": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureSlidingSync": "Sliding sync",
+    "@featureSlidingSync": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureSlidingSyncDesc": "Instant chat list on start",
+    "@featureSlidingSyncDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureDisappearing": "Disappearing messages",
+    "@featureDisappearing": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureDisappearingDesc": "Room retention policy",
+    "@featureDisappearingDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureQrSignIn": "Sign in with QR",
+    "@featureQrSignIn": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureQrSignInDesc": "Link devices by scanning",
+    "@featureQrSignInDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureThreadNotifications": "Thread notifications",
+    "@featureThreadNotifications": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureThreadNotificationsDesc": "Unread counts per topic",
+    "@featureThreadNotificationsDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureScheduling": "Server-side scheduling",
+    "@featureScheduling": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureSchedulingDesc": "Falls back to sending from this device",
+    "@featureSchedulingDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureGroupCalls": "Group calls",
+    "@featureGroupCalls": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureGroupCallsDesc": "Needs a call server (LiveKit)",
+    "@featureGroupCallsDesc": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureSupported": "Supported",
+    "@featureSupported": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featurePartial": "Partial",
+    "@featurePartial": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureNotSetUp": "Not set up",
+    "@featureNotSetUp": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "featureUnknown": "Unknown",
+    "@featureUnknown": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "homeserverOnline": "Online",
+    "@homeserverOnline": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "homeserverOffline": "Offline",
+    "@homeserverOffline": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "homeserverUploadLimit": "upload limit {size}",
+    "@homeserverUploadLimit": {
+        "type": "String",
+        "placeholders": {
+            "size": {
+                "type": "String"
+            }
+        }
+    },
+    "homeserverChecksNote": "{app} checks this when you sign in and hides or adapts features your server can't support.",
+    "@homeserverChecksNote": {
+        "type": "String",
+        "placeholders": {
+            "app": {
+                "type": "String"
+            }
+        }
+    },
+    "shareWithAdmin": "Share with your admin",
+    "@shareWithAdmin": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "checkAgain": "Check again",
+    "@checkAgain": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "adminReportTitle": "Homeserver feature report",
+    "@adminReportTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "adminReportFooter": "Created with {app}",
+    "@adminReportFooter": {
+        "type": "String",
+        "placeholders": {
+            "app": {
+                "type": "String"
+            }
+        }
+    },
+    "moreServerDetails": "More server details",
+    "@moreServerDetails": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "settingsDataAndStorage": "Data and storage",
+    "@settingsDataAndStorage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportChat": "Export chat",
+    "@exportChat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportFormat": "Format",
+    "@exportFormat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportFormatHtml": "HTML (readable)",
+    "@exportFormatHtml": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportFormatJson": "JSON (Matrix events)",
+    "@exportFormatJson": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportInclude": "Include",
+    "@exportInclude": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportPhotosVideos": "Photos and videos",
+    "@exportPhotosVideos": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportFiles": "Files",
+    "@exportFiles": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportVoice": "Voice messages",
+    "@exportVoice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportMediaLimit": "Up to 25 MB per file and 200 MB in total. Larger files are left out.",
+    "@exportMediaLimit": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportDecryptedWarning": "Messages are decrypted on this device. Keep the exported file somewhere safe.",
+    "@exportDecryptedWarning": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportDecryptedTitle": "Export decrypted messages?",
+    "@exportDecryptedTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportDecryptedConfirm": "The exported file is not encrypted. Anyone who gets it can read these messages.",
+    "@exportDecryptedConfirm": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportAnyway": "Export",
+    "@exportAnyway": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportAction": "Export",
+    "@exportAction": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportRunning": "Exporting… {count} messages",
+    "@exportRunning": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "exportSaved": "Export saved",
+    "@exportSaved": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportTruncated": "The export stopped at the limit of {count} messages.",
+    "@exportTruncated": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "exportUndecryptable": "[Message could not be decrypted]",
+    "@exportUndecryptable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportMediaSkipped": "Some files are not included: too large or unavailable.",
+    "@exportMediaSkipped": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportFailed": "Export failed. Nothing was saved.",
+    "@exportFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportPickChat": "Export a chat",
+    "@exportPickChat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "dataStorageNote": "Exports are created on this device and saved where you choose.",
+    "@dataStorageNote": {
         "type": "String",
         "placeholders": {}
     }

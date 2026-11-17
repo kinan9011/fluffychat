@@ -45,11 +45,21 @@ class RecordingApi extends FakeMatrixApi {
   /// The next write to `/send/` is refused with a server error.
   bool failNextSend = false;
 
+  /// GET paths (by their end) that the server does not know: 404.
+  final notFound = <String>{};
+
+  /// Writes to these paths need user-interactive auth: a request without an
+  /// `auth` member gets the 401 flow, one with it succeeds.
+  final uiaPaths = <String>{};
+
+  /// Runs for every request that leaves the client, before it is answered.
+  Future<void> Function(BaseRequest request)? onRequest;
+
   /// Answers for other GET requests, by the end of their path.
   final getOverrides = <String, Object?>{};
 
   static final _accept = RegExp(
-    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads',
+    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/',
   );
 
   void clear() => log.clear();
@@ -75,6 +85,35 @@ class RecordingApi extends FakeMatrixApi {
         utf8.decode(bytes, allowMalformed: true),
       ),
     );
+    await onRequest?.call(request);
+    if (request.method != 'GET' &&
+        uiaPaths.any((path) => request.url.path.contains(path))) {
+      final body = copy.body.isEmpty
+          ? <String, Object?>{}
+          : jsonDecode(copy.body);
+      final needsAuth = body is! Map || !body.containsKey('auth');
+      return StreamedResponse(
+        Stream.value(
+          utf8.encode(
+            jsonEncode(
+              needsAuth
+                  ? {
+                      'flows': [
+                        {
+                          'stages': ['m.login.password'],
+                        },
+                      ],
+                      'params': <String, Object?>{},
+                      'session': 'uia-session',
+                    }
+                  : <String, Object?>{},
+            ),
+          ),
+        ),
+        needsAuth ? 401 : 200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
     final threads = threadsResponse;
     if (threads != null &&
         request.method == 'GET' &&
@@ -82,6 +121,18 @@ class RecordingApi extends FakeMatrixApi {
       return StreamedResponse(
         Stream.value(utf8.encode(jsonEncode(threads))),
         200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (request.method == 'GET' &&
+        notFound.any((end) => request.url.path.endsWith(end))) {
+      return StreamedResponse(
+        Stream.value(
+          utf8.encode(
+            '{"errcode":"M_UNRECOGNIZED","error":"Unrecognized request"}',
+          ),
+        ),
+        404,
         headers: {'content-type': 'application/json'},
       );
     }

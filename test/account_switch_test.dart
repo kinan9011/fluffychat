@@ -440,10 +440,10 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style?client=Second');
+      await goTo(tester, '/settings/appearance?client=Second');
       await settle(tester);
       expect(matrix.client, second);
-      expect(location(), '/settings/style?client=Second');
+      expect(location(), '/settings/appearance?client=Second');
       return matrix;
     });
 
@@ -477,7 +477,7 @@ void main() {
         'a destination switch resets the other tabs when selected at $width px',
         (tester, matrix) async {
           final roomId = second.rooms.first.id;
-          await goTo(tester, '/settings/style');
+          await goTo(tester, '/settings/appearance');
           await goTo(tester, '/rooms/$roomId?client=Second');
           await settle(tester);
           expect(location(), '/rooms/$roomId?client=Second');
@@ -495,7 +495,7 @@ void main() {
     ) async {
       await AppSettings.callsEnabled.setItem(false);
       final roomId = second.rooms.first.id;
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await goTo(tester, '/rooms/$roomId?client=Second');
       await settle(tester);
       expect(location(), '/rooms/$roomId?client=Second');
@@ -506,7 +506,7 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await goTo(tester, '/rooms');
       matrix.joinCall(second, '!nothere:fakeServer.notExisting');
       await settle(tester);
@@ -547,7 +547,7 @@ void main() {
       accountTest(
         'a user switch opens the other tabs at their root at $width px',
         (tester, matrix) async {
-          await goTo(tester, '/settings/style');
+          await goTo(tester, '/settings/appearance');
           await goTo(tester, '/rooms');
           matrix.setActiveClient(second);
           await settle(tester);
@@ -564,7 +564,7 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await goTo(tester, '/rooms');
       matrix.setActiveClient(second);
       matrix.joinCall(first, '!nothere:fakeServer.notExisting');
@@ -579,7 +579,7 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       matrix.joinCall(second, '!nothere:fakeServer.notExisting');
       await settle(tester);
       expect(location(), '/rooms/!nothere:fakeServer.notExisting?action=call');
@@ -590,7 +590,7 @@ void main() {
 
     accountTest('a notification tap into another account resets the tab you '
         'were on', (tester, matrix) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       final roomId = second.rooms.first.id;
       await goTo(tester, '/rooms/$roomId?client=Second');
       await settle(tester);
@@ -604,7 +604,7 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await goTo(tester, '/rooms');
       matrix.setActiveClient(second);
       await settle(tester);
@@ -1391,7 +1391,7 @@ void main() {
       tester,
       matrix,
     ) async {
-      await goTo(tester, '/settings/style');
+      await goTo(tester, '/settings/appearance');
       await back(tester);
       expect(location(), '/settings');
       await back(tester);

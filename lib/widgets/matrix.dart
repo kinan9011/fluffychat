@@ -21,6 +21,7 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
@@ -325,18 +326,27 @@ class MatrixState extends State<Matrix> {
     _listener = AppLifecycleListener(onStateChange: didChangeAppLifecycleState);
     AppSettings.shareOnlineStatus.listenable.addListener(_applyPresence);
     AppSettings.appearOffline.listenable.addListener(_applyPresence);
+    AppSettings.presenceAway.listenable.addListener(_applyPresence);
     initMatrix();
     _applyPresence();
+    _clearDueStatuses();
   }
 
-  void _applyPresence() => unawaited(
-    PresenceApplier.apply(
-      widget.clients,
-      foreground:
-          (_lifecycleState ?? AppLifecycleState.resumed) ==
-          AppLifecycleState.resumed,
-    ),
-  );
+  void _clearDueStatuses() {
+    final store = StatusClearStore();
+    for (final client in widget.clients) {
+      unawaited(store.clearIfDue(client, foreground: _foreground));
+    }
+  }
+
+  bool get _foreground =>
+      (_lifecycleState ??
+          WidgetsBinding.instance.lifecycleState ??
+          AppLifecycleState.resumed) ==
+      AppLifecycleState.resumed;
+
+  void _applyPresence() =>
+      unawaited(PresenceApplier.apply(widget.clients, foreground: _foreground));
 
   AppLifecycleListener? _listener;
   AppLifecycleState? _lifecycleState;
@@ -515,6 +525,7 @@ class MatrixState extends State<Matrix> {
       backgroundPush?.openRoomFromNotification(newActivity: true);
     }
     final foreground = state == AppLifecycleState.resumed;
+    if (foreground) _clearDueStatuses();
     for (final client in widget.clients) {
       if (foreground) unawaited(ScheduledQueue.of(client).evaluate());
       if (PlatformInfos.isMobile) {
@@ -531,6 +542,7 @@ class MatrixState extends State<Matrix> {
     _listener?.dispose();
     AppSettings.shareOnlineStatus.listenable.removeListener(_applyPresence);
     AppSettings.appearOffline.listenable.removeListener(_applyPresence);
+    AppSettings.presenceAway.listenable.removeListener(_applyPresence);
 
     for (final sub in onRoomKeyRequestSub.values) {
       sub.cancel();

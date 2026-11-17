@@ -70,6 +70,7 @@ class ChatPageHarness {
     Brightness brightness = Brightness.light,
     Locale? locale,
     int highlightCount = 0,
+    String? path,
   }) async {
     room.highlightCount = highlightCount;
     tester.view.physicalSize = Size(width, height);
@@ -86,7 +87,7 @@ class ChatPageHarness {
         appLockSettings: (pincode: null, useBiometrics: false),
       ),
     );
-    FluffyChatApp.router.go('/rooms/${room.id}');
+    FluffyChatApp.router.go(path ?? '/rooms/${room.id}');
     await settle(tester, rounds: locale == null ? 6 : 24);
     await tester.loadAssets();
     await tester.pump();

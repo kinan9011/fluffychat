@@ -124,6 +124,7 @@ class ChatEventList extends StatelessWidget {
     }
 
     final hasWallpaper =
+        AppSettings.chatWallpaperLocal.value ||
         controller.room.client.applicationAccountConfig.wallpaperUrl != null;
 
     return SelectionArea(

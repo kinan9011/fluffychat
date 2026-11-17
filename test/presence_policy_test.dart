@@ -61,6 +61,69 @@ void main() {
       },
     );
 
+    group('Away', () {
+      PresencePolicy of({
+        required bool share,
+        required bool appear,
+        required bool away,
+      }) => PresencePolicy(
+        shareOnlineStatus: share,
+        appearOffline: appear,
+        away: away,
+      );
+
+      test('a hidden user stays offline whatever Away says', () {
+        for (final away in [true, false]) {
+          for (final (share, appear) in [
+            (false, false),
+            (true, true),
+            (false, true),
+          ]) {
+            final policy = of(share: share, appear: appear, away: away);
+            for (final foreground in [true, false]) {
+              expect(
+                policy.syncPresence(foreground: foreground),
+                PresenceType.offline,
+                reason: 'share=$share appear=$appear away=$away',
+              );
+            }
+            expect(policy.statusPresence, PresenceType.offline);
+          }
+        }
+      });
+
+      test('a visible user who is away is unavailable, never online', () {
+        final policy = of(share: true, appear: false, away: true);
+        expect(policy.syncPresence(foreground: true), PresenceType.unavailable);
+        expect(
+          policy.syncPresence(foreground: false),
+          PresenceType.unavailable,
+        );
+        expect(policy.statusPresence, PresenceType.unavailable);
+      });
+
+      test('a visible user who is not away keeps the old behaviour', () {
+        final policy = of(share: true, appear: false, away: false);
+        expect(policy.syncPresence(foreground: true), isNull);
+        expect(
+          policy.syncPresence(foreground: false),
+          PresenceType.unavailable,
+        );
+        expect(policy.statusPresence, PresenceType.online);
+      });
+
+      test('away is off by default and read from the settings', () async {
+        expect(AppSettings.presenceAway.value, isFalse);
+        expect(
+          const PresencePolicy(
+            shareOnlineStatus: true,
+            appearOffline: false,
+          ).away,
+          isFalse,
+        );
+      });
+    });
+
     test('the background fetch mode stays offline', () {
       expect(backgroundFetchPresence, PresenceType.offline);
     });

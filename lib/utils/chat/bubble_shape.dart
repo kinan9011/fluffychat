@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 20 px on every corner, the sender-side bottom corner of the last bubble of
@@ -14,9 +15,10 @@ import 'package:material_ui/material_ui.dart';
 BorderRadiusDirectional bubbleRadius({
   required bool outgoing,
   required bool tail,
+  BubbleCorners corners = BubbleCorners.standard,
 }) {
-  const round = Radius.circular(AppRadius.bubble);
-  const tailCorner = Radius.circular(AppRadius.bubbleTail);
+  final round = Radius.circular(corners.radius);
+  final tailCorner = Radius.circular(corners.tail);
   return BorderRadiusDirectional.only(
     topStart: round,
     topEnd: round,

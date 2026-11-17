@@ -27,9 +27,22 @@ void main() {
       ChatOverflowAction.search,
       ChatOverflowAction.disappearing,
       ChatOverflowAction.wallpaper,
+      ChatOverflowAction.exportChat,
       ChatOverflowAction.encryption,
       ChatOverflowAction.leave,
     ]);
+  });
+
+  test('export is offered for joined rooms only (the page needs a join)', () {
+    expect(actions(), contains(ChatOverflowAction.exportChat));
+    expect(
+      actions(joined: false, left: true),
+      isNot(contains(ChatOverflowAction.exportChat)),
+    );
+    expect(
+      actions(joined: false),
+      isNot(contains(ChatOverflowAction.exportChat)),
+    );
   });
 
   test('disappearing messages are offered in joined rooms only', () {
@@ -67,6 +80,7 @@ void main() {
       actions(showDetails: true),
       containsAllInOrder([
         ChatOverflowAction.wallpaper,
+        ChatOverflowAction.exportChat,
         ChatOverflowAction.details,
         ChatOverflowAction.encryption,
       ]),

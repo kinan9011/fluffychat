@@ -99,7 +99,14 @@ class _ChatHeaderState extends State<ChatHeader> {
       case ChatOverflowAction.disappearing:
         await showRetentionSheet(context, room);
       case ChatOverflowAction.wallpaper:
-        context.go('/settings/style');
+        context.go('/rooms/${room.id}/appearance');
+      case ChatOverflowAction.exportChat:
+        context.go(
+          Uri(
+            path: '/settings/data/export',
+            queryParameters: {'room': room.id},
+          ).toString(),
+        );
       case ChatOverflowAction.details:
         final path = GoRouterState.of(context).uri.path;
         context.go(

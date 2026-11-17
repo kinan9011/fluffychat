@@ -71,7 +71,12 @@ void main() {
     await harness.open(tester);
     await tester.tap(find.byKey(const Key('chat_overflow_button')));
     await harness.settle(tester, rounds: 3);
-    for (final label in ['Search', 'Change wallpaper', 'Leave chat']) {
+    for (final label in [
+      'Search',
+      'Change wallpaper',
+      'Export chat',
+      'Leave chat',
+    ]) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
     expect(find.text('Scheduled messages'), findsOneWidget);

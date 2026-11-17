@@ -5,7 +5,7 @@
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/settings_style/settings_style.dart';
+import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
 import 'package:fluffychat/utils/oklch.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,7 +26,7 @@ void main() {
 
   group('accent swatches (m5)', () {
     test('a grey system colour is not offered', () {
-      final swatches = SettingsStyleController.accentSwatches(
+      final swatches = SettingsAppearanceController.accentSwatches(
         const Color(0xFF808080),
       );
       expect(swatches, isNot(contains(const Color(0xFF808080))));
@@ -35,14 +35,14 @@ void main() {
 
     test('without a system colour the list starts with the app colour', () {
       expect(
-        SettingsStyleController.accentSwatches(null).first,
+        SettingsAppearanceController.accentSwatches(null).first,
         AppConfig.chatColor,
       );
     });
 
     test('a coloured system colour comes first', () {
       const system = Color(0xFF2E7D32);
-      expect(SettingsStyleController.accentSwatches(system).first, system);
+      expect(SettingsAppearanceController.accentSwatches(system).first, system);
     });
 
     test('exactly one swatch is checked even when two share the hue', () {
@@ -52,12 +52,12 @@ void main() {
         const Color(0xFF2E7D32),
       ];
       final hue = accentHueOf(AppConfig.chatColor)!.toInt();
-      expect(SettingsStyleController.checkedSwatch(swatches, hue), 0);
+      expect(SettingsAppearanceController.checkedSwatch(swatches, hue), 0);
     });
 
     test('no swatch is checked for an unknown hue', () {
       expect(
-        SettingsStyleController.checkedSwatch([AppConfig.chatColor], 1),
+        SettingsAppearanceController.checkedSwatch([AppConfig.chatColor], 1),
         isNull,
       );
     });
@@ -77,11 +77,11 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
-    FluffyChatApp.router.go('/settings/style');
+    FluffyChatApp.router.go('/settings/appearance');
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 400));
 
-    final tile = find.widgetWithText(SwitchListTile, 'Reduce transparency');
+    final tile = find.text('Reduce transparency');
     expect(tile, findsOneWidget);
     expect(
       find.text('Use solid backgrounds instead of blurred glass'),

@@ -16,6 +16,7 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'utils/recording_api.dart';
 import 'utils/test_client.dart';
 
 class _FakeSource implements ServerCapabilitySource {
@@ -347,6 +348,43 @@ void main() {
         expect(caps.features.length, ServerFeature.values.length);
       },
     );
+
+    test(
+      'the RTC probe has no doubled _matrix prefix (W02 carried bug)',
+      () async {
+        final client = await prepareTestClient(loggedIn: true);
+        await client.abortSync();
+        await pumpEventQueue();
+        FakeMatrixApi.calledEndpoints.clear();
+        await SdkServerCapabilitySource(client).fetch();
+        final rtc = FakeMatrixApi.calledEndpoints.keys.where(
+          (path) => path.contains('rtc/transports'),
+        );
+        expect(rtc, isNotEmpty);
+        for (final path in rtc) {
+          expect(path, '/client/unstable/org.matrix.msc4143/rtc/transports');
+        }
+      },
+    );
+
+    test('the RTC probe asks exactly one _matrix prefix on the wire', () async {
+      final api = RecordingApi();
+      final client = await prepareTestClient(loggedIn: true, httpClient: api);
+      await client.abortSync();
+      await pumpEventQueue();
+      api.clear();
+      await SdkServerCapabilitySource(client).fetch();
+      final probes = api.log.where(
+        (r) => r.url.path.contains('rtc/transports'),
+      );
+      expect(probes, isNotEmpty);
+      for (final probe in probes) {
+        expect(
+          probe.url.path,
+          '/_matrix/client/unstable/org.matrix.msc4143/rtc/transports',
+        );
+      }
+    });
 
     test('a failing service logs only the exception type', () async {
       final log = StringBuffer();

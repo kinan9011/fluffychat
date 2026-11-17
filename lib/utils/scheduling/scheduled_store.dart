@@ -295,6 +295,15 @@ class ScheduledStore {
     return left.compareTo(right);
   }
 
+  /// Messages the homeserver still holds and will send, which stay there when
+  /// this device logs out.
+  int get serverHeldCount => entries()
+      .where(
+        (entry) =>
+            entry.delayId != null && entry.state == ScheduledState.pending,
+      )
+      .length;
+
   /// When online first, then by time.
   List<ScheduledEntry> entries({String? roomId}) => [
     for (final e in _entries.values)

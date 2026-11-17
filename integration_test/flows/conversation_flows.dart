@@ -97,6 +97,7 @@ extension on FluffyChatTester {
       'Search',
       'Scheduled messages',
       'Change wallpaper',
+      'Export chat',
       'Leave chat',
     ]) {
       expect(find.text(label), findsOneWidget, reason: label);

@@ -19,6 +19,7 @@ enum ChatOverflowAction {
   scheduled,
   disappearing,
   wallpaper,
+  exportChat,
   details,
   encryption,
   leave,
@@ -42,6 +43,7 @@ List<ChatOverflowAction> chatOverflowActions({
   if (joined && canSchedule) ChatOverflowAction.scheduled,
   if (joined) ChatOverflowAction.disappearing,
   ChatOverflowAction.wallpaper,
+  if (joined) ChatOverflowAction.exportChat,
   if (showDetails && joined) ChatOverflowAction.details,
   if (joined || left) ChatOverflowAction.encryption,
   ChatOverflowAction.leave,
@@ -89,6 +91,11 @@ List<ChatOverflowAction> chatOverflowActions({
   ChatOverflowAction.wallpaper => (
     icon: Icons.wallpaper_rounded,
     label: l10n.changeWallpaper,
+    destructive: false,
+  ),
+  ChatOverflowAction.exportChat => (
+    icon: Icons.download_rounded,
+    label: l10n.exportChat,
     destructive: false,
   ),
   ChatOverflowAction.details => (

@@ -19,6 +19,22 @@ abstract class AppRadius {
   static const double spaceAvatarFactor = 0.3;
 }
 
+/// Settings cards and rows (DESIGN.md 7.14).
+abstract class AppSettingsLayout {
+  static const double cardRadius = 20;
+  static const double rowHeight = 50;
+  static const double rowHeightSub = 62;
+  static const double tile = 32;
+  static const double tileRadius = 10;
+  static const double dividerInset = 58;
+  static const double rowPadding = 14;
+  static const double switchWidth = 46;
+  static const double switchHeight = 28;
+  static const double knob = 22;
+  static const double sideMargin = 14;
+  static const double maxWidth = 600;
+}
+
 /// Spacing scale (DESIGN.md 6.4).
 abstract class AppSpacing {
   static const double xxs = 4;

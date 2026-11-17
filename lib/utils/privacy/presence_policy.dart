@@ -15,15 +15,21 @@ class PresencePolicy {
   const PresencePolicy({
     required this.shareOnlineStatus,
     required this.appearOffline,
+    this.away = false,
   });
 
   factory PresencePolicy.fromSettings() => PresencePolicy(
     shareOnlineStatus: AppSettings.shareOnlineStatus.value,
     appearOffline: AppSettings.appearOffline.value,
+    away: AppSettings.presenceAway.value,
   );
 
   final bool shareOnlineStatus;
   final bool appearOffline;
+
+  /// The user chose "Away". Only matters while visible: a hidden user stays
+  /// offline whatever else is set.
+  final bool away;
 
   bool get visibleToOthers => shareOnlineStatus && !appearOffline;
 
@@ -31,12 +37,15 @@ class PresencePolicy {
   /// user online, which is only ever allowed when the user shares it.
   PresenceType? syncPresence({required bool foreground}) {
     if (!visibleToOthers) return PresenceType.offline;
+    if (away) return PresenceType.unavailable;
     return foreground ? null : PresenceType.unavailable;
   }
 
   /// The presence to publish together with a status message.
-  PresenceType get statusPresence =>
-      visibleToOthers ? PresenceType.online : PresenceType.offline;
+  PresenceType get statusPresence {
+    if (!visibleToOthers) return PresenceType.offline;
+    return away ? PresenceType.unavailable : PresenceType.online;
+  }
 }
 
 /// The only writer of [Client.syncPresence] (besides the background fetch

@@ -82,8 +82,12 @@ abstract class FluffyThemes {
         defaultAccentHue;
   }
 
-  static ThemeData buildTheme(BuildContext context, Brightness brightness) {
-    final hue = accentHue();
+  static ThemeData buildTheme(
+    BuildContext context,
+    Brightness brightness, {
+    double? hueOverride,
+  }) {
+    final hue = hueOverride ?? accentHue();
     final isDark = brightness == Brightness.dark;
     final tokens = isDark
         ? AppTokens.dark(hue: hue)

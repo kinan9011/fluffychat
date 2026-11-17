@@ -13,8 +13,9 @@ import '../data/environment_constants.dart';
 class SynapseUser {
   final String userId;
   final String _token;
+  final String _deviceId;
 
-  SynapseUser._(this.userId, this._token);
+  SynapseUser._(this.userId, this._token, this._deviceId);
 
   static Future<Object?> _request(
     String method,
@@ -60,6 +61,7 @@ class SynapseUser {
     return SynapseUser._(
       json['user_id']! as String,
       json['access_token']! as String,
+      json['device_id']! as String,
     );
   }
 
@@ -275,5 +277,91 @@ class SynapseUser {
     token: _token,
   );
 
+  /// Ids of every device (session) of this user.
+  Future<List<String>> deviceIds() async {
+    final json =
+        await _request('GET', '/devices', token: _token)
+            as Map<String, Object?>;
+    return [
+      for (final device in (json['devices'] as List? ?? const []))
+        (device as Map)['device_id']! as String,
+    ];
+  }
+
+  Future<String?> deviceName(String deviceId) async {
+    final json =
+        await _request(
+              'GET',
+              '/devices/${Uri.encodeComponent(deviceId)}',
+              token: _token,
+              allow404: true,
+            )
+            as Map<String, Object?>?;
+    return json?['display_name'] as String?;
+  }
+
   Future<void> logout() => _request('POST', '/logout', token: _token);
+
+  /// Gives this session device keys, so the app treats the user as someone
+  /// who can receive encrypted messages (the app decides on that by asking
+  /// the homeserver for the keys of the other user). The keys are made up:
+  /// nobody can decrypt anything with them.
+  Future<void> uploadDeviceKeys() async {
+    final id = _deviceId;
+    final key = base64Encode(List.filled(32, 7)).replaceAll('=', '');
+    final signature = base64Encode(List.filled(64, 9)).replaceAll('=', '');
+    await _request(
+      'POST',
+      '/keys/upload',
+      token: _token,
+      body: {
+        'device_keys': {
+          'user_id': userId,
+          'device_id': id,
+          'algorithms': [
+            'm.olm.v1.curve25519-aes-sha2',
+            'm.megolm.v1.aes-sha2',
+          ],
+          'keys': {'curve25519:$id': key, 'ed25519:$id': key},
+          'signatures': {
+            userId: {'ed25519:$id': signature},
+          },
+        },
+      },
+    );
+  }
+
+  /// The state events (`type` -> content) of the room this user shares with
+  /// [otherUserId] as a direct chat (an invite or join of the other user and
+  /// `is_direct`), or null when there is none.
+  Future<Map<String, Map<String, Object?>>?> directRoomWith(
+    String otherUserId,
+  ) async {
+    final rooms =
+        await _request('GET', '/joined_rooms', token: _token)
+            as Map<String, Object?>;
+    for (final roomId in (rooms['joined_rooms'] as List? ?? const [])) {
+      final events =
+          await _request(
+                'GET',
+                '/rooms/${Uri.encodeComponent(roomId as String)}/state',
+                token: _token,
+              )
+              as List;
+      final byType = <String, Map<String, Object?>>{};
+      var isDirectInvite = false;
+      for (final event in events.cast<Map>()) {
+        final type = event['type']! as String;
+        final content = Map<String, Object?>.from(event['content'] as Map);
+        byType[type] = content;
+        if (type == 'm.room.member' &&
+            event['state_key'] == otherUserId &&
+            content['is_direct'] == true) {
+          isDirectInvite = true;
+        }
+      }
+      if (isDirectInvite) return byType;
+    }
+    return null;
+  }
 }

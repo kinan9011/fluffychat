@@ -5,6 +5,7 @@
 
 import 'package:async/async.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/status/status_sheet.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -245,7 +246,7 @@ class ClientChooserButton extends StatelessWidget {
           context.go('/rooms/archive');
           break;
         case SettingsAction.setStatus:
-          controller.setStatus();
+          showStatusSheet(context);
           break;
       }
     }
