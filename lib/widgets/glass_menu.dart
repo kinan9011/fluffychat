@@ -61,6 +61,8 @@ class GlassMenuRow extends StatelessWidget {
   final bool destructive;
   final bool autofocus;
   final bool showDivider;
+  final Color? iconColor;
+  final double minHeight;
 
   const GlassMenuRow({
     required this.icon,
@@ -69,6 +71,8 @@ class GlassMenuRow extends StatelessWidget {
     this.destructive = false,
     this.autofocus = false,
     this.showDivider = false,
+    this.iconColor,
+    this.minHeight = 46,
     super.key,
   });
 
@@ -91,13 +95,13 @@ class GlassMenuRow extends StatelessWidget {
           autofocus: autofocus,
           onTap: onTap,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 46),
+            constraints: BoxConstraints(minHeight: minHeight),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Row(
                 spacing: AppSpacing.xxl,
                 children: [
-                  Icon(icon, size: 22, color: color),
+                  Icon(icon, size: 22, color: iconColor ?? color),
                   Expanded(
                     child: Text(
                       label,

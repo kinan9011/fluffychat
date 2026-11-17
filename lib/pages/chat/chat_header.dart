@@ -60,6 +60,7 @@ class _ChatHeaderState extends State<ChatHeader> {
       showDetails: true,
       joined: room.membership == Membership.join,
       left: room.membership == Membership.leave,
+      canSchedule: room.canSendDefaultMessages,
     );
     _menuOpen.value = true;
     final action = await showChatOverflowMenu(
@@ -89,6 +90,8 @@ class _ChatHeaderState extends State<ChatHeader> {
         controller.startOrJoinVideoCall();
       case ChatOverflowAction.search:
         context.go('/rooms/${room.id}/search');
+      case ChatOverflowAction.scheduled:
+        context.go('/rooms/${room.id}/scheduled');
       case ChatOverflowAction.wallpaper:
         context.go('/settings/style');
       case ChatOverflowAction.details:

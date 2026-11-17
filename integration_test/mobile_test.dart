@@ -14,6 +14,7 @@ import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
+import 'flows/scheduling_flows.dart';
 import 'flows/shell_navigation.dart';
 
 void main() {
@@ -33,6 +34,8 @@ void main() {
     testWidgets('Conversation jump buttons', conversationJumpButtons);
     testWidgets('Composer rich text', composerRichText);
     testWidgets('Edit history', editHistory);
+    testWidgets('Scheduled message send now', scheduleAndSendNow);
+    testWidgets('Scheduled message delete', scheduleAndDelete);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
     testWidgets('Final logout', finalLogout);

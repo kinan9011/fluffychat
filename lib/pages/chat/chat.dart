@@ -40,6 +40,8 @@ import 'package:fluffychat/utils/rich_text/html_serializer.dart';
 import 'package:fluffychat/utils/rich_text/outgoing_message.dart';
 import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:fluffychat/utils/rich_text/send_rich_message.dart';
+import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
+import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -613,6 +615,8 @@ class ChatController extends State<ChatPageWithRoom>
         ? lastEventThreadId ?? room.fullyRead
         : '';
     WidgetsBinding.instance.addObserver(this);
+    ScheduledStore.revision.addListener(syncScheduled);
+    unawaited(_loadScheduled());
     _tryLoadTimeline();
   }
 
@@ -889,6 +893,9 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     _displayChatDetailsColumn.dispose();
+    ScheduledStore.revision.removeListener(syncScheduled);
+    scheduledCount.dispose();
+    scheduledFailed.dispose();
     web.window.removeEventListener('paste', _handleClipboardFilePasteWeb);
     if (currentlyTyping) room.setTyping(false);
     MxcImage.clearCache(widget.room.id);
@@ -897,6 +904,27 @@ class ChatController extends State<ChatPageWithRoom>
 
   final sendController = RichTextEditingController();
   final composerPanel = ComposerPanelModel();
+
+  final scheduledCount = ValueNotifier<int>(0);
+  final scheduledFailed = ValueNotifier<bool>(false);
+  final sendButtonKey = GlobalKey();
+  ScheduledMessages get scheduledMessages =>
+      ScheduledMessages.of(room.client, Matrix.of(context).serverCapabilities);
+
+  void syncScheduled() {
+    scheduledCount.value = scheduledMessages.countFor(room.id);
+    scheduledFailed.value = scheduledMessages.hasFailed(room.id);
+  }
+
+  Future<void> _loadScheduled() async {
+    syncScheduled();
+    try {
+      await scheduledMessages.refreshCounts(room);
+    } catch (_) {
+      Logs().w('[Scheduled] could not refresh the counts');
+    }
+    if (mounted) syncScheduled();
+  }
 
   void setSendingClient(Client c) {
     // first cancel typing with the old sending client
@@ -918,16 +946,19 @@ class ChatController extends State<ChatPageWithRoom>
 
     // then set the new sending client
     setState(() => sendingClient = c);
+    unawaited(_loadScheduled());
   }
 
   void setActiveClient(Client c) => setState(() {
     Matrix.of(context).setActiveClient(c, resetTabs: false);
   });
 
-  Future<void> send() async {
+  /// The trust dialog, the empty check and the rich/plain decision shared by
+  /// the normal send and the send options. Null when nothing should be sent.
+  Future<OutgoingText?> planComposerOutgoing() async {
     final proceed = await showTrustUserInRoomDialog(context, room);
-    if (!mounted || !proceed) return;
-    if (sendController.text.trim().isEmpty) return;
+    if (!mounted || !proceed) return null;
+    if (sendController.text.trim().isEmpty) return null;
     final OutgoingText outgoing;
     try {
       outgoing = planOutgoing(
@@ -943,9 +974,42 @@ class ChatController extends State<ChatPageWithRoom>
         message: L10n.of(context).formattedMessageTooLong,
         okLabel: L10n.of(context).ok,
       );
-      return;
+      return null;
     }
-    if (!mounted) return;
+    return mounted ? outgoing : null;
+  }
+
+  void _stopTyping() {
+    if (!currentlyTyping) return;
+    typingCoolDown?.cancel();
+    currentlyTyping = false;
+    room.setTyping(false);
+  }
+
+  void _resetComposerAfterSend() {
+    composerPanel.close();
+    setState(() {
+      sendController.resetTo(pendingText, state: pendingFormat);
+      pendingFormat = null;
+      _inputTextIsEmpty = pendingText.isEmpty;
+      replyEvent = null;
+      editEvent = null;
+      pendingText = '';
+    });
+  }
+
+  /// After a send through the send options: the message is out (or stored),
+  /// so the draft and the composer go.
+  void finishOptionsSend() {
+    _storeInputTimeoutTimer?.cancel();
+    unawaited(_drafts.remove(roomId));
+    _stopTyping();
+    _resetComposerAfterSend();
+  }
+
+  Future<void> send() async {
+    final outgoing = await planComposerOutgoing();
+    if (outgoing == null || !mounted) return;
     _storeInputTimeoutTimer?.cancel();
     unawaited(_drafts.remove(roomId));
     var parseCommands = true;
@@ -966,11 +1030,7 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    if (currentlyTyping) {
-      typingCoolDown?.cancel();
-      currentlyTyping = false;
-      room.setTyping(false);
-    }
+    _stopTyping();
 
     switch (outgoing) {
       case RichOutgoing():
@@ -993,16 +1053,7 @@ class ChatController extends State<ChatPageWithRoom>
           threadRootEventId: activeThreadId,
         );
     }
-    composerPanel.close();
-
-    setState(() {
-      sendController.resetTo(pendingText, state: pendingFormat);
-      pendingFormat = null;
-      _inputTextIsEmpty = pendingText.isEmpty;
-      replyEvent = null;
-      editEvent = null;
-      pendingText = '';
-    });
+    _resetComposerAfterSend();
   }
 
   Future<void> sendFileAction({FileType type = FileType.any}) async {

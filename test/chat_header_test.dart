@@ -74,7 +74,7 @@ void main() {
     for (final label in ['Search', 'Change wallpaper', 'Leave chat']) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
-    expect(find.text('Scheduled messages'), findsNothing);
+    expect(find.text('Scheduled messages'), findsOneWidget);
     expect(find.text('Clear history'), findsNothing);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await harness.settle(tester, rounds: 3);
@@ -95,7 +95,9 @@ void main() {
       showDetails: true,
       joined: true,
       left: false,
+      canSchedule: room.canSendDefaultMessages,
     );
+    expect(expected, contains(ChatOverflowAction.scheduled));
     expect(find.byType(GlassMenuRow), findsNWidgets(expected.length));
     await harness.finish(tester);
   });

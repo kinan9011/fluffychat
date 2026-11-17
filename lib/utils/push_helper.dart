@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/notification_avatar_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/scheduling/silent_notification.dart';
 import 'package:fluffychat/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
@@ -168,10 +169,12 @@ Future<void> _tryPushHelper(
 
   Logs().v('Push helper got notification event of type ${event.type}.');
 
-  if (!client.pushruleEvaluator.match(event).notify) {
+  final pushAction = client.pushruleEvaluator.match(event);
+  if (!pushAction.notify) {
     Logs().i('Push helper: filtered by client-side push rules.');
     return;
   }
+  final silent = notifySilently(event, highlight: pushAction.highlight);
 
   if (event.type == RtcNotificationContent.eventType &&
       event.tryParseRtcNotificationContent()?.notificationType == .ring &&
@@ -299,6 +302,7 @@ Future<void> _tryPushHelper(
     ),
     importance: Importance.high,
     priority: Priority.max,
+    silent: silent,
     groupKey: client.clientName,
     actions: switch (event.type) {
       EventTypes.Message ||
@@ -337,6 +341,7 @@ Future<void> _tryPushHelper(
       : null;
   final iOSPlatformChannelSpecifics = DarwinNotificationDetails(
     threadIdentifier: '${notification.clientName}_${notification.roomId}',
+    presentSound: !silent,
     attachments: iOSAttachmentPath == null
         ? null
         : [

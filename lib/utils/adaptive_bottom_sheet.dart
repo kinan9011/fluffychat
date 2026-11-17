@@ -15,6 +15,7 @@ Future<T?> showAdaptiveBottomSheet<T>({
   bool isDismissible = true,
   bool isScrollControlled = true,
   bool useRootNavigator = true,
+  double maxHeight = 600,
 }) {
   if (FluffyThemes.isColumnMode(context)) {
     return showDialog<T>(
@@ -45,7 +46,7 @@ Future<T?> showAdaptiveBottomSheet<T>({
       constraints: BoxConstraints(
         maxHeight:
             MediaQuery.viewInsetsOf(context).bottom +
-            min(MediaQuery.sizeOf(context).height - 32, 600),
+            min(MediaQuery.sizeOf(context).height - 32, maxHeight),
       ),
       child: builder(context),
     ),

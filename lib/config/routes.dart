@@ -12,6 +12,7 @@ import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_page.dart';
 import 'package:fluffychat/pages/calls/calls_page.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/scheduling/scheduled_messages_page.dart';
 import 'package:fluffychat/pages/chat_access_settings/chat_access_settings_controller.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
@@ -331,6 +332,17 @@ abstract class AppRoutes {
                         context,
                         state,
                         ChatSearchPage(roomId: state.pathParameters['roomid']!),
+                      ),
+                      redirect: loggedOutRedirect,
+                    ),
+                    GoRoute(
+                      path: 'scheduled',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        ScheduledMessagesPage(
+                          roomId: state.pathParameters['roomid']!,
+                        ),
                       ),
                       redirect: loggedOutRedirect,
                     ),

@@ -22,12 +22,13 @@ class SynapseUser {
     String? token,
     Map<String, Object?>? body,
     bool allow404 = false,
+    String prefix = '/_matrix/client/v3',
   }) async {
     final client = HttpClient();
     try {
       final request = await client.openUrl(
         method,
-        Uri.parse('http://$homeserver/_matrix/client/v3$path'),
+        Uri.parse('http://$homeserver$prefix$path'),
       );
       if (token != null) request.headers.set('Authorization', 'Bearer $token');
       request.headers.contentType = ContentType.json;
@@ -139,6 +140,26 @@ class SynapseUser {
       }
     }
     throw StateError('The homeserver has no message of that sender');
+  }
+
+  /// How many messages the homeserver holds back for this user (MSC4140).
+  Future<int> delayedEventCount() async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        final json =
+            await _request(
+                  'GET',
+                  '/delayed_events',
+                  token: _token,
+                  prefix: '/_matrix/client/unstable/org.matrix.msc4140',
+                )
+                as Map<String, Object?>;
+        return ((json['delayed_events'] ?? json['scheduled']) as List).length;
+      } on Exception catch (e) {
+        if (attempt >= 8 || !e.toString().contains('429')) rethrow;
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
   }
 
   Future<void> sendMany(String roomId, int count, String prefix) async {

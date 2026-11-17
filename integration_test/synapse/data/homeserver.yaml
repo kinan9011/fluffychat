@@ -2800,3 +2800,8 @@ refreshable_access_token_lifetime: 2h
 rc_message:
   per_second: 1000
   burst_count: 10000
+
+# Scheduled messages (delayed events, MSC4140).
+experimental_features:
+  msc4140_enabled: true
+max_event_delay_duration: 30d

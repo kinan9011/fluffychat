@@ -38,6 +38,8 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/scheduling/scheduled_queue.dart';
+import '../utils/scheduling/scheduled_store.dart';
 import '../utils/server_capabilities/server_capabilities_service.dart';
 import 'local_notifications_extension.dart';
 
@@ -197,6 +199,8 @@ class MatrixState extends State<Matrix> {
     _hookedClients.remove(c.clientName);
     _updateAccountCount();
     serverCapabilities.forget(c);
+    ScheduledQueue.forget(c);
+    ScheduledStore.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;
     _emitIfChanged(before, resetTabs: true);
   }
@@ -365,6 +369,7 @@ class MatrixState extends State<Matrix> {
                 context,
           );
         });
+    unawaited(ScheduledQueue.of(c).start());
     onLogoutSub[name] ??= c.onLoginStateChanged.stream
         .where((state) => state == LoginState.loggedOut)
         .listen((_) {
@@ -497,6 +502,7 @@ class MatrixState extends State<Matrix> {
     }
     final foreground = state == AppLifecycleState.resumed;
     for (final client in widget.clients) {
+      if (foreground) unawaited(ScheduledQueue.of(client).evaluate());
       client.syncPresence = state == AppLifecycleState.resumed
           ? null
           : PresenceType.unavailable;
@@ -544,6 +550,9 @@ class MatrixState extends State<Matrix> {
 
     voiceMessageEventId.dispose();
     serverCapabilities.dispose();
+    for (final client in widget.clients) {
+      ScheduledQueue.forget(client);
+    }
     _activeClientChanged.close();
     _accountSwitched.close();
     _ownProfileChanged.close();

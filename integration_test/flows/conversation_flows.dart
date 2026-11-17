@@ -92,10 +92,16 @@ extension on FluffyChatTester {
     expect(find.byKey(ChatJumpButtons.scrollDownKey), findsNothing);
 
     await _openOverflow();
-    for (final label in ['Mute', 'Search', 'Change wallpaper', 'Leave chat']) {
+    for (final label in [
+      'Mute',
+      'Search',
+      'Scheduled messages',
+      'Change wallpaper',
+      'Leave chat',
+    ]) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
-    expect(find.text('Scheduled messages'), findsNothing);
+    expect(find.text('Clear history'), findsNothing);
     await _closeOverflow();
 
     await _openOverflow();

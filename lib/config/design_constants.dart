@@ -123,6 +123,33 @@ abstract class AppChat {
   static const double newDeviceBannerHeight = 56;
 }
 
+/// Send options, schedule sheet and scheduled list (DESIGN.md 7.12, 7.13,
+/// 9.8, mockup screens 03-05).
+abstract class AppSchedule {
+  static const double menuWidth = 272;
+  static const double menuRow = 50;
+  static const double menuGap = 10;
+  static const double sheetHandleWidth = 40;
+  static const double sheetHandleHeight = 4;
+  static const double closeButton = 34;
+  static const double presetRadius = 16;
+  static const double presetGap = 8;
+  static const double wheelRadius = 18;
+  static const double wheelRow = 38;
+  static const int wheelRows = 5;
+  static const double wheelHighlightHeight = 40;
+  static const double wheelHighlightRadius = 12;
+  static const double primaryButton = 54;
+  static const double chipRadius = 16;
+  static const double groupChipRadius = 12;
+  static const double badge = 16;
+  static const double badgeIcon = 11;
+  static const double actionIcon = 17;
+  static const double bubbleMaxFraction = 0.82;
+  static const double overlayBlur = 4;
+  static const double sheetMaxHeight = 720;
+}
+
 abstract class AppTypography {
   static const monoFamily = 'JetBrainsMono';
   static const mono = TextStyle(fontFamily: monoFamily);

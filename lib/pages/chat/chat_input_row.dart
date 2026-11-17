@@ -12,6 +12,7 @@ import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
 import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
 import 'package:fluffychat/pages/chat/recording_input_row.dart';
 import 'package:fluffychat/pages/chat/recording_view_model.dart';
+import 'package:fluffychat/pages/chat/scheduling/send_button.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rich_text/format_range.dart';
@@ -265,6 +266,10 @@ class ChatInputRow extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            ScheduledButton(
+                              controller: controller,
+                              height: height,
+                            ),
                             AnimatedContainer(
                               duration: FluffyThemes.animationDuration,
                               curve: FluffyThemes.animationCurve,
@@ -345,17 +350,7 @@ class ChatInputRow extends StatelessWidget {
                               ),
                             ),
                           )
-                        : IconButton(
-                            key: Key('send_button'),
-                            tooltip: L10n.of(context).send,
-                            onPressed: controller.send,
-                            style: IconButton.styleFrom(
-                              backgroundColor: tokens.acc,
-                              foregroundColor: tokens.onacc,
-                              fixedSize: const Size.square(height),
-                            ),
-                            icon: const Icon(Icons.send_rounded),
-                          ),
+                        : SendButton(controller: controller, size: height),
                   ),
                 ],
         );

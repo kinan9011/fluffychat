@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/utils/scheduling/silent_notification.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/incoming_call_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -94,7 +95,14 @@ extension LocalNotificationsExtension on MatrixState {
 
     final unreadRooms = client.rooms.where((r) => r.isUnreadOrInvited).length;
 
-    if (kIsWeb && AppSettings.webNotificationSound.value) _audioPlayer.play();
+    final silent = notifySilently(
+      event,
+      highlight: event.room.client.pushruleEvaluator.match(event).highlight,
+    );
+
+    if (kIsWeb && AppSettings.webNotificationSound.value && !silent) {
+      _audioPlayer.play();
+    }
 
     await FlutterLocalNotificationsPlugin().show(
       id: id,
@@ -102,7 +110,7 @@ extension LocalNotificationsExtension on MatrixState {
       body: body,
       notificationDetails: NotificationDetails(
         linux: LinuxNotificationDetails(
-          sound: ThemeLinuxSound('message-new-instant'),
+          sound: silent ? null : ThemeLinuxSound('message-new-instant'),
           actions: switch (event.type) {
             EventTypes.Message ||
             EventTypes.Encrypted ||
@@ -128,6 +136,7 @@ extension LocalNotificationsExtension on MatrixState {
         windows: WindowsNotificationDetails(timestamp: event.originServerTs),
         macOS: DarwinNotificationDetails(
           badgeNumber: unreadRooms,
+          presentSound: !silent,
           threadIdentifier: '${client.clientName}_$roomId',
         ),
         web: WebNotificationDetails(

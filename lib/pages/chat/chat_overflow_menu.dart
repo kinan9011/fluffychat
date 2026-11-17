@@ -15,24 +15,27 @@ enum ChatOverflowAction {
   unmute,
   videoCall,
   search,
+  scheduled,
   wallpaper,
   details,
   encryption,
   leave,
 }
 
-/// Only entries that have a real action: no Scheduled messages (W06) and no
-/// Clear history (Matrix cannot do it).
+/// Only entries that have a real action: no Clear history (Matrix cannot do
+/// it). Scheduled messages only where the user can write.
 List<ChatOverflowAction> chatOverflowActions({
   required bool muted,
   required bool canCall,
   required bool showDetails,
   required bool joined,
   required bool left,
+  bool canSchedule = false,
 }) => [
   if (joined) muted ? ChatOverflowAction.unmute : ChatOverflowAction.mute,
   if (canCall) ChatOverflowAction.videoCall,
   if (joined || left) ChatOverflowAction.search,
+  if (joined && canSchedule) ChatOverflowAction.scheduled,
   ChatOverflowAction.wallpaper,
   if (showDetails && joined) ChatOverflowAction.details,
   if (joined || left) ChatOverflowAction.encryption,
@@ -61,6 +64,11 @@ List<ChatOverflowAction> chatOverflowActions({
   ChatOverflowAction.search => (
     icon: Icons.search_rounded,
     label: l10n.search,
+    destructive: false,
+  ),
+  ChatOverflowAction.scheduled => (
+    icon: Icons.schedule_send_rounded,
+    label: l10n.scheduledMessages,
     destructive: false,
   ),
   ChatOverflowAction.wallpaper => (

@@ -3390,5 +3390,279 @@
     "@noOlderMentionFound": {
         "type": "String",
         "placeholders": {}
+    },
+    "sendOptions": "Send options",
+    "@sendOptions": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendWithoutSound": "Send without sound",
+    "@sendWithoutSound": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleMessage": "Schedule message",
+    "@scheduleMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendWhenOnline": "Send when {name} is online",
+    "@sendWhenOnline": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "sendSilentlyNote": "Silent sending is best effort: other apps may still make a sound.",
+    "@sendSilentlyNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleIn1Hour": "In 1 hour",
+    "@scheduleIn1Hour": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleThisEvening": "This evening",
+    "@scheduleThisEvening": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleTomorrowMorning": "Tomorrow morning",
+    "@scheduleTomorrowMorning": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleNextWeek": "Next week",
+    "@scheduleNextWeek": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleCustom": "Custom",
+    "@scheduleCustom": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleForDate": "Schedule for {date}",
+    "@scheduleForDate": {
+        "type": "String",
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduleServerNote": "Your homeserver sends it at this time, even if your phone is offline. You can reschedule or delete it until then.",
+    "@scheduleServerNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleDeviceNote": "Your server can't schedule messages, so this device sends it. FluffyChat must be running at that time.",
+    "@scheduleDeviceNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleEncryptedNote": "People who join the chat before it's sent won't be able to read it.",
+    "@scheduleEncryptedNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleTooSoon": "Pick a time at least one minute from now.",
+    "@scheduleTooSoon": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleTooFar": "Your server can't schedule this far ahead.",
+    "@scheduleTooFar": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleTooFarDays": "Your server can schedule up to {days} days ahead.",
+    "@scheduleTooFarDays": {
+        "type": "String",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "scheduleUnsupported": "Your server doesn't support scheduling right now. Your message wasn't scheduled.",
+    "@scheduleUnsupported": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleEncryptionUnavailable": "Encryption isn't ready, so this message can't be scheduled yet.",
+    "@scheduleEncryptionUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleStorageUnavailable": "This device couldn't save the scheduled message. It wasn't scheduled.",
+    "@scheduleStorageUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledTooMany": "You have too many scheduled messages. Send or delete some first.",
+    "@scheduledTooMany": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleFailed": "The message couldn't be scheduled.",
+    "@scheduleFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledFor": "Scheduled for {date}",
+    "@scheduledFor": {
+        "type": "String",
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "waitingUntilOnline": "Will send when {name} is online",
+    "@waitingUntilOnline": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduledMessages": "Scheduled messages",
+    "@scheduledMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledCount": "{count, plural, =1{1 in {room}} other{{count} in {room}}}",
+    "@scheduledCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "room": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduledSendingOn": "Sending on {date}",
+    "@scheduledSendingOn": {
+        "type": "String",
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduledWhenOnline": "When {name} is online",
+    "@scheduledWhenOnline": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduledSendNow": "Send now",
+    "@scheduledSendNow": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledReschedule": "Reschedule",
+    "@scheduledReschedule": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledDeleteConfirm": "Delete this scheduled message?",
+    "@scheduledDeleteConfirm": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "noScheduledMessages": "No scheduled messages",
+    "@noScheduledMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledFromOtherDevice": "Scheduled on another device",
+    "@scheduledFromOtherDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledMissed": "Not sent: FluffyChat wasn't running at {time}",
+    "@scheduledMissed": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "scheduledSendFailed": "Not sent: sending failed or was interrupted. Check the chat before you send it again.",
+    "@scheduledSendFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledRoomUnavailable": "Not sent: you are no longer in this chat.",
+    "@scheduledRoomUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledRescheduleFailed": "Not rescheduled: the new time could not be set. The message is kept here, reschedule it or send it now.",
+    "@scheduledRescheduleFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledExpired": "Not sent: they did not come online within 30 days.",
+    "@scheduledExpired": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledUnencrypted": "Will be sent unencrypted: this chat was encrypted after you scheduled it. Reschedule it to encrypt it.",
+    "@scheduledUnencrypted": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleAlreadySent": "This message was already sent or was cancelled on another device.",
+    "@scheduleAlreadySent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledDeviceBanner": "Some messages are sent from this device. Keep FluffyChat running until then.",
+    "@scheduledDeviceBanner": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduledLoadFailed": "Couldn't load messages scheduled on your server.",
+    "@scheduledLoadFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "dayWheel": "Day",
+    "@dayWheel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "hourWheel": "Hour",
+    "@hourWheel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "minuteWheel": "Minute",
+    "@minuteWheel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "tomorrow": "Tomorrow",
+    "@tomorrow": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "scheduleMessageTooLong": "This message is too long to send with these options. Shorten it.",
+    "@scheduleMessageTooLong": {
+        "type": "String",
+        "placeholders": {}
     }
 }
