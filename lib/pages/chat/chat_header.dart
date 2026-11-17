@@ -11,6 +11,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_overflow_menu.dart';
+import 'package:fluffychat/pages/chat/retention_sheet.dart';
 import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -61,6 +62,7 @@ class _ChatHeaderState extends State<ChatHeader> {
       joined: room.membership == Membership.join,
       left: room.membership == Membership.leave,
       canSchedule: room.canSendDefaultMessages,
+      canTopics: controller.topics != null,
     );
     _menuOpen.value = true;
     final action = await showChatOverflowMenu(
@@ -92,6 +94,10 @@ class _ChatHeaderState extends State<ChatHeader> {
         context.go('/rooms/${room.id}/search');
       case ChatOverflowAction.scheduled:
         context.go('/rooms/${room.id}/scheduled');
+      case ChatOverflowAction.topics:
+        context.go('/rooms/${room.id}/topics');
+      case ChatOverflowAction.disappearing:
+        await showRetentionSheet(context, room);
       case ChatOverflowAction.wallpaper:
         context.go('/settings/style');
       case ChatOverflowAction.details:

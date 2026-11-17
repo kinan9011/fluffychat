@@ -150,6 +150,20 @@ abstract class AppSchedule {
   static const double sheetMaxHeight = 720;
 }
 
+abstract class AppTopics {
+  static const double rowHeight = 72;
+  static const double iconTile = 48;
+  static const double iconTileRadius = 15;
+  static const double iconSize = 24;
+  static const double badge = 22;
+  static const double fabHeight = 54;
+  static const double chipHeight = 32;
+  static const double chipTap = 44;
+  static const double chipBarHeight = 44;
+  static const double segmentHeight = 34;
+  static const int maxChips = 8;
+}
+
 abstract class AppTypography {
   static const monoFamily = 'JetBrainsMono';
   static const mono = TextStyle(fontFamily: monoFamily);

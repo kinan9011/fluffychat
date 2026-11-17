@@ -46,8 +46,10 @@ enum AppSettings<T> {
   hideRedactedEvents<bool>('chat.fluffy.hideRedactedEvents', false),
   hideUnknownEvents<bool>('chat.fluffy.hideUnknownEvents', true),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
-  sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', true),
-  sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', true),
+  sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', false),
+  sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', false),
+  shareOnlineStatus<bool>('chat.fluffy.share_online_status', false),
+  appearOffline<bool>('chat.fluffy.appear_offline', false),
   swipeRightToLeftToReply<bool>('chat.fluffy.swipeRightToLeftToReply', true),
   sendOnEnter<bool>('chat.fluffy.send_on_enter', false),
   shareKeysWith<String>('chat.fluffy.share_keys_with_2', 'all'),
@@ -272,6 +274,8 @@ bool _intIn(Object? value, int min, int max) =>
 final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
   AppSettings.sendTypingNotifications: (value) => value == false,
   AppSettings.sendPublicReadReceipts: (value) => value == false,
+  AppSettings.shareOnlineStatus: (value) => value == false,
+  AppSettings.appearOffline: (value) => value == true,
   AppSettings.autoSendErrorReports: (value) => value == false,
   AppSettings.shareKeysWith: (value) =>
       value is String &&

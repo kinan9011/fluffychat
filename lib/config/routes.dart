@@ -40,6 +40,7 @@ import 'package:fluffychat/pages/settings_password/settings_password.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_in/sign_in_page.dart';
+import 'package:fluffychat/pages/topics/topics_page.dart';
 import 'package:fluffychat/widgets/config_viewer.dart';
 import 'package:fluffychat/widgets/database_quarantine_banner.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
@@ -321,6 +322,7 @@ abstract class AppRoutes {
                         shareItems: shareItems,
                         eventId: state.uri.queryParameters['event'],
                         action: state.uri.queryParameters['action'],
+                        threadId: state.uri.queryParameters['thread'],
                       ),
                     );
                   },
@@ -332,6 +334,15 @@ abstract class AppRoutes {
                         context,
                         state,
                         ChatSearchPage(roomId: state.pathParameters['roomid']!),
+                      ),
+                      redirect: loggedOutRedirect,
+                    ),
+                    GoRoute(
+                      path: 'topics',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        TopicsPage(roomId: state.pathParameters['roomid']!),
                       ),
                       redirect: loggedOutRedirect,
                     ),

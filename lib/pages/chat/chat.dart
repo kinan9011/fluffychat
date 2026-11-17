@@ -18,11 +18,11 @@ import 'package:fluffychat/pages/chat/composer/attachment_type_bar.dart';
 import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
 import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
-import 'package:fluffychat/pages/chat/start_poll_bottom_sheet.dart';
+import 'package:fluffychat/pages/chat/poll_composer/poll_composer.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
+import 'package:fluffychat/pages/chat/typing_notifier.dart';
 import 'package:fluffychat/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/chat/mention_jump.dart';
 import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
@@ -34,6 +34,9 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/ogg_opus_remuxer.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/privacy/read_markers.dart';
+import 'package:fluffychat/utils/retention/retention_policy.dart';
+import 'package:fluffychat/utils/retention/retention_ticker.dart';
 import 'package:fluffychat/utils/rich_text/edit_prefill.dart';
 import 'package:fluffychat/utils/rich_text/format_state.dart';
 import 'package:fluffychat/utils/rich_text/html_serializer.dart';
@@ -42,7 +45,10 @@ import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:fluffychat/utils/rich_text/send_rich_message.dart';
 import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
 import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
+import 'package:fluffychat/utils/topics/topic.dart';
+import 'package:fluffychat/utils/topics/topics_model.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -71,6 +77,7 @@ class ChatPage extends StatelessWidget {
   final String? eventId;
   final Timeline? timeline;
   final String? action;
+  final String? threadId;
 
   const ChatPage({
     super.key,
@@ -79,6 +86,7 @@ class ChatPage extends StatelessWidget {
     this.shareItems,
     this.timeline,
     this.action,
+    this.threadId,
   });
 
   @override
@@ -99,13 +107,14 @@ class ChatPage extends StatelessWidget {
 
     return ChatPageWithRoom(
       key: Key(
-        'chat_page_${room.client.clientName}_${roomId}_${eventId}_$action',
+        'chat_page_${room.client.clientName}_${roomId}_${eventId}_${action}_$threadId',
       ),
       room: room,
       shareItems: shareItems,
       eventId: eventId,
       timeline: timeline,
       action: action,
+      threadId: threadId,
     );
   }
 }
@@ -116,6 +125,7 @@ class ChatPageWithRoom extends StatefulWidget {
   final String? eventId;
   final Timeline? timeline;
   final String? action;
+  final String? threadId;
 
   const ChatPageWithRoom({
     super.key,
@@ -124,6 +134,7 @@ class ChatPageWithRoom extends StatefulWidget {
     this.eventId,
     this.timeline,
     this.action,
+    this.threadId,
   });
 
   @override
@@ -140,6 +151,43 @@ class ChatController extends State<ChatPageWithRoom>
 
   String? activeThreadId;
 
+  RetentionPolicy? get retention => RetentionPolicy.fromContent(
+    room.getState(RetentionPolicy.eventType)?.content,
+  );
+
+  TopicsModel? _topics;
+
+  /// The topics of this room, when it is a group on a server that has
+  /// threaded receipts (the same condition as the Topics entry).
+  TopicsModel? get topics {
+    if (room.isDirectChat) return null;
+    final capabilities = Matrix.of(
+      context,
+    ).serverCapabilities.cached(room.client);
+    if (!capabilities.supports(ServerFeature.threadNotifications)) return null;
+    return _topics ??= TopicsModel(room);
+  }
+
+  void _loadTopics() => unawaited(topics?.load(timeline?.events ?? const []));
+
+  Future<void> _loadCapabilities() async {
+    await Matrix.of(context).serverCapabilities.load(room.client);
+    if (!mounted) return;
+    setState(() {});
+    _loadTopics();
+  }
+
+  late final _retentionTicker = RetentionTicker(
+    onExpire: () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleRetention();
+    },
+  );
+
+  void _scheduleRetention() =>
+      _retentionTicker.schedule(retention, timeline?.events ?? const []);
+
   late final Set<String> bigEmojis;
 
   late final String readMarkerEventId;
@@ -150,9 +198,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   late final FocusNode inputFocus;
 
-  Timer? typingCoolDown;
-  Timer? typingTimeout;
-  bool currentlyTyping = false;
+  late final TypingNotifier typing = TypingNotifier(
+    send: (typing, {timeoutMs}) => room.setTyping(typing, timeout: timeoutMs),
+    enabled: () => AppSettings.sendTypingNotifications.value,
+  );
   bool dragging = false;
 
   final GlobalKey inputBarKey = GlobalKey();
@@ -227,7 +276,10 @@ class ChatController extends State<ChatPageWithRoom>
     if (key == _mentionCacheKey) return _mentionCache;
     _mentionCacheKey = key;
     return _mentionCache = mentionJump.pending(
-      eventsNewestFirst: events.filterByVisibleInGui(threadId: activeThreadId),
+      eventsNewestFirst: events.filterByVisibleInGui(
+        retention: retention,
+        threadId: activeThreadId,
+      ),
       ownUserId: room.client.userID,
       fullyReadEventId: room.fullyRead,
       isHighlight: (event) =>
@@ -303,9 +355,35 @@ class ChatController extends State<ChatPageWithRoom>
     final threadId = activeThreadId;
     if (threadId == null) return null;
     return timeline?.events
-        .filterByVisibleInGui(threadId: threadId)
+        .filterByVisibleInGui(retention: retention, threadId: threadId)
         .firstOrNull
         ?.eventId;
+  }
+
+  /// The title of the topic that is open, for the line above the composer.
+  String get activeThreadTitle {
+    final id = activeThreadId;
+    final known = _topics?.topics.value.firstWhereOrNull(
+      (topic) => topic.rootEventId == id,
+    );
+    if (known != null) return known.title;
+    final root = timeline?.events.firstWhereOrNull((e) => e.eventId == id);
+    return root == null ? '' : TopicParser.titleFrom(root.content);
+  }
+
+  /// `?thread=` comes from the address: only a well-formed id of an event
+  /// that is in this room opens a thread.
+  Future<void> _openRequestedThread() async {
+    final id = widget.threadId;
+    if (id == null || !TopicParser.isEventId(id)) return;
+    Event? root;
+    try {
+      root = await room.getEventById(id);
+    } catch (_) {
+      Logs().w('Unable to check the requested thread');
+    }
+    if (!mounted || root == null) return;
+    enterThread(id);
   }
 
   void enterThread(String eventId) => setState(() {
@@ -391,16 +469,18 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline == null) return;
     Logs().v('Requesting future...');
 
-    final mostRecentEvent = timeline.events.filterByVisibleInGui().firstOrNull;
+    final mostRecentEvent = timeline.events
+        .filterByVisibleInGui(retention: retention)
+        .firstOrNull;
 
     await timeline.requestFuture(historyCount: _loadHistoryCount);
 
     if (mostRecentEvent != null) {
       setReadMarker(eventId: mostRecentEvent.eventId);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final index = timeline.events.filterByVisibleInGui().indexOf(
-          mostRecentEvent,
-        );
+        final index = timeline.events
+            .filterByVisibleInGui(retention: retention)
+            .indexOf(mostRecentEvent);
         if (index >= 0) {
           scrollController.scrollToIndex(
             index,
@@ -587,6 +667,8 @@ class ChatController extends State<ChatPageWithRoom>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _shareItems();
       _checkMatrixRtcCallSupport();
+      unawaited(_loadCapabilities());
+      unawaited(_openRequestedThread());
       if (widget.action == 'call') {
         Matrix.of(context).activeCallRoomId.value = room.id;
       }
@@ -636,6 +718,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void expandEventsFrom(Event event, bool expand) {
     final events = timeline!.events.filterByVisibleInGui(
+      retention: retention,
       threadId: activeThreadId,
     );
     final start = events.indexOf(event);
@@ -669,6 +752,7 @@ class ChatController extends State<ChatPageWithRoom>
           ? -1
           : timeline!.events
                 .filterByVisibleInGui(
+                  retention: retention,
                   exceptionEventId: readMarkerEventId,
                   threadId: activeThreadId,
                 )
@@ -680,6 +764,7 @@ class ChatController extends State<ChatPageWithRoom>
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
             .filterByVisibleInGui(
+              retention: retention,
               exceptionEventId: readMarkerEventId,
               threadId: activeThreadId,
             )
@@ -697,6 +782,8 @@ class ChatController extends State<ChatPageWithRoom>
       setReadMarker();
 
       if (!mounted) return;
+      _scheduleRetention();
+      _loadTopics();
     } catch (e, s) {
       ErrorReporter(context, 'Unable to load timeline').onErrorCallback(e, s);
       rethrow;
@@ -736,6 +823,8 @@ class ChatController extends State<ChatPageWithRoom>
       mentionJump.rearm();
     }
     setReadMarker();
+    _scheduleRetention();
+    _loadTopics();
     setState(() {});
   }
 
@@ -791,9 +880,20 @@ class ChatController extends State<ChatPageWithRoom>
     if (state != AppLifecycleState.resumed) return;
     if (!mounted) return;
     setReadMarker();
+    if (retention != null) {
+      _scheduleRetention();
+      setState(() {});
+    }
   }
 
   String? _setReadMarkerEventId;
+
+  final _threadMarkers = ThreadReadMarkerSender();
+
+  /// Reading inside a topic: a threaded receipt for the newest event of that
+  /// thread, nothing for the main timeline.
+  void _setThreadReadMarker(String threadId) =>
+      _threadMarkers.send(room, threadId, threadLastEventId);
 
   void setReadMarker({String? eventId}) {
     // Do not send read markers when app is not in foreground
@@ -819,6 +919,12 @@ class ChatController extends State<ChatPageWithRoom>
     // We do not set read marker if timeline is empty
     final timeline = this.timeline;
     if (timeline == null || timeline.events.isEmpty) return;
+
+    final threadId = activeThreadId;
+    if (threadId != null) {
+      if (setOnLatestEvent) _setThreadReadMarker(threadId);
+      return;
+    }
 
     // Do not set read marker on rtc notification while call is active. This
     // mutes callkit.
@@ -870,23 +976,18 @@ class ChatController extends State<ChatPageWithRoom>
     Logs().d('Set read marker...', eventId);
     _setReadMarkerEventId = eventId;
     // ignore: unawaited_futures
-    timeline
-        .setReadMarker(
-          eventId: eventId,
-          public: AppSettings.sendPublicReadReceipts.value,
-        )
-        .whenComplete(() {
-          if (_setReadMarkerEventId == eventId) _setReadMarkerEventId = null;
-        });
+    sendReadMarker(room, eventId).whenComplete(() {
+      if (_setReadMarkerEventId == eventId) _setReadMarkerEventId = null;
+    });
   }
 
   @override
   void dispose() {
     timeline?.cancelSubscriptions();
     timeline = null;
+    _retentionTicker.dispose();
+    _topics?.dispose();
     _storeInputTimeoutTimer?.cancel();
-    typingCoolDown?.cancel();
-    typingTimeout?.cancel();
     sendController.dispose();
     composerPanel.dispose();
     scrollController.dispose();
@@ -897,7 +998,8 @@ class ChatController extends State<ChatPageWithRoom>
     scheduledCount.dispose();
     scheduledFailed.dispose();
     web.window.removeEventListener('paste', _handleClipboardFilePasteWeb);
-    if (currentlyTyping) room.setTyping(false);
+    typing.stop();
+    typing.dispose();
     MxcImage.clearCache(widget.room.id);
     super.dispose();
   }
@@ -928,13 +1030,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void setSendingClient(Client c) {
     // first cancel typing with the old sending client
-    if (currentlyTyping) {
-      // no need to have the setting typing to false be blocking
-      typingCoolDown?.cancel();
-      typingCoolDown = null;
-      room.setTyping(false);
-      currentlyTyping = false;
-    }
+    typing.stop();
     // then cancel the old timeline
     // fixes bug with read reciepts and quick switching
     loadTimelineFuture = _getTimeline(eventContextId: room.fullyRead).onError(
@@ -979,13 +1075,6 @@ class ChatController extends State<ChatPageWithRoom>
     return mounted ? outgoing : null;
   }
 
-  void _stopTyping() {
-    if (!currentlyTyping) return;
-    typingCoolDown?.cancel();
-    currentlyTyping = false;
-    room.setTyping(false);
-  }
-
   void _resetComposerAfterSend() {
     composerPanel.close();
     setState(() {
@@ -1003,7 +1092,7 @@ class ChatController extends State<ChatPageWithRoom>
   void finishOptionsSend() {
     _storeInputTimeoutTimer?.cancel();
     unawaited(_drafts.remove(roomId));
-    _stopTyping();
+    typing.stop();
     _resetComposerAfterSend();
   }
 
@@ -1030,7 +1119,7 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    _stopTyping();
+    typing.stop();
 
     switch (outgoing) {
       case RichOutgoing():
@@ -1582,6 +1671,7 @@ class ChatController extends State<ChatPageWithRoom>
         ? -1
         : timeline!.events
               .filterByVisibleInGui(
+                retention: retention,
                 exceptionEventId: eventId,
                 threadId: activeThreadId,
               )
@@ -1741,6 +1831,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline == null) return;
 
     final events = timeline.events.filterByVisibleInGui(
+      retention: retention,
       threadId: activeThreadId,
     );
 
@@ -1840,10 +1931,7 @@ class ChatController extends State<ChatPageWithRoom>
         sendFileAction(type: FileType.video);
         return;
       case AddPopupMenuActions.poll:
-        showAdaptiveBottomSheet(
-          context: context,
-          builder: (context) => StartPollBottomSheet(room: room),
-        );
+        unawaited(showPollComposer(context, room));
         return;
       case AddPopupMenuActions.photoCamera:
         openCameraAction();
@@ -1935,26 +2023,7 @@ class ChatController extends State<ChatPageWithRoom>
         }
       }
     }
-    if (AppSettings.sendTypingNotifications.value) {
-      typingCoolDown?.cancel();
-      typingCoolDown = Timer(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        typingCoolDown = null;
-        currentlyTyping = false;
-        room.setTyping(false);
-      });
-      typingTimeout ??= Timer(const Duration(seconds: 30), () {
-        typingTimeout = null;
-        currentlyTyping = false;
-      });
-      if (!currentlyTyping) {
-        currentlyTyping = true;
-        room.setTyping(
-          true,
-          timeout: const Duration(seconds: 30).inMilliseconds,
-        );
-      }
-    }
+    typing.onTextChanged();
   }
 
   bool _inputTextIsEmpty = true;

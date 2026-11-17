@@ -28,6 +28,7 @@ const _guardedSubRoutes = [
   '/rooms/newspace',
   '/rooms/!abc:example.org',
   '/rooms/!abc:example.org/details',
+  '/rooms/!abc:example.org/topics',
   '/settings/security',
   '/settings/style',
   '/settings/devices',

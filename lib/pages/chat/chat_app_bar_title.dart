@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/retention/retention_labels.dart';
 import 'package:fluffychat/utils/sync_status_localization.dart';
 import 'package:fluffychat/utils/verified_room_extension.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -27,6 +28,7 @@ class ChatAppBarTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final room = controller.room;
     final tokens = AppTokens.of(context);
+    final retention = controller.retention;
     return InkWell(
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
@@ -97,7 +99,9 @@ class ChatAppBarTitle extends StatelessWidget {
                     final style = TextStyle(fontSize: 12, color: tokens.fg);
                     return AnimatedSize(
                       duration: FluffyThemes.animationDuration,
-                      child: hide
+                      child: hide && retention != null
+                          ? _DisappearLine(retention.maxLifetime)
+                          : hide
                           ? room.isDirectChat
                                 ? PresenceBuilder(
                                     userId: room.directChatMatrixID,
@@ -183,6 +187,42 @@ class ChatAppBarTitle extends StatelessWidget {
                   },
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DisappearLine extends StatelessWidget {
+  final Duration lifetime;
+
+  const _DisappearLine(this.lifetime);
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final label = L10n.of(
+      context,
+    ).disappearAfter(formatRetention(L10n.of(context), lifetime));
+    return Semantics(
+      label: label,
+      excludeSemantics: true,
+      child: Row(
+        spacing: 3,
+        children: [
+          Icon(Icons.timer_outlined, size: 14, color: tokens.acc),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: tokens.acc,
+              ),
             ),
           ),
         ],

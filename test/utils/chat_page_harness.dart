@@ -11,6 +11,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
+import 'package:http/http.dart' show BaseClient;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,11 @@ import 'test_client.dart';
 /// The whole app on a fake server, opened on a chat. Shared by the conversation
 /// widget tests.
 class ChatPageHarness {
+  ChatPageHarness({this.httpClient});
+
+  /// A recording fake server for tests that assert on the requests.
+  final BaseClient? httpClient;
+
   late Client client;
 
   Future<void> setUpAll() async {
@@ -35,7 +41,7 @@ class ChatPageHarness {
           (_) async =>
               const StandardMessageCodec().encodeMessage(<Object?>[null]),
         );
-    client = await prepareTestClient();
+    client = await prepareTestClient(httpClient: httpClient);
     client.backgroundSync = false;
   }
 

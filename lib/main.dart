@@ -18,6 +18,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_d
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:fluffychat/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
@@ -93,7 +94,7 @@ void main(List<String> args) => runZonedGuarded(() async {
 
     final List<Client> clients;
     try {
-      clients = await ClientManager.getClients(store: store);
+      clients = await ClientManager.getClients(store: store, background: true);
     } on DatabaseKeyUnavailableException catch (e) {
       Logs().w('Database key unavailable in background-fetch mode', e);
       return;
@@ -105,7 +106,7 @@ void main(List<String> args) => runZonedGuarded(() async {
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
       client.backgroundSync = false;
-      client.syncPresence = PresenceType.offline;
+      client.syncPresence = backgroundFetchPresence;
     }
 
     // In the background fetch mode we do not want to waste ressources with
@@ -217,7 +218,9 @@ class AppStarter with WidgetsBindingObserver {
     // Switching to foreground mode needs to reenable send online sync presence.
     for (final client in clients) {
       client.backgroundSync = true;
-      client.syncPresence = PresenceType.online;
+      client.syncPresence = PresencePolicy.fromSettings().syncPresence(
+        foreground: true,
+      );
     }
     startGui(clients, store);
     // We must make sure that the GUI is only started once.

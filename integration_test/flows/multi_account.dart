@@ -34,6 +34,8 @@ extension on FluffyChatTester {
     await tapOn('Logout');
     await tapOn(Key('ok_cancel_alert_dialog_ok_button'));
     await waitFor('One of your clients has been logged out');
+    // The snackbar covers the bar and the first rows until it is gone.
+    await waitForGone('One of your clients has been logged out');
     await openTab('Chats');
   }
 }

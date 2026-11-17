@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:async/async.dart';
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/events/message_bubble.dart';
+import 'package:fluffychat/utils/polls/poll_content.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -41,33 +41,38 @@ class PollWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eventContentResult = Result(() => event.parsedPollEventContent);
-    final eventContent = eventContentResult.asValue?.value;
-    if (eventContent == null) {
-      Logs().w('Invalid poll event', eventContentResult.error);
-      return const Text('Unable to parse poll event...');
+    final content = PollContent.parse(event.content);
+    if (content == null) {
+      Logs().w('Invalid poll event');
+      return Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(L10n.of(context).unreadablePoll),
+      );
     }
     final responses = event.getPollResponses(timeline);
     final pollHasBeenEnded = event.getPollHasBeenEnded(timeline);
-    final canVote =
-        event.room.canSendEvent(PollEventContent.responseType) &&
-        !pollHasBeenEnded;
     final maxPolls = responses.length;
-    final answersVisible =
-        eventContent.pollStartContent.kind == PollKind.disclosed ||
-        pollHasBeenEnded;
+    final answersVisible = !content.undisclosed || pollHasBeenEnded;
 
     final userId = event.room.client.userID!;
+    final mine = responses[userId] ?? const <String>{};
+    final canVote =
+        event.room.canSendEvent(PollEventContent.responseType) &&
+        content.canVote(mine: mine, ended: pollHasBeenEnded);
     return PollView(
-      question: eventContent.pollStartContent.question.mText,
+      question: content.question,
+      quiz: content.isQuiz,
       options: [
-        for (final answer in eventContent.pollStartContent.answers.take(
-          PollView.maxOptions,
-        ))
+        for (final answer in content.answers)
           PollOptionView(
             id: answer.id,
-            text: answer.mText,
+            text: answer.text,
             selected: responses[userId]?.contains(answer.id) ?? false,
+            mark: content.markFor(
+              answer.id,
+              mine: mine,
+              ended: pollHasBeenEnded,
+            ),
             voters: [
               for (final entry in responses.entries)
                 if (entry.value.contains(answer.id))
@@ -95,11 +100,8 @@ class PollWidget extends StatelessWidget {
       canEnd: !pollHasBeenEnded && event.senderId == userId,
       outgoing: event.senderId == userId,
       client: event.room.client,
-      onVote: (answerId) => _toggleVote(
-        context,
-        answerId,
-        eventContent.pollStartContent.maxSelections,
-      ),
+      onVote: (answerId) =>
+          _toggleVote(context, answerId, content.maxSelections),
       onEnd: () => _endPoll(context),
       onOpenLink: (url) => UrlLauncher(context, url).launchUrl(),
     );
@@ -119,12 +121,14 @@ class PollOptionView {
   final String text;
   final bool selected;
   final List<PollVoter> voters;
+  final PollQuizMark mark;
 
   const PollOptionView({
     required this.id,
     required this.text,
     required this.selected,
     required this.voters,
+    this.mark = PollQuizMark.none,
   });
 }
 
@@ -136,6 +140,7 @@ class PollView extends StatelessWidget {
   static const maxVoterAvatars = 5;
 
   final String question;
+  final bool quiz;
   final List<PollOptionView> options;
   final int totalVoters;
   final bool answersVisible;
@@ -157,6 +162,7 @@ class PollView extends StatelessWidget {
     required this.ended,
     required this.canEnd,
     required this.outgoing,
+    this.quiz = false,
     this.client,
     this.onVote,
     this.onEnd,
@@ -179,6 +185,7 @@ class PollView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 7,
           children: [
+            if (quiz) _QuizBadge(label: l10n.pollQuizBadge, colors: colors),
             Linkify(
               text: question,
               maxLines: 3,
@@ -259,10 +266,16 @@ class _Option extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final ratio = totalVoters == 0 ? 0.0 : option.voters.length / totalVoters;
+    final l10n = L10n.of(context);
+    final markLabel = switch (option.mark) {
+      PollQuizMark.correct => l10n.pollCorrectAnswer,
+      PollQuizMark.wrong => l10n.pollWrongAnswer,
+      PollQuizMark.none => null,
+    };
     return Semantics(
       button: onTap != null,
       checked: option.selected,
-      label: option.text,
+      label: markLabel == null ? option.text : '${option.text}, $markLabel',
       excludeSemantics: true,
       onTap: onTap,
       child: InkWell(
@@ -277,14 +290,11 @@ class _Option extends StatelessWidget {
               Row(
                 spacing: 4,
                 children: [
-                  if (option.selected)
-                    Icon(
-                      Icons.check_circle_rounded,
-                      size: 16,
-                      color: colors.accent,
-                    )
-                  else
-                    const SizedBox(width: 16),
+                  _OptionMark(
+                    option: option,
+                    colors: colors,
+                    outgoing: outgoing,
+                  ),
                   Expanded(
                     child: Text(
                       option.text,
@@ -342,5 +352,64 @@ class _Option extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _QuizBadge extends StatelessWidget {
+  final String label;
+  final BubbleColors colors;
+
+  const _QuizBadge({required this.label, required this.colors});
+
+  @override
+  Widget build(BuildContext context) => Row(
+    spacing: 4,
+    children: [
+      Icon(Icons.quiz_rounded, size: 14, color: colors.secondary),
+      Text(
+        label,
+        style: TextStyle(
+          color: colors.secondary,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ],
+  );
+}
+
+class _OptionMark extends StatelessWidget {
+  final PollOptionView option;
+  final BubbleColors colors;
+  final bool outgoing;
+
+  const _OptionMark({
+    required this.option,
+    required this.colors,
+    required this.outgoing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final plain = colors.text;
+    return switch ((option.mark, option.selected)) {
+      (PollQuizMark.correct, _) => Icon(
+        Icons.check_circle_rounded,
+        size: 16,
+        color: outgoing ? plain : tokens.ok,
+      ),
+      (PollQuizMark.wrong, _) => Icon(
+        Icons.cancel_rounded,
+        size: 16,
+        color: outgoing ? plain : tokens.red,
+      ),
+      (_, true) => Icon(
+        Icons.check_circle_rounded,
+        size: 16,
+        color: colors.accent,
+      ),
+      _ => const SizedBox(width: 16),
+    };
   }
 }

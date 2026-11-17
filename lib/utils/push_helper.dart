@@ -125,12 +125,17 @@ Future<void> _tryPushHelper(
       ? (clients?.first ??
             (await ClientManager.getClients(
               initialize: false,
+              background: true,
               store: store,
             )).first)
       : (clients?.firstWhereOrNull(
               (client) => client.clientName == clientName,
             ) ??
-            await ClientManager.createClient(clientName, store));
+            await ClientManager.createClient(
+              clientName,
+              store,
+              background: true,
+            ));
 
   lastReceivedPushNotification[client.clientName] = DateTime.now();
 

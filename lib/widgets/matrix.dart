@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -260,6 +261,7 @@ class MatrixState extends State<Matrix> {
     _registerSubs(client.clientName);
     serverCapabilities.load(client, force: true);
     _updateAccountCount();
+    _applyPresence();
     setActiveClient(client, resetTabs: false);
     unawaited(_runAccountHooks(client));
   }
@@ -321,8 +323,20 @@ class MatrixState extends State<Matrix> {
   void initState() {
     super.initState();
     _listener = AppLifecycleListener(onStateChange: didChangeAppLifecycleState);
+    AppSettings.shareOnlineStatus.listenable.addListener(_applyPresence);
+    AppSettings.appearOffline.listenable.addListener(_applyPresence);
     initMatrix();
+    _applyPresence();
   }
+
+  void _applyPresence() => unawaited(
+    PresenceApplier.apply(
+      widget.clients,
+      foreground:
+          (_lifecycleState ?? AppLifecycleState.resumed) ==
+          AppLifecycleState.resumed,
+    ),
+  );
 
   AppLifecycleListener? _listener;
   AppLifecycleState? _lifecycleState;
@@ -503,20 +517,20 @@ class MatrixState extends State<Matrix> {
     final foreground = state == AppLifecycleState.resumed;
     for (final client in widget.clients) {
       if (foreground) unawaited(ScheduledQueue.of(client).evaluate());
-      client.syncPresence = state == AppLifecycleState.resumed
-          ? null
-          : PresenceType.unavailable;
       if (PlatformInfos.isMobile) {
         client.backgroundSync = foreground;
         client.requestHistoryOnLimitedTimeline = !foreground;
         Logs().v('Set background sync to', foreground);
       }
     }
+    _applyPresence();
   }
 
   @override
   void dispose() {
     _listener?.dispose();
+    AppSettings.shareOnlineStatus.listenable.removeListener(_applyPresence);
+    AppSettings.appearOffline.listenable.removeListener(_applyPresence);
 
     for (final sub in onRoomKeyRequestSub.values) {
       sub.cancel();

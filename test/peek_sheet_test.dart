@@ -64,9 +64,11 @@ void main() {
     api.api['POST']!['/client/v3/rooms/$_roomPath/leave'] = (_) => {};
   });
 
-  setUp(() {
+  setUp(() async {
     FakeMatrixApi.currentApi = api;
     FakeMatrixApi.calledEndpoints.clear();
+    // Hidden users announce "offline" once; that is the app, not the peek.
+    await AppSettings.shareOnlineStatus.setItem(true);
   });
 
   tearDown(() {

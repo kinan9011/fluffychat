@@ -4,25 +4,35 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:matrix/matrix.dart';
 
 extension VisibleInGuiExtension on List<Event> {
   List<Event> filterByVisibleInGui({
     String? exceptionEventId,
     String? threadId,
-  }) => where((event) {
-    if (threadId != null &&
-        event.relationshipType != RelationshipTypes.reaction) {
-      if ((event.relationshipType != RelationshipTypes.thread ||
-              event.relationshipEventId != threadId) &&
-          event.eventId != threadId) {
+    RetentionPolicy? retention,
+    DateTime? now,
+  }) {
+    final at = now ?? DateTime.now();
+    return where((event) {
+      if (event.eventId != exceptionEventId &&
+          retention?.hides(event, at) == true) {
         return false;
       }
-    } else if (event.relationshipType == RelationshipTypes.thread) {
-      return false;
-    }
-    return event.isVisibleInGui || event.eventId == exceptionEventId;
-  }).toList();
+      if (threadId != null &&
+          event.relationshipType != RelationshipTypes.reaction) {
+        if ((event.relationshipType != RelationshipTypes.thread ||
+                event.relationshipEventId != threadId) &&
+            event.eventId != threadId) {
+          return false;
+        }
+      } else if (event.relationshipType == RelationshipTypes.thread) {
+        return false;
+      }
+      return event.isVisibleInGui || event.eventId == exceptionEventId;
+    }).toList();
+  }
 }
 
 extension IsStateExtension on Event {
@@ -40,7 +50,9 @@ extension IsStateExtension on Event {
       // if we enabled to hide all redacted events, don't show those
       (!AppSettings.hideRedactedEvents.value || !redacted) &&
       // if we enabled to hide all unknown events, don't show those
-      (!AppSettings.hideUnknownEvents.value || isEventTypeKnown);
+      (!AppSettings.hideUnknownEvents.value ||
+          isEventTypeKnown ||
+          type == RetentionPolicy.eventType);
 
   bool get isState => !{EventTypes.Message, EventTypes.Sticker}.contains(type);
 

@@ -14,6 +14,7 @@ import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
+import 'flows/privacy_topics_flows.dart';
 import 'flows/scheduling_flows.dart';
 import 'flows/shell_navigation.dart';
 
@@ -38,6 +39,11 @@ void main() {
     testWidgets('Scheduled message delete', scheduleAndDelete);
     testWidgets('Multi-Account', multiAccount);
     testWidgets('Archive chats', archiveChats);
+    // After the flows that look for older chats by name: these create rooms.
+    testWidgets('Appear offline', appearOfflineFlow);
+    testWidgets('Poll creation', pollFlow);
+    testWidgets('Topics', topicFlow);
+    testWidgets('Disappearing messages', disappearingFlow);
     testWidgets('Final logout', finalLogout);
   });
 }

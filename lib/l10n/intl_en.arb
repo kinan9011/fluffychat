@@ -244,7 +244,7 @@
             }
         }
     },
-    "sendTypingNotifications": "Send typing notifications",
+    "sendTypingNotifications": "Show when I'm typing",
     "swipeRightToLeftToReply": "Swipe right to left to reply",
     "sendOnEnter": "Send on enter",
     "noMoreChatsFound": "No more chats found...",
@@ -2158,8 +2158,8 @@
         }
     },
     "sendReadReceipts": "Send read receipts",
-    "sendTypingNotificationsDescription": "Other participants in a chat can see when you are typing a new message.",
-    "sendReadReceiptsDescription": "Other participants in a chat can see when you have read a message.",
+    "sendTypingNotificationsDescription": "Off: other people in a chat don't see when you're typing a message.",
+    "sendReadReceiptsDescription": "Off: other people can't see when you've read their messages.",
     "formattedMessages": "Formatted messages",
     "formattedMessagesDescription": "Display rich message content like bold text using markdown.",
     "verifyOtherUser": "🔐 Verify other user",
@@ -3662,6 +3662,373 @@
     },
     "scheduleMessageTooLong": "This message is too long to send with these options. Shorten it.",
     "@scheduleMessageTooLong": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "readReceiptsPrivateNote": "Your devices and your server still record what you've read, so unread counts stay in sync.",
+    "@readReceiptsPrivateNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "showOnlineStatus": "Show online status",
+    "@showOnlineStatus": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "showOnlineStatusDescription": "Others see when you're online. Off: your server is told you're offline while the app is open.",
+    "@showOnlineStatusDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearOffline": "Appear offline",
+    "@appearOffline": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "appearOfflineDescription": "Others see you as offline even while the app is open. Overrides Show online status.",
+    "@appearOfflineDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newPoll": "New poll",
+    "@newPoll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuestionHeader": "Question",
+    "@pollQuestionHeader": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollAnswersHeader": "Answers",
+    "@pollAnswersHeader": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollAnswersHeaderQuiz": "Answers · tap to mark correct",
+    "@pollAnswersHeaderQuiz": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollMultipleAnswers": "Multiple answers",
+    "@pollMultipleAnswers": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollMultipleAnswersSub": "Voters can pick more than one",
+    "@pollMultipleAnswersSub": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollHideResults": "Hide results until it ends",
+    "@pollHideResults": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollHideResultsSub": "Votes stay hidden in this app until the poll ends",
+    "@pollHideResultsSub": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuiz": "Quiz mode",
+    "@pollQuiz": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuizSub": "One correct answer, shown after voting",
+    "@pollQuizSub": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollVotesVisibleNote": "Votes are visible to room members.",
+    "@pollVotesVisibleNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuizNote": "Other apps show a quiz as a normal poll, and anyone who inspects the message can find the correct answer.",
+    "@pollQuizNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "createPoll": "Create poll",
+    "@createPoll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollNeedsCorrectAnswer": "Mark the correct answer",
+    "@pollNeedsCorrectAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollDuplicateAnswer": "Two answers are the same",
+    "@pollDuplicateAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuizBadge": "Quiz",
+    "@pollQuizBadge": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollCorrectAnswer": "Correct answer",
+    "@pollCorrectAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollWrongAnswer": "Your answer was not correct",
+    "@pollWrongAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "moveAnswer": "Move answer {number}",
+    "@moveAnswer": {
+        "type": "String",
+        "placeholders": {
+            "number": {
+                "type": "String"
+            }
+        }
+    },
+    "markAnswerCorrect": "Mark answer {number} as correct",
+    "@markAnswerCorrect": {
+        "type": "String",
+        "placeholders": {
+            "number": {
+                "type": "String"
+            }
+        }
+    },
+    "unreadablePoll": "This poll can't be shown",
+    "@unreadablePoll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "disappearingMessages": "Disappearing messages",
+    "@disappearingMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "disappearAfter": "Disappear after {duration}",
+    "@disappearAfter": {
+        "type": "String",
+        "placeholders": {
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "retentionOff": "Off",
+    "@retentionOff": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionDays": "{count, plural, =1{1 day} other{{count} days}}",
+    "@retentionDays": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "retentionHours": "{count, plural, =1{1 hour} other{{count} hours}}",
+    "@retentionHours": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "retentionWeek": "1 week",
+    "@retentionWeek": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionMonth": "1 month",
+    "@retentionMonth": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionCustom": "Custom",
+    "@retentionCustom": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionCustomDays": "Days",
+    "@retentionCustomDays": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionHonestNote": "Messages are hidden in this chat on this device after the timer. Hiding is not deleting: your server and other people's apps may keep them.",
+    "@retentionHonestNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionOffNote": "Turning this off shows hidden messages again.",
+    "@retentionOffNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionServerSupported": "Your server can also delete them, if its admin turned that on.",
+    "@retentionServerSupported": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionServerUnsupported": "Your server doesn't remove messages by itself.",
+    "@retentionServerUnsupported": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionServerUnknown": "We couldn't check whether your server removes messages.",
+    "@retentionServerUnknown": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionSetBy": "{name} set messages to disappear after {duration}",
+    "@retentionSetBy": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "retentionChanged": "{name} changed how long messages are kept",
+    "@retentionChanged": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "retentionElsewhereNote": "This chat has a message-history rule set by the server or another app; this app doesn't hide messages for it.",
+    "@retentionElsewhereNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionTurnedOff": "{name} turned off disappearing messages",
+    "@retentionTurnedOff": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "retentionNoPermission": "Only people who can change room settings can change this.",
+    "@retentionNoPermission": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topics": "Topics",
+    "@topics": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "asOneChat": "As one chat",
+    "@asOneChat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicCount": "{count, plural, =1{1 topic} other{{count} topics}}",
+    "@topicCount": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "newTopic": "New topic",
+    "@newTopic": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicNameHint": "Topic name",
+    "@topicNameHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicIconLabel": "Icon",
+    "@topicIconLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "createTopic": "Create topic",
+    "@createTopic": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendingToTopic": "Sending to # {title}",
+    "@sendingToTopic": {
+        "type": "String",
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "topicUntitled": "Untitled topic",
+    "@topicUntitled": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicGeneral": "General",
+    "@topicGeneral": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicsEmpty": "No topics yet. Start one to keep a conversation on its own.",
+    "@topicsEmpty": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicsLoadFailed": "Couldn't load topics. Check your connection and try again.",
+    "@topicsLoadFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicsUnavailable": "Your server doesn't support topics.",
+    "@topicsUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "topicRowSemantics": "{title}, {unread} unread, {preview}",
+    "@topicRowSemantics": {
+        "type": "String",
+        "placeholders": {
+            "title": {
+                "type": "String"
+            },
+            "unread": {
+                "type": "String"
+            },
+            "preview": {
+                "type": "String"
+            }
+        }
+    },
+    "topicIconName": "Icon {name}",
+    "@topicIconName": {
+        "type": "String",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "retentionDaysMore": "More days",
+    "@retentionDaysMore": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "retentionDaysFewer": "Fewer days",
+    "@retentionDaysFewer": {
         "type": "String",
         "placeholders": {}
     }

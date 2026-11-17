@@ -14,6 +14,7 @@ import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -794,7 +795,7 @@ class ChatListController extends State<ChatList>
       context: context,
       future: () => client.setPresence(
         client.userID!,
-        PresenceType.online,
+        PresencePolicy.fromSettings().statusPresence,
         statusMsg: input,
       ),
     );

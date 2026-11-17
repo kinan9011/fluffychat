@@ -25,10 +25,23 @@ void main() {
     expect(actions(), [
       ChatOverflowAction.mute,
       ChatOverflowAction.search,
+      ChatOverflowAction.disappearing,
       ChatOverflowAction.wallpaper,
       ChatOverflowAction.encryption,
       ChatOverflowAction.leave,
     ]);
+  });
+
+  test('disappearing messages are offered in joined rooms only', () {
+    expect(actions(), contains(ChatOverflowAction.disappearing));
+    expect(
+      actions(joined: false),
+      isNot(contains(ChatOverflowAction.disappearing)),
+    );
+    expect(
+      actions(joined: false, left: true),
+      isNot(contains(ChatOverflowAction.disappearing)),
+    );
   });
 
   test('muted shows unmute instead of mute', () {

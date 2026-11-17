@@ -234,16 +234,22 @@ extension on FluffyChatTester {
 
     // The row takes taps after a peek (the Navigator's pointer cancel arrives).
     // Opening the chat is the control: it sends the receipt, so the checks
-    // above would have noticed one.
+    // above would have noticed one. Public receipts are off by default, so the
+    // receipt is the private one: only alice sees it, bob never does.
     await tapOn(row);
     await waitFor(find.byKey(const Key('chat_input_field')));
     final end = DateTime.now().add(const Duration(seconds: 30));
     var seen = false;
     while (!seen && DateTime.now().isBefore(end)) {
       await tester.pump(const Duration(seconds: 1));
-      seen = (await bob.receiptUsers(roomId, eventId)).contains(alice.userId);
+      seen = (await alice.receiptUsers(roomId, eventId)).contains(alice.userId);
     }
-    expect(seen, isTrue, reason: 'opening the chat sends the receipt');
+    expect(seen, isTrue, reason: 'opening the chat sends the private receipt');
+    expect(
+      await bob.receiptUsers(roomId, eventId),
+      isNot(contains(alice.userId)),
+      reason: 'with public receipts off bob never sees it',
+    );
     expect(
       await alice.getRoomAccountData(roomId, 'm.fully_read'),
       isNot(fullyReadBefore),

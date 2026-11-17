@@ -162,6 +162,69 @@ class SynapseUser {
     }
   }
 
+  /// The presence the homeserver reports for this user.
+  Future<String> presence() async {
+    final json =
+        await _request(
+              'GET',
+              '/presence/${Uri.encodeComponent(userId)}/status',
+              token: _token,
+            )
+            as Map<String, Object?>;
+    return json['presence']! as String;
+  }
+
+  /// Content of a state event of the room, or null when there is none.
+  Future<Map<String, Object?>?> stateContent(String roomId, String type) async {
+    final json = await _request(
+      'GET',
+      '/rooms/${Uri.encodeComponent(roomId)}/state/$type/',
+      token: _token,
+      allow404: true,
+    );
+    return json == null ? null : Map<String, Object?>.from(json as Map);
+  }
+
+  /// Content of the newest event of [type] (optionally of [senderId]) as the
+  /// homeserver stores it, or null.
+  Future<Map<String, Object?>?> latestEvent(
+    String roomId,
+    String type, {
+    String? senderId,
+  }) async {
+    final json =
+        await _request(
+              'GET',
+              '/rooms/${Uri.encodeComponent(roomId)}/messages?dir=b&limit=50',
+              token: _token,
+            )
+            as Map<String, Object?>;
+    for (final event in json['chunk']! as List) {
+      if (event is Map &&
+          event['type'] == type &&
+          (senderId == null || event['sender'] == senderId)) {
+        return Map<String, Object?>.from(event['content'] as Map);
+      }
+    }
+    return null;
+  }
+
+  /// The ids of the thread roots of the room (replies from anyone).
+  Future<List<String>> threadRootIds(String roomId) async {
+    final json =
+        await _request(
+              'GET',
+              '/rooms/${Uri.encodeComponent(roomId)}/threads',
+              token: _token,
+              prefix: '/_matrix/client/v1',
+            )
+            as Map<String, Object?>;
+    return [
+      for (final event in json['chunk']! as List)
+        (event as Map)['event_id']! as String,
+    ];
+  }
+
   Future<void> sendMany(String roomId, int count, String prefix) async {
     for (var i = 1; i <= count; i++) {
       await sendText(roomId, '$prefix $i');

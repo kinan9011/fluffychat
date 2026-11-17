@@ -108,6 +108,7 @@ class ChatEventList extends StatelessWidget {
 
     final events = timeline.events.filterByVisibleInGui(
       threadId: controller.activeThreadId,
+      retention: controller.retention,
     );
     final tokens = AppTokens.of(context);
     final client = controller.room.client;

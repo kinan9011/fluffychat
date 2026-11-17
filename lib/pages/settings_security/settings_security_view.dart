@@ -8,6 +8,7 @@ import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/settings_security/privacy_toggles.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -72,18 +73,7 @@ class SettingsSecurityView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SettingsSwitchListTile.adaptive(
-                    title: L10n.of(context).sendTypingNotifications,
-                    subtitle: L10n.of(
-                      context,
-                    ).sendTypingNotificationsDescription,
-                    setting: AppSettings.sendTypingNotifications,
-                  ),
-                  SettingsSwitchListTile.adaptive(
-                    title: L10n.of(context).sendReadReceipts,
-                    subtitle: L10n.of(context).sendReadReceiptsDescription,
-                    setting: AppSettings.sendPublicReadReceipts,
-                  ),
+                  const PrivacyToggles(),
                   SettingsSwitchListTile.adaptive(
                     title: L10n.of(context).shareCrashReports,
                     subtitle: L10n.of(context).shareCrashReportsDescription,

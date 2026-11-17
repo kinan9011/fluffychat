@@ -10,6 +10,7 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/privacy/read_markers.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -87,8 +88,12 @@ Future<void> notificationTapBackground(
   );
   final clientName = payload.clientName;
   final client = clientName == null
-      ? (await ClientManager.getClients(store: store, initialize: false)).first
-      : (await ClientManager.createClient(clientName, store));
+      ? (await ClientManager.getClients(
+          store: store,
+          initialize: false,
+          background: true,
+        )).first
+      : (await ClientManager.createClient(clientName, store, background: true));
   await client.abortSync();
   await client.init(
     waitForFirstSync: false,
@@ -173,10 +178,9 @@ Future<void> notificationTap(
       }
       switch (actionType) {
         case FluffyChatNotificationActions.markAsRead:
-          await room.setReadMarker(
+          await sendReadMarker(
+            room,
             payload.eventId ?? room.lastEvent!.eventId,
-            mRead: payload.eventId ?? room.lastEvent!.eventId,
-            public: AppSettings.sendPublicReadReceipts.value,
           );
         case FluffyChatNotificationActions.reply:
           final input = notificationResponse.input;

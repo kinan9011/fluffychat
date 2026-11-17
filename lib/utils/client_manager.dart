@@ -13,9 +13,11 @@ import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'package:http/http.dart' show BaseClient;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,6 +29,7 @@ abstract class ClientManager {
 
   static Future<List<Client>> getClients({
     bool initialize = true,
+    bool background = false,
     required SharedPreferences store,
   }) async {
     final clientNames = <String>{};
@@ -42,7 +45,9 @@ abstract class ClientManager {
       await store.setStringList(clientNamespace, clientNames.toList());
     }
     final clients = await Future.wait(
-      clientNames.map((name) => createClient(name, store)),
+      clientNames.map(
+        (name) => createClient(name, store, background: background),
+      ),
     );
     if (initialize) {
       await Future.wait(
@@ -112,14 +117,17 @@ abstract class ClientManager {
 
   static Future<Client> createClient(
     String clientName,
-    SharedPreferences store,
-  ) async {
+    SharedPreferences store, {
+    bool background = false,
+    @visibleForTesting BaseClient? httpClient,
+    @visibleForTesting DatabaseApi? database,
+  }) async {
     final shareKeysWith = AppSettings.shareKeysWith.value;
     final enableSoftLogout = AppSettings.enableSoftLogout.value;
 
-    return Client(
+    final client = Client(
       clientName,
-      httpClient: CustomHttpClient.createHTTPClient(),
+      httpClient: httpClient ?? CustomHttpClient.createHTTPClient(),
       verificationMethods: {
         KeyVerificationMethod.numbers,
         if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isLinux)
@@ -135,7 +143,7 @@ abstract class ClientManager {
           ? customImageResizer
           : null,
       logLevel: Level.verbose,
-      database: await flutterMatrixSdkDatabaseBuilder(clientName),
+      database: database ?? await flutterMatrixSdkDatabaseBuilder(clientName),
       supportedLoginTypes: {
         AuthenticationTypes.password,
         AuthenticationTypes.sso,
@@ -153,6 +161,12 @@ abstract class ClientManager {
         seconds: AppSettings.sendTimelineEventTimeout.value,
       ),
     );
+    // The first sync goes out inside init(): an unset value would mark a
+    // hidden user online before any later PresenceApplier call.
+    client.syncPresence = background
+        ? backgroundFetchPresence
+        : PresencePolicy.fromSettings().syncPresence(foreground: true);
+    return client;
   }
 
   static WindowsInitializationSettings get windowsNotificationSettings =>
