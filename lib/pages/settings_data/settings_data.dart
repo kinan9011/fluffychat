@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/settings_data/search_index_group.dart';
 import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -33,6 +34,7 @@ class SettingsData extends StatelessWidget {
     return SettingsScaffold(
       title: l10n.settingsDataAndStorage,
       children: [
+        const SearchIndexGroup(),
         SettingsGroup(
           header: l10n.exportPickChat,
           footer: l10n.dataStorageNote,

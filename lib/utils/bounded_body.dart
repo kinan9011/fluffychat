@@ -16,8 +16,15 @@ Future<String?> readBoundedBody(
   Client client,
   Uri url, {
   int maxBytes = 64 * 1024,
+}) => readBoundedResponse(client, Request('GET', url), maxBytes: maxBytes);
+
+/// Sends [request] and reads the answer like [readBoundedBody].
+Future<String?> readBoundedResponse(
+  Client client,
+  BaseRequest request, {
+  int maxBytes = 64 * 1024,
 }) async {
-  final response = await client.send(Request('GET', url));
+  final response = await client.send(request);
   if (response.statusCode < 200 || response.statusCode >= 300) return null;
   final declared = response.contentLength;
   if (declared != null && declared > maxBytes) return null;

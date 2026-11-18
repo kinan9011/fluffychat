@@ -264,6 +264,51 @@ void main() {
     });
   });
 
+  group('hidesAt', () {
+    const policy = RetentionPolicy(day);
+
+    test('same truth table as hides for the boundary', () {
+      expect(
+        policy.hidesAt(now.subtract(day), EventTypes.Message, now),
+        isTrue,
+      );
+      final at = now.subtract(day).add(const Duration(milliseconds: 1));
+      expect(policy.hidesAt(at, EventTypes.Message, now), isFalse);
+    });
+
+    test('state and unknown types are never hidden', () {
+      final old = now.subtract(const Duration(days: 30));
+      for (final type in [
+        EventTypes.RoomName,
+        EventTypes.RoomMember,
+        RetentionPolicy.eventType,
+        'com.example.unknown',
+      ]) {
+        expect(policy.hidesAt(old, type, now), isFalse, reason: type);
+      }
+    });
+
+    test('messages, stickers, encrypted events and polls are hideable', () {
+      final old = now.subtract(const Duration(days: 30));
+      for (final type in [
+        EventTypes.Message,
+        EventTypes.Sticker,
+        EventTypes.Encrypted,
+        PollEventContent.startType,
+      ]) {
+        expect(policy.hidesAt(old, type, now), isTrue, reason: type);
+      }
+    });
+
+    test('hides delegates to the same rule', () {
+      final old = now.subtract(const Duration(days: 30));
+      expect(
+        policy.hides(event(old), now),
+        policy.hidesAt(old, EventTypes.Message, now),
+      );
+    });
+  });
+
   group('nextExpiry', () {
     const policy = RetentionPolicy(day);
 

@@ -9,12 +9,15 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/pages/new_private_chat/qr_scanner_modal.dart';
+import 'package:fluffychat/pages/new_private_chat/scan_confirm_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/links/matrix_link_policy.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/new_message/contact_list.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -83,6 +86,29 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     return profiles;
   }
 
+  /// The people the user already chats with, from what the client holds.
+  List<ContactEntry> get contacts {
+    final client = Matrix.of(context).client;
+    final locals = MatrixLocals(L10n.of(context));
+    return ContactList.build(
+      [
+        for (final room in client.rooms)
+          if (room.membership == Membership.join &&
+              room.directChatMatrixID != null)
+            ContactSource(
+              userId: room.directChatMatrixID!,
+              name: room.getLocalizedDisplayname(locals),
+              lastActivity: room.latestEventReceivedTime,
+            ),
+      ],
+      // The map only holds what sync delivered. Its replacement,
+      // fetchCurrentPresence, asks the server once per person.
+      // ignore: deprecated_member_use
+      presences: client.presences,
+      ownUserId: client.userID ?? '',
+    );
+  }
+
   void inviteAction() => FluffyShare.shareInviteLink(context);
 
   Future<void> openScannerAction() async {
@@ -101,22 +127,26 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     if (!mounted) return;
     await showAdaptiveBottomSheet(
       context: context,
-      builder: (_) => QrScannerModal(
-        onScan: (link) => UrlLauncher(context, link).openMatrixToUrl(),
-      ),
+      builder: (_) => QrScannerModal(onScan: handleScan),
     );
   }
 
-  Future<void> copyUserId() async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+  /// What a scanned code leads to. The text is untrusted: only a plain
+  /// Matrix link gets this far, the user is shown where it leads, and only
+  /// Open hands it to the same flow that handles links in messages, which
+  /// asks again before it joins anything.
+  Future<void> handleScan(String raw) async {
     final l10n = L10n.of(context);
-    await Clipboard.setData(
-      ClipboardData(text: Matrix.of(context).client.userID!),
-    );
-    if (!mounted) return;
-    scaffoldMessenger.showSnackBar(
-      SnackBar(content: Text(l10n.copiedToClipboard)),
-    );
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final target = MatrixLinkPolicy.parse(raw);
+    if (target == null) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.qrNotMatrixLink)),
+      );
+      return;
+    }
+    if (!await confirmScannedTarget(context, target) || !mounted) return;
+    await UrlLauncher(context, target.normalizedUrl).openMatrixToUrl();
   }
 
   void openUserModal(Profile profile) =>
@@ -124,6 +154,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   @override
   void dispose() {
+    _searchCoolDown?.cancel();
     controller.dispose();
     textFieldFocus.dispose();
     super.dispose();

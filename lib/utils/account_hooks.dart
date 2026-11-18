@@ -61,6 +61,7 @@ Future<void> showUnverifiedDeviceNoticeAfterFirstSync(
     );
   }
   if (!context.mounted) return;
+  if (Matrix.of(context).activeClientOrNull != client) return;
   final hasUnverified =
       client.userDeviceKeys[client.userID]?.deviceKeys.values.any(
         (device) => !device.verified && !device.blocked,

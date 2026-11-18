@@ -1188,7 +1188,6 @@
             }
         }
     },
-    "shareInviteLink": "Share invite link",
     "scanQrCode": "Scan QR code",
     "noPasswordRecoveryDescription": "You have not added a way to recover your password yet.",
     "@noPasswordRecoveryDescription": {
@@ -2059,7 +2058,6 @@
     "makeAdminDescription": "Once you make this user admin, you may not be able to undo this as they will then have the same permissions as you.",
     "pushNotificationsNotAvailable": "Push notifications not available",
     "learnMore": "Learn more",
-    "yourGlobalUserIdIs": "Your global user-ID is: ",
     "noUsersFoundWithQuery": "Unfortunately no user could be found with \"{query}\". Please check whether you made a typo.",
     "@noUsersFoundWithQuery": {
         "type": "String",
@@ -2090,7 +2088,6 @@
     "databaseMigrationBody": "Please wait. This may take a moment.",
     "leaveEmptyToClearStatus": "Leave empty to clear your status.",
     "select": "Select",
-    "searchForUsers": "Search for @users...",
     "pleaseEnterYourCurrentPassword": "Please enter your current password",
     "newPassword": "New password",
     "pleaseChooseAStrongPassword": "Please choose a strong password",
@@ -2099,8 +2096,6 @@
     "publicChatAddresses": "Public chat addresses",
     "createNewAddress": "Create new address",
     "joinSpace": "Join space",
-    "publicSpaces": "Public spaces",
-    "addChatOrSubSpace": "Add chat or sub space",
     "initAppError": "An error occured while init the app",
     "searchIn": "Search in chat \"{chat}\"...",
     "@searchIn": {
@@ -4658,6 +4653,384 @@
     },
     "dataStorageNote": "Exports are created on this device and saved where you choose.",
     "@dataStorageNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchHint": "Search chats, people and messages",
+    "@searchHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchFilters": "Filters",
+    "@searchFilters": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchFiltersActive": "Filters, {count} active",
+    "@searchFiltersActive": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "searchShowResults": "Show results",
+    "@searchShowResults": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchFromLabel": "From",
+    "@searchFromLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchInLabel": "In",
+    "@searchInLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchDateLabel": "Date",
+    "@searchDateLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypeLabel": "Type",
+    "@searchTypeLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchAnyone": "Anyone",
+    "@searchAnyone": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchAddChat": "Chat",
+    "@searchAddChat": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchAny": "Any",
+    "@searchAny": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchWeek": "Week",
+    "@searchWeek": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchMonth": "Month",
+    "@searchMonth": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypePhotos": "Photos",
+    "@searchTypePhotos": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypeVideos": "Videos",
+    "@searchTypeVideos": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypeFiles": "Files",
+    "@searchTypeFiles": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypeLinks": "Links",
+    "@searchTypeLinks": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypeVoice": "Voice",
+    "@searchTypeVoice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchTypePolls": "Polls",
+    "@searchTypePolls": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchMentionsMe": "Only messages that mention me",
+    "@searchMentionsMe": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchSectionMedia": "Media",
+    "@searchSectionMedia": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchSectionLinks": "Links",
+    "@searchSectionLinks": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchMessagesCount": "MESSAGES · {count}",
+    "@searchMessagesCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "searchNoticePersistent": "Encrypted chats are searched on this device only. {count} messages are indexed.",
+    "@searchNoticePersistent": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "searchNoticeMemoryOnly": "Encrypted chats are searched only for messages seen since you opened the app.",
+    "@searchNoticeMemoryOnly": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchNoticeServer": "Messages in unencrypted chats are searched on your server.",
+    "@searchNoticeServer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchNoticeFilterOnly": "Without a search word, only messages already on this device are listed.",
+    "@searchNoticeFilterOnly": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchError": "Search failed. Tap to try again.",
+    "@searchError": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "publicSpaces": "Public spaces",
+    "@publicSpaces": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchNoticeDirectory": "The words you type here are sent to {host} to look for public rooms.",
+    "@searchNoticeDirectory": {
+        "type": "String",
+        "placeholders": {
+            "host": {
+                "type": "String"
+            }
+        }
+    },
+    "communityNotificationsAll": "All messages",
+    "@communityNotificationsAll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityNotificationsMentions": "Mentions only",
+    "@communityNotificationsMentions": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityNotificationsNote": "This sets the notifications of the announcements room. The other groups keep their own setting.",
+    "@communityNotificationsNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchServerRow": "Server: {host}",
+    "@searchServerRow": {
+        "type": "String",
+        "placeholders": {
+            "host": {
+                "type": "String"
+            }
+        }
+    },
+    "searchIndexTitle": "Search index",
+    "@searchIndexTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchIndexCount": "{count} messages indexed on this device",
+    "@searchIndexCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "searchIndexMemoryOnly": "Kept in memory only on this device",
+    "@searchIndexMemoryOnly": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchIndexClear": "Clear search index",
+    "@searchIndexClear": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "searchIndexClearConfirm": "This deletes the search index of all your accounts on this device. Your messages are not deleted and the index builds up again.",
+    "@searchIndexClearConfirm": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "spaceMembersCount": "Space · {count} members",
+    "@spaceMembersCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceTabJoined": "Joined {count}",
+    "@spaceTabJoined": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceTabSuggested": "Suggested {count}",
+    "@spaceTabSuggested": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceOtherRooms": "Other rooms",
+    "@spaceOtherRooms": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "spaceSubspaceRooms": "Subspace · {count} rooms",
+    "@spaceSubspaceRooms": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceAlreadyOpen": "Already open",
+    "@spaceAlreadyOpen": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "spaceTooDeep": "Too deep to open here",
+    "@spaceTooDeep": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "spaceListCapped": "Showing the first {count} rooms",
+    "@spaceListCapped": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceAddRoom": "Add room",
+    "@spaceAddRoom": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "spaceLoadFailed": "Could not load the rooms. Tap to try again.",
+    "@spaceLoadFailed": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityMembersCount": "Community · {count} members",
+    "@communityMembersCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "communityAnnouncements": "Announcements",
+    "@communityAnnouncements": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityOnlyModeratorsPost": "Only moderators and admins can post",
+    "@communityOnlyModeratorsPost": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityGroups": "GROUPS IN THIS COMMUNITY",
+    "@communityGroups": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityInviteLink": "Invite link",
+    "@communityInviteLink": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityAddAnnouncements": "Add announcements room",
+    "@communityAddAnnouncements": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "communityNoChannelsNote": "Matrix has no broadcast channels. This creates a normal group where only moderators and admins can post.",
+    "@communityNoChannelsNote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newMessage": "New message",
+    "@newMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newMessageSearchHint": "Name or @user:server",
+    "@newMessageSearchHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newMessageContacts": "CONTACTS · SORTED BY LAST SEEN",
+    "@newMessageContacts": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newGroup": "New group",
+    "@newGroup": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newMessageShareLink": "Share my invite link",
+    "@newMessageShareLink": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "qrNotMatrixLink": "This QR code is not a Matrix link, so it was not opened.",
+    "@qrNotMatrixLink": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "qrOpenTitle": "Open this link?",
+    "@qrOpenTitle": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "qrOpenUser": "This code points to a person. Open their profile?",
+    "@qrOpenUser": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "qrOpenRoom": "This code points to a chat. Open it? You are asked again before you join.",
+    "@qrOpenRoom": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "qrOpenAlias": "This code points to a chat address. Look it up? You are asked again before you join.",
+    "@qrOpenAlias": {
         "type": "String",
         "placeholders": {}
     }

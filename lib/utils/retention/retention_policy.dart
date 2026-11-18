@@ -49,6 +49,10 @@ class RetentionPolicy {
     return RetentionPolicy(duration);
   }
 
+  /// The policy this app applies to [room], if any.
+  static RetentionPolicy? forRoom(Room room) =>
+      fromContent(room.getState(eventType)?.content);
+
   static RetentionState stateOf(Map<String, Object?>? content) {
     if (content == null || content.isEmpty) return RetentionState.off;
     if (fromContent(content) != null) return RetentionState.applied;
@@ -78,7 +82,14 @@ class RetentionPolicy {
   /// True when [event] is older than the timer. State events, messages that
   /// are still being sent and ones that are not delivered yet stay visible.
   bool hides(Event event, DateTime now) =>
-      _canHide(event) && !_expiry(event).isAfter(now);
+      _canHide(event) && hidesAt(event.originServerTs, event.type, now);
+
+  /// The same rule for data that is not an [Event] (the search index): a
+  /// hideable [eventType] sent at [originServerTs] is hidden once the timer
+  /// has run out.
+  bool hidesAt(DateTime originServerTs, String eventType, DateTime now) =>
+      _hideableTypes.contains(eventType) &&
+      !originServerTs.add(maxLifetime).isAfter(now);
 
   /// The next moment a visible message expires, if that is within a day.
   DateTime? nextExpiry(Iterable<Event> events, DateTime now) {

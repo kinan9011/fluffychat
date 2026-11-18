@@ -17,8 +17,10 @@ import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/privacy_topics_flows.dart';
 import 'flows/scheduling_flows.dart';
+import 'flows/search_flows.dart';
 import 'flows/settings_flows.dart';
 import 'flows/shell_navigation.dart';
+import 'flows/space_flows.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +49,9 @@ void main() {
     testWidgets('Topics', topicFlow);
     testWidgets('Disappearing messages', disappearingFlow);
     testWidgets('Direct chat with the default timer', directChatFlow);
+    testWidgets('Search encrypted chats', searchEncryptedFlow);
+    testWidgets('Search unencrypted chats', searchServerFlow);
+    testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
     testWidgets('Settings homeserver features', settingsHomeserverFlow);
     testWidgets('Settings export chat', settingsExportFlow);

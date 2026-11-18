@@ -28,6 +28,16 @@ class ChatPageHarness {
 
   late Client client;
 
+  /// The joined room of the fake account as it is before any test changed
+  /// the room list. The list is sorted by activity, so "the first room" is not
+  /// stable once a test added rooms.
+  late Room fixtureRoom;
+
+  /// Back to the room list of the fake account: only [fixtureRoom].
+  void resetRooms() => client.rooms
+    ..clear()
+    ..add(fixtureRoom);
+
   Future<void> setUpAll() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -43,6 +53,9 @@ class ChatPageHarness {
         );
     client = await prepareTestClient(httpClient: httpClient);
     client.backgroundSync = false;
+    fixtureRoom = client.rooms.firstWhere(
+      (room) => room.membership == Membership.join,
+    );
   }
 
   Room get room {

@@ -35,7 +35,6 @@ class ChatListItem extends StatelessWidget {
   final void Function(BuildContext context)? onPeek;
   final void Function()? onForget;
   final void Function() onTap;
-  final String? filter;
   final ChatRowActions? actions;
   final DraftStore? drafts;
 
@@ -46,7 +45,6 @@ class ChatListItem extends StatelessWidget {
     this.onLongPress,
     this.onPeek,
     this.onForget,
-    this.filter,
     this.space,
     this.actions,
     this.drafts,
@@ -58,10 +56,6 @@ class ChatListItem extends StatelessWidget {
     final l10n = L10n.of(context);
     final locals = MatrixLocals(l10n);
     final displayname = room.getLocalizedDisplayname(locals);
-    final filter = this.filter;
-    if (filter != null && !displayname.toLowerCase().contains(filter)) {
-      return const SizedBox.shrink();
-    }
     final lastEvent = room.lastEvent;
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;

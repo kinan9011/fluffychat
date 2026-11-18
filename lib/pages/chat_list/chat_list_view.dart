@@ -17,20 +17,9 @@ class ChatListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop:
-          !controller.isSearchMode &&
-          controller.overviewSpaceId == null &&
-          !controller.scope.archived,
+      canPop: !controller.scope.archived,
       onPopInvokedWithResult: (pop, _) {
         if (pop) return;
-        if (controller.overviewSpaceId != null) {
-          controller.closeSpaceOverview();
-          return;
-        }
-        if (controller.isSearchMode) {
-          controller.cancelSearch();
-          return;
-        }
         if (controller.scope.archived) {
           controller.closeArchived();
           return;
@@ -48,14 +37,11 @@ class ChatListView extends StatelessWidget {
             right: false,
             child: ChatListViewBody(controller),
           ),
-          floatingActionButton:
-              !controller.isSearchMode && controller.overviewSpaceId == null
-              ? ValueListenableBuilder(
-                  valueListenable: controller.scrolledToTop,
-                  builder: (context, scrolledToTop, _) =>
-                      StartChatFab(extended: scrolledToTop),
-                )
-              : const SizedBox.shrink(),
+          floatingActionButton: ValueListenableBuilder(
+            valueListenable: controller.scrolledToTop,
+            builder: (context, scrolledToTop, _) =>
+                StartChatFab(extended: scrolledToTop),
+          ),
         ),
       ),
     );

@@ -6,6 +6,8 @@
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
+import 'package:fluffychat/pages/global_search/global_search.dart';
+import 'package:fluffychat/pages/global_search/global_search_view.dart';
 import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
@@ -253,9 +255,18 @@ void main() {
       expect(find.text('Back up your encryption keys'), findsOneWidget);
       await tester.tap(find.byTooltip('Search'));
       await settle(tester);
-      expect(find.text('Back up your encryption keys'), findsNothing);
-      await tester.tap(find.byTooltip('Cancel'));
+      expect(find.byType(GlobalSearch), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(GlobalSearch),
+          matching: find.text('Back up your encryption keys'),
+        ),
+        findsNothing,
+      );
+      await tester.tap(find.byKey(GlobalSearchView.cancelKey));
       await settle(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(GlobalSearch), findsNothing);
       expect(find.text('Back up your encryption keys'), findsOneWidget);
       await tester.tap(archivedRow);
       await settle(tester);

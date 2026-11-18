@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/utils/chat/display_text.dart';
+import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:matrix/matrix.dart' show MatrixIdExtension;
 
 /// Content key a topic root event carries (a client convention; other apps
 /// show the root as a normal message and the first line of its body).
@@ -116,14 +116,7 @@ abstract class TopicParser {
   static const maxPages = 4;
   static const maxTopics = 200;
 
-  static final _eventId = RegExp(
-    r'^\$[A-Za-z0-9+/=_.\-]{1,255}(:[A-Za-z0-9.\-\[\]:]{1,255})?$',
-  );
-
-  static bool isEventId(Object? value) =>
-      value is String &&
-      value.isValidMatrixIdStrict() &&
-      _eventId.hasMatch(value);
+  static bool isEventId(Object? value) => isMatrixEventId(value);
 
   static String _firstLine(String text) => text
       .split('\n')

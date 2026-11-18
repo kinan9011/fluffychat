@@ -11,9 +11,9 @@ import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
 import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
 import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/route_path.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -22,7 +22,6 @@ import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
 
 import '../../../utils/account_bundles.dart';
@@ -48,10 +47,6 @@ class ChatListController extends State<ChatList>
   String? get activeTag =>
       scope.folder.kind == FolderKind.tag ? scope.folder.value : null;
 
-  String? _overviewSpaceId;
-
-  String? get overviewSpaceId => _overviewSpaceId;
-
   static final _roomId = RegExp(r'^![^:\s]{1,255}:[^\s]{1,255}$');
 
   Future<void> openSpaceOverview(String spaceId) async {
@@ -59,14 +54,8 @@ class ChatListController extends State<ChatList>
     if (space == null || !space.isJoinedSpace) return;
     await space.postLoad();
     if (!mounted) return;
-    setState(() {
-      _overviewSpaceId = spaceId;
-    });
+    unawaited(context.push(routePath(['rooms', 'space', spaceId])));
   }
-
-  void closeSpaceOverview() => setState(() {
-    _overviewSpaceId = null;
-  });
 
   void selectTab(ChatListScope newScope) {
     setState(() {
@@ -154,137 +143,9 @@ class ChatListController extends State<ChatList>
     context.go('/rooms/${room.id}');
   }
 
-  bool isSearchMode = false;
-  Future<QueryPublicRoomsResponse>? publicRoomsResponse;
-  String? searchServer;
-  Timer? _coolDown;
-  SearchUserDirectoryResponse? userSearchResult;
-  QueryPublicRoomsResponse? roomSearchResult;
+  void startSearch() => context.go('/rooms/search');
 
-  bool isSearching = false;
-  static const String _serverStoreNamespace = 'im.fluffychat.search.server';
-
-  Future<void> setServer() async {
-    final matrix = Matrix.of(context);
-    final l10n = L10n.of(context);
-    final newServer = await showTextInputDialog(
-      useRootNavigator: false,
-      title: l10n.changeTheHomeserver,
-      context: context,
-      okLabel: l10n.ok,
-      cancelLabel: l10n.cancel,
-      prefixText: 'https://',
-      hintText: matrix.client.homeserver?.host,
-      initialText: searchServer,
-      keyboardType: TextInputType.url,
-      autocorrect: false,
-      validator: (server) =>
-          server.contains('.') == true ? null : l10n.invalidServerName,
-    );
-    if (newServer == null) return;
-    if (!mounted) return;
-    matrix.store.setString(_serverStoreNamespace, newServer);
-    setState(() {
-      searchServer = newServer;
-    });
-    _coolDown?.cancel();
-    _coolDown = Timer(const Duration(milliseconds: 500), _search);
-  }
-
-  final TextEditingController searchController = TextEditingController();
-  final FocusNode searchFocusNode = FocusNode();
-
-  Future<void> _search() async {
-    final client = Matrix.of(context).client;
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    if (!isSearching) {
-      setState(() {
-        isSearching = true;
-      });
-    }
-    SearchUserDirectoryResponse? userSearchResult;
-    QueryPublicRoomsResponse? roomSearchResult;
-    final searchQuery = searchController.text.trim();
-    try {
-      roomSearchResult = await client.queryPublicRooms(
-        server: searchServer,
-        filter: PublicRoomQueryFilter(genericSearchTerm: searchQuery),
-        limit: 20,
-      );
-
-      if (searchQuery.isValidMatrixIdStrict() &&
-          searchQuery.sigil == '#' &&
-          roomSearchResult.chunk.any(
-                (room) => room.canonicalAlias == searchQuery,
-              ) ==
-              false) {
-        final response = await client.getRoomIdByAlias(searchQuery);
-        final roomId = response.roomId;
-        if (roomId != null) {
-          roomSearchResult.chunk.add(
-            PublishedRoomsChunk(
-              name: searchQuery,
-              guestCanJoin: false,
-              numJoinedMembers: 0,
-              roomId: roomId,
-              worldReadable: false,
-              canonicalAlias: searchQuery,
-            ),
-          );
-        }
-      }
-      userSearchResult = await client.searchUserDirectory(
-        searchController.text,
-        limit: 20,
-      );
-    } catch (e, s) {
-      Logs().w('Searching has crashed', e, s);
-      if (!mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(e.toLocalizedString(context))),
-      );
-    }
-    if (!isSearchMode) return;
-    setState(() {
-      isSearching = false;
-      this.roomSearchResult = roomSearchResult;
-      this.userSearchResult = userSearchResult;
-    });
-  }
-
-  void onSearchEnter(String text, {bool globalSearch = true}) {
-    if (text.isEmpty) {
-      cancelSearch(unfocus: false);
-      return;
-    }
-
-    setState(() {
-      isSearchMode = true;
-    });
-    _coolDown?.cancel();
-    if (globalSearch) {
-      _coolDown = Timer(const Duration(milliseconds: 500), _search);
-    }
-  }
-
-  void startSearch() {
-    setState(() {
-      isSearchMode = true;
-    });
-    searchFocusNode.requestFocus();
-    _coolDown?.cancel();
-    _coolDown = Timer(const Duration(milliseconds: 500), _search);
-  }
-
-  void cancelSearch({bool unfocus = true}) {
-    setState(() {
-      searchController.clear();
-      isSearchMode = false;
-      roomSearchResult = userSearchResult = null;
-      isSearching = false;
-    });
-    if (unfocus) searchFocusNode.unfocus();
-  }
+  void explorePublic() => context.go('/rooms/search?section=public');
 
   BoxConstraints? snappingSheetContainerSize;
 
@@ -333,7 +194,6 @@ class ChatListController extends State<ChatList>
     _activeClientSubscription = Matrix.of(context).onActiveClientChanged.listen(
       (_) => setState(() {
         scope = const ChatListScope();
-        _overviewSpaceId = null;
         openSwipeRow.value = null;
       }),
     );
@@ -343,12 +203,6 @@ class ChatListController extends State<ChatList>
       if (widget.activeSpace != null) {
         openSpaceFromLink(widget.activeSpace!);
       }
-      if (mounted) {
-        searchServer = Matrix.of(
-          context,
-        ).store.getString(_serverStoreNamespace);
-      }
-
       // Workaround for system UI overlay style not applied on app start
       SystemChrome.setSystemUIOverlayStyle(
         Theme.of(context).appBarTheme.systemOverlayStyle!,
@@ -362,8 +216,6 @@ class ChatListController extends State<ChatList>
   void dispose() {
     _activeClientSubscription?.cancel();
     scrollController.removeListener(_onScroll);
-    searchController.dispose();
-    searchFocusNode.dispose();
     scrollController.dispose();
     scrolledToTop.dispose();
     openSwipeRow.dispose();
@@ -774,7 +626,6 @@ class ChatListController extends State<ChatList>
     context.go('/rooms');
     setState(() {
       scope = const ChatListScope();
-      _overviewSpaceId = null;
       Matrix.of(context).setActiveClient(client);
     });
     _clientStream.add(client);
@@ -784,7 +635,6 @@ class ChatListController extends State<ChatList>
     context.go('/rooms');
     setState(() {
       scope = const ChatListScope();
-      _overviewSpaceId = null;
       Matrix.of(context).activeBundle = bundle;
       if (!Matrix.of(
         context,

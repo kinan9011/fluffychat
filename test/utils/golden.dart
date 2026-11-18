@@ -14,27 +14,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Light, dark and one RTL variant (Arabic locale). Every new component gets
 /// these. The test font set has no Arabic glyphs, so Arabic text renders as
 /// boxes: layout direction and l10n strings are covered, glyph shapes are not.
-const goldenVariants =
-    <({String suffix, Brightness brightness, bool rtl, Locale locale})>[
-      (
-        suffix: 'light',
-        brightness: Brightness.light,
-        rtl: false,
-        locale: Locale('en'),
-      ),
-      (
-        suffix: 'dark',
-        brightness: Brightness.dark,
-        rtl: false,
-        locale: Locale('en'),
-      ),
-      (
-        suffix: 'rtl',
-        brightness: Brightness.light,
-        rtl: true,
-        locale: Locale('ar'),
-      ),
-    ];
+typedef GoldenVariant = ({
+  String suffix,
+  Brightness brightness,
+  bool rtl,
+  Locale locale,
+});
+
+const goldenVariants = <GoldenVariant>[
+  (
+    suffix: 'light',
+    brightness: Brightness.light,
+    rtl: false,
+    locale: Locale('en'),
+  ),
+  (
+    suffix: 'dark',
+    brightness: Brightness.dark,
+    rtl: false,
+    locale: Locale('en'),
+  ),
+  (
+    suffix: 'rtl',
+    brightness: Brightness.light,
+    rtl: true,
+    locale: Locale('ar'),
+  ),
+];
 
 /// Pumps [child] inside the app theme (default accent hue) and localizations,
 /// without needing network or a Matrix client.

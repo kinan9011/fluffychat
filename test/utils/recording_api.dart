@@ -58,6 +58,10 @@ class RecordingApi extends FakeMatrixApi {
   /// Answers for other GET requests, by the end of their path.
   final getOverrides = <String, Object?>{};
 
+  /// Answers a GET with this JSON when it returns something other than null;
+  /// asked first, by the whole url.
+  Object? Function(Uri url)? getResponder;
+
   static final _accept = RegExp(
     r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/',
   );
@@ -137,6 +141,14 @@ class RecordingApi extends FakeMatrixApi {
       );
     }
     if (request.method == 'GET') {
+      final answer = getResponder?.call(request.url);
+      if (answer != null) {
+        return StreamedResponse(
+          Stream.value(utf8.encode(jsonEncode(answer))),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }
       for (final entry in getOverrides.entries) {
         if (!request.url.path.endsWith(entry.key)) continue;
         return StreamedResponse(

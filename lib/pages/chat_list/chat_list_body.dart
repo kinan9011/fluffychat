@@ -16,9 +16,7 @@ import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/folder_tab_actions.dart';
 import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
-import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_switcher.dart';
-import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/utils/chat_list/folder_filter.dart';
 import 'package:fluffychat/utils/chat_list/folder_ref.dart';
 import 'package:fluffychat/utils/chat_list/folder_store.dart';
@@ -27,17 +25,12 @@ import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../config/themes.dart';
-import '../../widgets/adaptive_dialogs/user_dialog.dart';
 import '../../widgets/matrix.dart';
-import 'chat_list_header.dart';
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
@@ -49,16 +42,6 @@ class ChatListViewBody extends StatelessWidget {
     final theme = Theme.of(context);
 
     final client = Matrix.of(context).client;
-    final overview = controller.overviewSpaceId;
-    if (overview != null) {
-      return SpaceView(
-        key: ValueKey(overview),
-        spaceId: overview,
-        onBack: controller.closeSpaceOverview,
-        onChatTab: controller.onChatTap,
-        activeChat: controller.activeChat,
-      );
-    }
     final spaces = client.rooms.where((r) => r.isSpace);
     final spaceDelegateCandidates = <String, Room>{};
     for (final space in spaces) {
@@ -69,15 +52,7 @@ class ChatListViewBody extends StatelessWidget {
       }
     }
 
-    final publicRooms = controller.roomSearchResult?.chunk
-        .where((room) => room.roomType != 'm.space')
-        .toList();
-    final publicSpaces = controller.roomSearchResult?.chunk
-        .where((room) => room.roomType == 'm.space')
-        .toList();
-    final userSearchResult = controller.userSearchResult;
     const dummyChatCount = 4;
-    final filter = controller.searchController.text.toLowerCase();
     final l10n = L10n.of(context);
     final drafts = DraftStore.of(client);
     return ListenableBuilder(
@@ -141,8 +116,7 @@ class ChatListViewBody extends StatelessWidget {
               }
             });
           }
-          final showArchivedRow =
-              archivedRooms.isNotEmpty && !controller.isSearchMode;
+          final showArchivedRow = archivedRooms.isNotEmpty;
           final unreadRooms = client.rooms
               .where((room) => room.isUnreadOrInvited)
               .toList();
@@ -158,15 +132,14 @@ class ChatListViewBody extends StatelessWidget {
           return CustomScrollView(
             controller: controller.scrollController,
             slivers: [
-              switch ((controller.isSearchMode, scope.archived)) {
-                (true, _) => ChatListHeader(controller: controller),
-                (_, true) => SliverToBoxAdapter(
+              switch (scope.archived) {
+                true => SliverToBoxAdapter(
                   child: SafeArea(
                     bottom: false,
                     child: _ArchivedHeader(onBack: controller.closeArchived),
                   ),
                 ),
-                _ => SliverToBoxAdapter(
+                false => SliverToBoxAdapter(
                   child: SafeArea(
                     bottom: false,
                     child: Column(
@@ -208,62 +181,7 @@ class ChatListViewBody extends StatelessWidget {
               },
               SliverList(
                 delegate: SliverChildListDelegate([
-                  if (controller.isSearchMode) ...[
-                    SearchTitle(
-                      title: L10n.of(context).publicRooms,
-                      icon: const Icon(Icons.explore_outlined),
-                    ),
-                    PublicRoomsHorizontalList(publicRooms: publicRooms),
-                    SearchTitle(
-                      title: L10n.of(context).publicSpaces,
-                      icon: const Icon(Icons.workspaces_outlined),
-                    ),
-                    PublicRoomsHorizontalList(publicRooms: publicSpaces),
-                    SearchTitle(
-                      title: L10n.of(context).users,
-                      icon: const Icon(Icons.group_outlined),
-                    ),
-                    AnimatedContainer(
-                      clipBehavior: Clip.hardEdge,
-                      decoration: const BoxDecoration(),
-                      height:
-                          userSearchResult == null ||
-                              userSearchResult.results.isEmpty
-                          ? 0
-                          : 106,
-                      duration: FluffyThemes.animationDuration,
-                      curve: FluffyThemes.animationCurve,
-                      child: userSearchResult == null
-                          ? null
-                          : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: userSearchResult.results.length,
-                              itemBuilder: (context, i) => _SearchItem(
-                                title:
-                                    userSearchResult.results[i].displayName ??
-                                    userSearchResult
-                                        .results[i]
-                                        .userId
-                                        .localpart ??
-                                    L10n.of(context).unknownDevice,
-                                colorSeed: userSearchResult.results[i].userId,
-                                avatar: userSearchResult.results[i].avatarUrl,
-                                onPressed: () => UserDialog.show(
-                                  context: context,
-                                  profile: userSearchResult.results[i],
-                                ),
-                              ),
-                            ),
-                    ),
-                  ],
-                  if (controller.isSearchMode)
-                    SearchTitle(
-                      title: L10n.of(context).chats,
-                      icon: const Icon(Icons.forum_outlined),
-                    ),
-                  if (client.prevBatch != null &&
-                      rooms.isEmpty &&
-                      !controller.isSearchMode) ...[
+                  if (client.prevBatch != null && rooms.isEmpty) ...[
                     Column(
                       mainAxisAlignment: .center,
                       children: [
@@ -350,7 +268,6 @@ class ChatListViewBody extends StatelessWidget {
                         room,
                         space: space,
                         key: ValueKey('chat_list_item_${room.id}'),
-                        filter: filter,
                         actions: controller.rowActions,
                         drafts: drafts,
                         onTap: () => controller.onChatTap(room),
@@ -439,90 +356,10 @@ class _TopBar extends StatelessWidget {
                 selectedSpaceId: controller.scope.spaceId,
                 onSelect: controller.selectSpace,
                 onCreateSpace: () => context.go('/rooms/newspace'),
-                onExplore: controller.startSearch,
+                onExplore: controller.explorePublic,
               )
             : null,
       );
     },
-  );
-}
-
-class PublicRoomsHorizontalList extends StatelessWidget {
-  const PublicRoomsHorizontalList({super.key, required this.publicRooms});
-
-  final List<PublishedRoomsChunk>? publicRooms;
-
-  @override
-  Widget build(BuildContext context) {
-    final publicRooms = this.publicRooms;
-    return AnimatedContainer(
-      clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(),
-      height: publicRooms == null || publicRooms.isEmpty ? 0 : 106,
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      child: publicRooms == null
-          ? null
-          : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: publicRooms.length,
-              itemBuilder: (context, i) => _SearchItem(
-                title:
-                    publicRooms[i].name ??
-                    publicRooms[i].canonicalAlias?.localpart ??
-                    L10n.of(context).group,
-                colorSeed: publicRooms[i].roomId,
-                avatar: publicRooms[i].avatarUrl,
-                onPressed: () => showAdaptiveDialog(
-                  context: context,
-                  barrierDismissible: true,
-                  builder: (c) => PublicRoomDialog(
-                    roomAlias:
-                        publicRooms[i].canonicalAlias ?? publicRooms[i].roomId,
-                    chunk: publicRooms[i],
-                  ),
-                ),
-              ),
-            ),
-    );
-  }
-}
-
-class _SearchItem extends StatelessWidget {
-  final String title;
-  final String colorSeed;
-  final Uri? avatar;
-  final void Function() onPressed;
-
-  const _SearchItem({
-    required this.title,
-    required this.colorSeed,
-    this.avatar,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onPressed,
-    child: SizedBox(
-      width: 84,
-      child: Column(
-        mainAxisSize: .min,
-        children: [
-          const SizedBox(height: 8),
-          Avatar(mxContent: avatar, name: title, colorSeed: colorSeed),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              title,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    ),
   );
 }

@@ -22,6 +22,7 @@ import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_sett
 import 'package:fluffychat/pages/chat_search/chat_search_page.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/export/export_page.dart';
+import 'package:fluffychat/pages/global_search/global_search.dart';
 import 'package:fluffychat/pages/intro/intro_page_presenter.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
@@ -43,8 +44,12 @@ import 'package:fluffychat/pages/settings_notifications/settings_notifications.d
 import 'package:fluffychat/pages/settings_password/settings_password.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/sign_in/sign_in_page.dart';
+import 'package:fluffychat/pages/space_overview/space_overview.dart';
 import 'package:fluffychat/pages/topics/topics_page.dart';
 import 'package:fluffychat/utils/matrix_room_id.dart';
+import 'package:fluffychat/utils/search/search_sections.dart';
+import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
+import 'package:fluffychat/utils/spaces/space_trail.dart';
 import 'package:fluffychat/widgets/config_viewer.dart';
 import 'package:fluffychat/widgets/database_quarantine_banner.dart';
 import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
@@ -302,6 +307,45 @@ abstract class AppRoutes {
                     NewGroup(
                       createGroupType: CreateGroupType.space,
                       spaceId: state.uri.queryParameters['space_id'],
+                    ),
+                  ),
+                  redirect: loggedOutRedirect,
+                ),
+                GoRoute(
+                  path: 'space/:spaceId',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    SpaceOverview(
+                      key: ValueKey(state.uri),
+                      spaceId: state.pathParameters['spaceId']!,
+                      trail: SpaceTrail.parse(
+                        state.uri.queryParameters['trail'],
+                      ),
+                      preview: state.extra is HierarchyChild
+                          ? state.extra as HierarchyChild
+                          : null,
+                    ),
+                  ),
+                  redirect: (context, state) {
+                    final redirect = loggedOutRedirect(context, state);
+                    if (redirect != null) return redirect;
+                    final id = state.pathParameters['spaceId'];
+                    return id != null && SpaceTrail.isSpaceId(id)
+                        ? null
+                        : '/rooms';
+                  },
+                ),
+                GoRoute(
+                  path: 'search',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    GlobalSearch(
+                      initialSection:
+                          state.uri.queryParameters['section'] == 'public'
+                          ? SearchSection.publicRooms
+                          : SearchSection.all,
                     ),
                   ),
                   redirect: loggedOutRedirect,

@@ -29,9 +29,13 @@ extension on FluffyChatTester {
     expect(await alice.directRoomWith(bob.userId), isNull);
 
     await tapOn(find.byIcon(Icons.edit_square));
+    await waitFor('New message');
+    expect(find.text('New group'), findsOneWidget);
+    expect(find.text('New space'), findsOneWidget);
+    expect(find.text('Share my invite link'), findsOneWidget);
     await enterText(find.byType(TextField).first, bob.userId);
     await tester.pump(const Duration(seconds: 2));
-    final result = find.widgetWithText(ListTile, bob.userId);
+    final result = find.widgetWithText(InkWell, bob.userId);
     await waitFor(result);
     await tapOn(result);
     await waitFor('Create new chat');

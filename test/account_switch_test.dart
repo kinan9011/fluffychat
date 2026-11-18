@@ -10,8 +10,9 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/calls/calls_page.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/space_view.dart';
+import 'package:fluffychat/pages/global_search/global_search.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
+import 'package:fluffychat/pages/space_overview/space_overview.dart';
 import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/chat_list/unread_counts.dart';
 import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
@@ -773,15 +774,19 @@ void main() {
       (tester, matrix) async {
         await goTo(tester, '/rooms?spaceId=!sub:x');
         await settle(tester);
-        expect(find.byType(SpaceView), findsOneWidget);
+        expect(find.byType(SpaceOverview), findsOneWidget);
         expect(
-          find.text('Alpha'),
+          find.descendant(
+            of: find.byType(SpaceOverview),
+            matching: find.text('Alpha'),
+          ),
           findsNothing,
-          reason: 'the tab bar is hidden',
+          reason: 'the overview has no tab bar',
         );
         await tester.tap(find.byTooltip('Back'));
         await settle(tester);
-        expect(find.byType(SpaceView), findsNothing);
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byType(SpaceOverview), findsNothing);
         expect(
           find.text('Alpha'),
           findsOneWidget,
@@ -818,6 +823,60 @@ void main() {
       },
     );
 
+    accountTest('the search page closes when the active account changes', (
+      tester,
+      matrix,
+    ) async {
+      await goTo(tester, '/rooms/search');
+      await settle(tester);
+      expect(find.byType(GlobalSearch), findsOneWidget);
+      matrix.setActiveClient(second, resetTabs: false);
+      await settle(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(GlobalSearch), findsNothing);
+      return matrix;
+    });
+
+    accountTest(
+      'the space overview closes when the active account changes',
+      (tester, matrix) async {
+        await goTo(tester, '/rooms?spaceId=!sub:x');
+        await settle(tester);
+        expect(find.byType(SpaceOverview), findsOneWidget);
+        matrix.setActiveClient(second, resetTabs: false);
+        await settle(tester);
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byType(SpaceOverview), findsNothing);
+        return matrix;
+      },
+      beforePump: () {
+        addSpace();
+        first.rooms.add(
+          testSpace(
+            first,
+            ['!r:x'],
+            id: '!sub:x',
+            name: 'Sub',
+            parents: [spaceId],
+          ),
+        );
+        final space = first.rooms.firstWhere((r) => r.id == spaceId);
+        space.setState(
+          Event(
+            type: EventTypes.SpaceChild,
+            stateKey: '!sub:x',
+            content: {
+              'via': ['example.org'],
+            },
+            room: space,
+            eventId: '\$sub',
+            senderId: '@admin:example.org',
+            originServerTs: DateTime(2030),
+          ),
+        );
+      },
+    );
+
     accountTest(
       '?spaceId= with a malformed id of a joined space is ignored',
       (tester, matrix) async {
@@ -826,7 +885,7 @@ void main() {
           '/rooms?spaceId=${Uri.encodeQueryComponent('!bad id:x')}',
         );
         await settle(tester);
-        expect(find.byType(SpaceView), findsNothing);
+        expect(find.byType(SpaceOverview), findsNothing);
         expect(row('!c:x'), findsOneWidget, reason: 'still All chats');
         expect(row('!a:x'), findsOneWidget);
         return matrix;

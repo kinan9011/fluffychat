@@ -19,6 +19,12 @@ import 'package:matrix/matrix.dart';
 import 'utils/golden.dart';
 import 'utils/test_client.dart';
 
+/// The golden shows the time of day, which only a message of today does.
+DateTime _today1240() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day, 12, 40);
+}
+
 Topic topic(
   String id,
   String title, {
@@ -31,7 +37,7 @@ Topic topic(
   title: title,
   icon: icon,
   replyCount: 3,
-  lastActivity: DateTime(2026, 11, 17, 12, 40),
+  lastActivity: _today1240(),
   hue: TopicParser.hueFor(id),
   lastSender: 'Priya',
   lastPreview: preview,

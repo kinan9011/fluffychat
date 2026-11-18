@@ -21,6 +21,7 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/privacy/presence_policy.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/utils/spaces/legacy_cache_purge.dart';
 import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -42,6 +43,8 @@ import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
 import '../utils/scheduling/scheduled_queue.dart';
 import '../utils/scheduling/scheduled_store.dart';
+import '../utils/search/index_feeder.dart';
+import '../utils/search/message_index.dart';
 import '../utils/server_capabilities/server_capabilities_service.dart';
 import 'local_notifications_extension.dart';
 
@@ -178,9 +181,18 @@ class MatrixState extends State<Matrix> {
     }
   }
 
+  Future<void> _purgeLegacyCaches() async {
+    try {
+      await purgeLegacySpaceHierarchyCache(store);
+    } catch (_) {
+      Logs().w('[Spaces] cache purge failed');
+    }
+  }
+
   void runStartupHooksOnce() {
     if (_startupHooksDone) return;
     _startupHooksDone = true;
+    unawaited(_purgeLegacyCaches());
     startupHooks(this);
     final active = activeClientOrNull;
     if (active != null) unawaited(_runAccountHooks(active));
@@ -203,6 +215,8 @@ class MatrixState extends State<Matrix> {
     serverCapabilities.forget(c);
     ScheduledQueue.forget(c);
     ScheduledStore.forget(c);
+    IndexFeeder.forget(c);
+    MessageIndex.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;
     _emitIfChanged(before, resetTabs: true);
   }
@@ -394,11 +408,15 @@ class MatrixState extends State<Matrix> {
           );
         });
     unawaited(ScheduledQueue.of(c).start());
+    IndexFeeder.of(c)
+      ..start()
+      ..catchUpAfterFirstSync();
     onLogoutSub[name] ??= c.onLoginStateChanged.stream
         .where((state) => state == LoginState.loggedOut)
         .listen((_) {
           final loggedInWithMultipleClients = widget.clients.length > 1;
 
+          unawaited(MessageIndex.of(c).wipe());
           _cancelSubs(c.clientName);
           _removeClient(c);
           ClientManager.removeClientNameFromStore(c.clientName, store);
@@ -578,6 +596,7 @@ class MatrixState extends State<Matrix> {
     serverCapabilities.dispose();
     for (final client in widget.clients) {
       ScheduledQueue.forget(client);
+      IndexFeeder.forget(client);
     }
     _activeClientChanged.close();
     _accountSwitched.close();

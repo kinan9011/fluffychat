@@ -7,6 +7,8 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/link_scheme_policy.dart';
+import 'package:fluffychat/utils/links/matrix_link_policy.dart';
+import 'package:fluffychat/utils/route_path.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -222,6 +224,7 @@ class UrlLauncher {
 
   Future<void> openMatrixToUrl() async {
     final matrix = Matrix.of(context);
+    final l10n = L10n.of(context);
     final url = this.url!.replaceFirst(
       AppConfig.deepLinkPrefix,
       AppConfig.inviteLinkPrefix,
@@ -260,17 +263,16 @@ class UrlLauncher {
         final result = response.result;
         if (result != null) {
           roomId = result.roomId;
-          servers.addAll(result.servers!);
+          servers.addAll(result.servers ?? const []);
           room = matrix.client.getRoomById(roomId!);
         }
       }
       servers.addAll(identityParts.via);
+      final via = MatrixLinkPolicy.safeVia(servers);
       if (!context.mounted) return;
       if (room != null) {
         if (room.isSpace) {
-          // TODO: Implement navigate to space
-          context.go('/rooms/${room.id}');
-
+          context.go(routePath(['rooms', 'space', room.id]));
           return;
         }
         // we have the room, so....just open it
@@ -296,7 +298,8 @@ class UrlLauncher {
         if (await showOkCancelAlertDialog(
               useRootNavigator: false,
               context: context,
-              title: 'Join room $roomIdOrAlias',
+              title: l10n.joinRoom,
+              message: roomIdOrAlias,
             ) ==
             OkCancelResult.ok) {
           roomId = roomIdOrAlias;
@@ -305,7 +308,7 @@ class UrlLauncher {
             context: context,
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
-              via: servers.isNotEmpty ? servers.toList() : null,
+              via: via.isEmpty ? null : via,
             ),
           );
           if (response.error != null) return;
