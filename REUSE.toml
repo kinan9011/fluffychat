@@ -98,3 +98,14 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2019-Present Christian Kußowski"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = [
+    "third_party/receive_sharing_intent/**"
+]
+precedence = "override"
+SPDX-FileCopyrightText = [
+    "receive_sharing_intent contributors",
+    "2026 Contributors to FluffyChat"
+]
+SPDX-License-Identifier = "Apache-2.0"

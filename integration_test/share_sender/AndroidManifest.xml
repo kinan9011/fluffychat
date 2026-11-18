@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="t197.evil">
+    <application android:label="t197 sender" android:hasCode="true">
+        <provider android:name=".EvilProvider" android:authorities="t197.evil" android:exported="true" />
+        <activity android:name=".SendActivity" android:exported="true" />
+    </application>
+</manifest>

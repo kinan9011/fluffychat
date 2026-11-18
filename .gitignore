@@ -204,7 +204,7 @@ web/e2ee.worker.dart.js.deps
 web/e2ee.worker.dart.js.map
 
 test/rust
-
+.planning/
 # FVM Version Cache
 .fvm/
 macos/FluffyChat.app/Contents/embedded.provisionprofile
@@ -324,3 +324,10 @@ macos/FluffyChat.app/Contents/Resources/wakelock_plus_wakelock_plus.bundle/Conte
 macos/FluffyChat.app/Contents/_CodeSignature/CodeResources
 macos/FluffyChat.app.dSYM.zip
 macos/FluffyChat.pkg
+
+
+# graphify local build cache (regenerable, large — not the graph deliverable)
+graphify-out/cache/ast/
+graphify-out/cache/stat-index.json
+graphify-out/.graphify_root
+graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
