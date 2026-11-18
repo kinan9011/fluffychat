@@ -3,17 +3,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/secure_storage.dart';
+import 'package:fluffychat/utils/shared_media_filter.dart';
 import 'package:flutter/foundation.dart';
-import 'package:matrix/encryption.dart' show cacheTypes;
 import 'package:matrix/matrix.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +20,7 @@ import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:universal_html/html.dart' as html;
 
+import 'account_secret_purge.dart';
 import 'cipher.dart';
 import 'database_file_state.dart';
 import 'database_open_error.dart';
@@ -188,74 +188,98 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
   );
 }
 
-/// What the SDK and the app keep in the secure storage for one account: the
-/// session (tokens, device key pickle), cached cross-signing secrets, the
-/// session backup and the stored recovery key.
-Future<void> _deleteAccountSecrets(String clientName) async {
-  final sdkStorage = createSecureStorage(iOptions: iosOptions);
-  final appStorage = createSecureStorage();
-  final keys = <String>[
-    'client_data_$clientName',
-    for (final type in cacheTypes) 'ssss_cache_${clientName}_$type',
-  ];
-  try {
-    final clientData = await sdkStorage.read(key: 'client_data_$clientName');
-    final userId = clientData == null
-        ? null
-        : (jsonDecode(clientData) as Map)['user_id'];
-    if (userId is String) {
-      await appStorage.delete(key: 'ssss_recovery_key_$userId');
-    }
-  } catch (e, s) {
-    Logs().w('Unable to look up the stored recovery key', e, s);
-  }
-  for (final key in keys) {
-    try {
-      await sdkStorage.delete(key: key);
-    } catch (e, s) {
-      Logs().w('Unable to delete a stored secret', e, s);
-    }
-  }
-  try {
-    await InitWithRestoreExtension.deleteSessionBackup(clientName);
-  } catch (e, s) {
-    Logs().w('Unable to delete the session backup', e, s);
-  }
-}
+bool _isMobile() => PlatformInfos.isMobile;
+
+enum ResetStep { secrets, databaseFiles, mediaCache, tempFiles, sharedFiles }
+
+Future<bool> _purgeProductionSecrets(Iterable<String> clientNames) =>
+    purgeStoredSecrets(
+      clientNames,
+      stores: productionSecretStores(),
+      repair: productionRepairStore(),
+    );
 
 /// Deletes everything the app stored for its accounts on this device: the
 /// shared database key, every database with its SQLite side files and
 /// quarantined copies, the sessions and cached secrets in the secure storage,
-/// and the decrypted media cache. The app lock settings stay.
-Future<void> resetLocalDatabases(
+/// the decrypted media cache, the app temp files and, on Android and iOS, the
+/// shared files (never through a link). The app lock settings stay. Every step is attempted; the steps that did not finish
+/// are returned, an empty set means the reset is complete.
+Future<Set<ResetStep>> resetLocalDatabases(
   Iterable<String> clientNames, {
   @visibleForTesting
   Future<String> Function(String clientName) databasePath = _getDatabasePath,
   @visibleForTesting
   Future<Directory?> Function() fileStorage = getFileStorageLocation,
+  @visibleForTesting
+  Future<Directory?> Function() tempStorage = appTempDirectoryIfExists,
+  @visibleForTesting
+  Future<String?> Function() sharedRoot = sharedMediaRootPath,
+  @visibleForTesting bool Function() isMobile = _isMobile,
+  @visibleForTesting
+  Future<bool> Function(Iterable<String> clientNames)? purgeSecrets,
 }) async {
-  await deleteDatabaseKey();
-  for (final clientName in clientNames) {
-    await _deleteAccountSecrets(clientName);
+  final failed = <ResetStep>{};
+  Future<void> attempt(ResetStep step, Future<void> Function() action) async {
     try {
+      await action();
+    } catch (e) {
+      Logs().w('Reset step failed: ${step.name}', e.runtimeType);
+      failed.add(step);
+    }
+  }
+
+  await attempt(ResetStep.secrets, () async {
+    final done = await (purgeSecrets ?? _purgeProductionSecrets)(clientNames);
+    if (!done) failed.add(ResetStep.secrets);
+  });
+  for (final clientName in clientNames) {
+    await attempt(ResetStep.databaseFiles, () async {
       final path = await databasePath(clientName);
       for (final suffix in ['', '-wal', '-shm', '-journal']) {
         final file = File('$path$suffix');
         if (await file.exists()) await file.delete();
       }
       await deleteQuarantinedDatabases(path);
-    } catch (e, s) {
-      Logs().w('Unable to delete local database', e, s);
-    }
+    });
   }
-  try {
+  await attempt(ResetStep.mediaCache, () async {
     final cache = await fileStorage();
     if (cache != null && await cache.exists()) {
       await cache.delete(recursive: true);
     }
-  } catch (e, s) {
-    Logs().w('Unable to delete the media cache', e, s);
-  }
+  });
+  await attempt(ResetStep.tempFiles, () async {
+    await (await tempStorage())?.delete(recursive: true);
+  });
+  await attempt(ResetStep.sharedFiles, () async {
+    if (!isMobile()) return;
+    final root = await sharedRoot();
+    if (root == null) return;
+    if (await FileSystemEntity.isLink(root)) {
+      Logs().w('The share root is a link, leaving it alone');
+      return;
+    }
+    final directory = Directory(root);
+    if (await directory.exists()) await directory.delete(recursive: true);
+  });
+  return failed;
+}
+
+/// L1: the user moves the one account that cannot be opened aside (renamed,
+/// bytes kept, no copy pruned, deleted again by logout and reset). The other
+/// accounts and the database key are not touched. Throws when the move fails:
+/// everything is moved back and nothing is deleted.
+Future<void> setAccountDatabaseAside(
+  String clientName, {
+  @visibleForTesting
+  Future<String> Function(String clientName) databasePath = _getDatabasePath,
+  @visibleForTesting Future<void> Function(File file, String newPath)? rename,
+}) async {
+  if (kIsWeb) return;
+  final path = await databasePath(clientName);
+  if (rename == null) return quarantineDatabase(path, maxCopies: null);
+  await quarantineDatabase(path, rename: rename, maxCopies: null);
 }
 
 /// Quarantined copies of one account's database: they are encrypted with the

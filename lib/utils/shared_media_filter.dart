@@ -92,16 +92,21 @@ Future<List<SharedMediaFile>> filterSharedMedia(
   return result;
 }
 
-Future<String?> sharedMediaRoot() async {
+/// Where the share plugin puts its copies, not created and not resolved: a
+/// caller that deletes must look at the path itself, never at a link target.
+Future<String?> sharedMediaRootPath() async {
   final base = PlatformInfos.isIOS
       ? await PathProviderFoundation().getContainerPath(
           appGroupIdentifier: AppConfig.appleAppGroupId,
         )
       : (await getTemporaryDirectory()).path;
-  if (base == null) return null;
-  final root = await Directory(
-    p.join(base, sharedMediaDirName),
-  ).create(recursive: true);
+  return base == null ? null : p.join(base, sharedMediaDirName);
+}
+
+Future<String?> sharedMediaRoot() async {
+  final path = await sharedMediaRootPath();
+  if (path == null) return null;
+  final root = await Directory(path).create(recursive: true);
   return root.resolveSymbolicLinks();
 }
 

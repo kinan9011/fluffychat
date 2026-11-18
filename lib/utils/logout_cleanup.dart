@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:fluffychat/utils/draft_migration.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 import 'package:fluffychat/utils/status/status_clear_store.dart';
@@ -14,7 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// What an account leaves on the device besides the database the SDK clears at
 /// logout: quarantined database copies (they open with the key that survives),
-/// the status timer (it holds the Matrix ID), legacy plaintext drafts and the
+/// decrypted media in the app temp directory, the status timer (it holds the
+/// Matrix ID), legacy plaintext drafts and the
 /// notifications that show message previews. The recovery key the user chose
 /// to remember on this device stays, as upstream does (W13-SECURITY C-4).
 /// Every step is attempted; none of them throws.
@@ -22,6 +24,7 @@ class LogoutCleanup {
   const LogoutCleanup({
     required this.deleteQuarantined,
     required this.cancelNotifications,
+    required this.deleteTempFiles,
     required this.prefs,
     required this.status,
   });
@@ -36,6 +39,7 @@ class LogoutCleanup {
     return LogoutCleanup(
       deleteQuarantined: deleteQuarantinedCopiesOf,
       cancelNotifications: () => cancelAllNotifications(),
+      deleteTempFiles: deleteAppTempDirectory,
       prefs: AppSettings.store,
       status: StatusClearStore(),
     );
@@ -43,6 +47,7 @@ class LogoutCleanup {
 
   final Future<void> Function(String clientName) deleteQuarantined;
   final Future<void> Function() cancelNotifications;
+  final Future<void> Function() deleteTempFiles;
   final SharedPreferences prefs;
   final StatusClearStore status;
 
@@ -61,6 +66,7 @@ class LogoutCleanup {
           if (name != clientName) name,
       ]);
     });
+    await _attempt('temp files', deleteTempFiles);
     if (!lastAccount) return;
     await _attempt('legacy drafts', () async {
       final keys = prefs.getKeys().where(

@@ -124,19 +124,41 @@ void main() {
     expect(File('${dir.path}/a.sqlite').readAsBytesSync(), [1]);
   });
 
-  test('a stale side file is removed when only its rename fails', () async {
+  test('a side file that cannot be moved rolls everything back and throws, '
+      'nothing is deleted (F4)', () async {
     write('a.sqlite', [1]);
+    write('a.sqlite-shm', [3]);
     write('a.sqlite-wal', [2]);
 
-    await quarantineDatabase(
-      path,
-      rename: (file, newPath) async {
-        if (file.path.endsWith('-wal')) throw const FileSystemException('x');
-        await file.rename(newPath);
-      },
+    await expectLater(
+      quarantineDatabase(
+        path,
+        rename: (file, newPath) async {
+          if (file.path.endsWith('-wal')) throw const FileSystemException('x');
+          await file.rename(newPath);
+        },
+      ),
+      throwsA(isA<FileSystemException>()),
     );
 
-    expect(names(), ['a.sqlite.quarantine-1']);
+    expect(names(), ['a.sqlite', 'a.sqlite-shm', 'a.sqlite-wal']);
+    expect(File('${dir.path}/a.sqlite').readAsBytesSync(), [1]);
+    expect(File('${dir.path}/a.sqlite-shm').readAsBytesSync(), [3]);
+    expect(File('${dir.path}/a.sqlite-wal').readAsBytesSync(), [2]);
+  });
+
+  test('without a cap no older copy is pruned (F4)', () async {
+    for (var i = 1; i <= 4; i++) {
+      write('a.sqlite', [i]);
+      await quarantineDatabase(path, maxCopies: null);
+    }
+
+    expect(names(), [
+      'a.sqlite.quarantine-1',
+      'a.sqlite.quarantine-2',
+      'a.sqlite.quarantine-3',
+      'a.sqlite.quarantine-4',
+    ]);
   });
 
   group('deleteQuarantinedDatabases', () {

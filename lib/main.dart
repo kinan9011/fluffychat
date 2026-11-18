@@ -12,6 +12,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/app_lock_unavailable/app_lock_unavailable_page.dart';
 import 'package:fluffychat/pages/database_key_error/database_key_error_page.dart';
 import 'package:fluffychat/utils/app_lock_settings.dart';
+import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/font_licenses.dart';
@@ -75,6 +76,7 @@ void main(List<String> args) => runZonedGuarded(() async {
 
   final store = await AppSettings.init();
   Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
+  await sweepAppTempDirectory();
 
   kEnableMatrixSdkBenchmarks = AppSettings.benchmarksInLogs.value;
 
@@ -130,8 +132,13 @@ void main(List<String> args) => runZonedGuarded(() async {
     _showDatabaseErrorPage(store, args, keyProblem: true);
     return;
   } on DatabaseOpenFailedException catch (e) {
-    Logs().w('Database not openable, asking the user', e);
-    _showDatabaseErrorPage(store, args, keyProblem: false);
+    Logs().w('Database not openable, asking the user', e.runtimeType);
+    _showDatabaseErrorPage(
+      store,
+      args,
+      keyProblem: false,
+      clientName: e.setAsideMayHelp ? e.clientName : null,
+    );
     return;
   }
 
@@ -146,22 +153,43 @@ void _showDatabaseErrorPage(
   SharedPreferences store,
   List<String> args, {
   required bool keyProblem,
+  String? clientName,
 }) => runApp(
   DatabaseKeyErrorPage.app(
     onRetry: () => main(args),
     onReset: () => _resetDatabasesAndRestart(store, args),
+    onSetAside: keyProblem || kIsWeb || clientName == null
+        ? null
+        : () => _setAsideAndRestart(clientName, args),
+    resetMayRemovePin: PlatformInfos.isAndroid,
     keyProblem: keyProblem,
   ),
 );
 
-Future<void> _resetDatabasesAndRestart(
+Future<bool> _setAsideAndRestart(String clientName, List<String> args) async {
+  try {
+    await setAccountDatabaseAside(clientName);
+  } catch (e) {
+    Logs().w('Unable to move the account data aside', e.runtimeType);
+    return false;
+  }
+  main(args);
+  return true;
+}
+
+Future<bool> _resetDatabasesAndRestart(
   SharedPreferences store,
   List<String> args,
 ) async {
-  await resetLocalDatabases(
+  final unfinished = await resetLocalDatabases(
     store.getStringList(ClientManager.clientNamespace) ?? [],
   );
+  if (unfinished.isNotEmpty) {
+    Logs().w('Reset incomplete: ${unfinished.map((step) => step.name)}');
+    return false;
+  }
   main(args);
+  return true;
 }
 
 /// Fetch the pincode for the applock and start the flutter engine.

@@ -13,6 +13,7 @@ void main() {
   late SharedPreferences prefs;
   late List<String> deletedQuarantine;
   late int notificationsCancelled;
+  late int tempDeletes;
   late LogoutCleanup cleanup;
 
   setUp(() async {
@@ -26,9 +27,11 @@ void main() {
     await AppSettings.databaseQuarantinedClients.setItem(['alice', 'bob']);
     deletedQuarantine = [];
     notificationsCancelled = 0;
+    tempDeletes = 0;
     cleanup = LogoutCleanup(
       deleteQuarantined: (name) async => deletedQuarantine.add(name),
       cancelNotifications: () async => notificationsCancelled++,
+      deleteTempFiles: () async => tempDeletes++,
       prefs: prefs,
       status: StatusClearStore(),
     );
@@ -82,6 +85,7 @@ void main() {
     final failing = LogoutCleanup(
       deleteQuarantined: (_) async => throw StateError('disk'),
       cancelNotifications: () async => throw StateError('plugin'),
+      deleteTempFiles: () async => throw StateError('files'),
       prefs: prefs,
       status: StatusClearStore(),
     );
@@ -91,5 +95,29 @@ void main() {
       lastAccount: true,
     );
     expect(prefs.getKeys().where((k) => k.startsWith('draft_')), isEmpty);
+  });
+
+  test('decrypted temp files go at every logout, also with other accounts '
+      'left (G4)', () async {
+    await cleanup.run(clientName: 'alice', userId: null, lastAccount: false);
+    expect(tempDeletes, 1);
+
+    await cleanup.run(clientName: 'bob', userId: null, lastAccount: true);
+    expect(tempDeletes, 2);
+  });
+
+  test('a failing temp delete does not stop the other steps', () async {
+    final failing = LogoutCleanup(
+      deleteQuarantined: (name) async => deletedQuarantine.add(name),
+      cancelNotifications: () async => notificationsCancelled++,
+      deleteTempFiles: () async => throw const FormatException('x'),
+      prefs: prefs,
+      status: StatusClearStore(),
+    );
+
+    await failing.run(clientName: 'alice', userId: null, lastAccount: true);
+
+    expect(deletedQuarantine, ['alice']);
+    expect(notificationsCancelled, 1);
   });
 }

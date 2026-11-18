@@ -23,6 +23,9 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
+import 'matrix_sdk_extensions/safe_init_client.dart';
 
 abstract class ClientManager {
   static const String clientNamespace = 'im.fluffychat.store.clients';
@@ -31,6 +34,7 @@ abstract class ClientManager {
     bool initialize = true,
     bool background = false,
     required SharedPreferences store,
+    @visibleForTesting Future<Client> Function(String name)? create,
   }) async {
     final clientNames = <String>{};
     try {
@@ -44,31 +48,45 @@ abstract class ClientManager {
       clientNames.add(PlatformInfos.appDisplayName);
       await store.setStringList(clientNamespace, clientNames.toList());
     }
-    final clients = await Future.wait(
-      clientNames.map(
-        (name) => createClient(name, store, background: background),
-      ),
-    );
-    if (initialize) {
-      await Future.wait(
-        clients.map(
-          (client) => client
-              .initWithRestore(
-                onMigration: () async {
-                  final l10n = await lookupL10n(
-                    PlatformDispatcher.instance.locale,
-                  );
-                  sendInitNotification(
-                    l10n.databaseMigrationTitle,
-                    l10n.databaseMigrationBody,
-                  );
-                },
-              )
-              .catchError(
-                (e, s) => Logs().e('Unable to initialize client', e, s),
-              ),
-        ),
-      );
+    final clients = <Client>[];
+    try {
+      for (final name in clientNames) {
+        clients.add(
+          await (create?.call(name) ??
+              createClient(name, store, background: background)),
+        );
+      }
+      if (initialize) {
+        await Future.wait(
+          clients.map(
+            (client) => client
+                .initWithRestore(
+                  onMigration: () async {
+                    final l10n = await lookupL10n(
+                      PlatformDispatcher.instance.locale,
+                    );
+                    sendInitNotification(
+                      l10n.databaseMigrationTitle,
+                      l10n.databaseMigrationBody,
+                    );
+                  },
+                )
+                .catchError((Object e, StackTrace s) {
+                  if (e is DatabaseOpenFailedException ||
+                      e is DatabaseKeyUnavailableException) {
+                    throw e;
+                  }
+                  Logs().e('Unable to initialize client', e, s);
+                }),
+          ),
+        );
+      }
+    } on DatabaseOpenFailedException {
+      await _disposeAll(clients);
+      rethrow;
+    } on DatabaseKeyUnavailableException {
+      await _disposeAll(clients);
+      rethrow;
     }
     if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
       final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
@@ -83,6 +101,9 @@ abstract class ClientManager {
     }
     return clients;
   }
+
+  static Future<void> _disposeAll(List<Client> clients) =>
+      Future.wait(clients.map((client) => client.dispose().catchError((_) {})));
 
   static Future<void> addClientNameToStore(
     String clientName,
@@ -125,7 +146,7 @@ abstract class ClientManager {
     final shareKeysWith = AppSettings.shareKeysWith.value;
     final enableSoftLogout = AppSettings.enableSoftLogout.value;
 
-    final client = Client(
+    final client = SafeInitClient(
       clientName,
       httpClient: httpClient ?? CustomHttpClient.createHTTPClient(),
       verificationMethods: {

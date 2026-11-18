@@ -12,6 +12,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/privacy/read_markers.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
@@ -72,45 +73,67 @@ Future<void> notificationTapBackground(
   );
 
   final pushIsolateReceivePort = ReceivePort();
+  await runBackgroundClientTask(pushIsolateReceivePort, () async {
+    if (!_vodInitialized) {
+      await vod.init();
+      _vodInitialized = true;
+    }
+    final store = await AppSettings.init();
+
+    final payload = FluffyChatPushPayload.fromString(
+      notificationResponse.payload ?? '',
+    );
+    final clientName = payload.clientName;
+    return clientName == null
+        ? (await ClientManager.getClients(
+            store: store,
+            initialize: false,
+            background: true,
+          )).first
+        : await ClientManager.createClient(clientName, store, background: true);
+  }, (client) => notificationTap(notificationResponse, clients: [client]));
+}
+
+/// Everything after the port is registered runs inside the try, so a failure
+/// of the setup, the client creation or the init releases the port, disposes
+/// the client and tells the main isolate it may go on.
+@visibleForTesting
+Future<void> runBackgroundClientTask(
+  ReceivePort pushIsolateReceivePort,
+  Future<Client> Function() create,
+  Future<void> Function(Client client) use,
+) async {
   IsolateNameServer.registerPortWithName(
     pushIsolateReceivePort.sendPort,
     AppConfig.pushIsolatePortName,
   );
-
-  if (!_vodInitialized) {
-    await vod.init();
-    _vodInitialized = true;
+  Client? client;
+  try {
+    client = await create();
+    await initBackgroundClient(client);
+    if (!client.isLogged()) {
+      throw Exception('Notification tab in background but not logged in!');
+    }
+    await use(client);
+  } finally {
+    try {
+      await client?.dispose(closeDatabase: false);
+    } finally {
+      pushIsolateReceivePort.sendPort.send('DONE');
+      IsolateNameServer.removePortNameMapping(AppConfig.pushIsolatePortName);
+    }
   }
-  final store = await AppSettings.init();
+}
 
-  final payload = FluffyChatPushPayload.fromString(
-    notificationResponse.payload ?? '',
-  );
-  final clientName = payload.clientName;
-  final client = clientName == null
-      ? (await ClientManager.getClients(
-          store: store,
-          initialize: false,
-          background: true,
-        )).first
-      : (await ClientManager.createClient(clientName, store, background: true));
+/// One attempt, no retry: a storage error leaves the database and the
+/// session as they are (see SafeInitClient) and ends this isolate's work.
+@visibleForTesting
+Future<void> initBackgroundClient(Client client) async {
   await client.abortSync();
   await client.init(
     waitForFirstSync: false,
     waitUntilLoadCompletedLoaded: false,
   );
-
-  if (!client.isLogged()) {
-    throw Exception('Notification tab in background but not logged in!');
-  }
-  try {
-    await notificationTap(notificationResponse, clients: [client]);
-  } finally {
-    await client.dispose(closeDatabase: false);
-    pushIsolateReceivePort.sendPort.send('DONE');
-    IsolateNameServer.removePortNameMapping(AppConfig.pushIsolatePortName);
-  }
-  return;
 }
 
 Future<void> notificationTap(

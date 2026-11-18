@@ -61,14 +61,29 @@ typedef MarkDatabaseEncryption =
 void markWebDatabaseUnencrypted(String clientName) =>
     unencryptedClientsThisSession.add(clientName);
 
-Future<void> deleteDatabaseKey() async {
-  try {
-    await createSecureStorage(
-      iOptions: iosOptions,
-    ).delete(key: _passwordStorageKey, iOptions: iosOptions);
-  } catch (e, s) {
-    Logs().w('Unable to delete database key', e, s);
+/// The old key location is read, the key written to the new one and read back
+/// before the old one is deleted, so a failure never leaves the user without
+/// the key of an encrypted database.
+@visibleForTesting
+Future<String?> migrateLegacyDatabaseKey({
+  required Future<String?> Function() readLegacy,
+  required Future<void> Function(String value) writeNew,
+  required Future<String?> Function() readNew,
+  required Future<void> Function() deleteLegacy,
+}) async {
+  final legacy = await readLegacy();
+  if (legacy == null) return null;
+  Logs().i('Migrate database key location on iOS...');
+  await writeNew(legacy);
+  if (await readNew() != legacy) {
+    throw StateError('The migrated database key can not be read back');
   }
+  try {
+    await deleteLegacy();
+  } catch (e) {
+    Logs().w('Unable to delete the old database key', e.runtimeType);
+  }
+  return legacy;
 }
 
 Future<DatabaseFileState> _stateOrEncrypted(
@@ -107,15 +122,18 @@ Future<String?> getDatabaseCipher(
 
     if (PlatformInfos.isIOS) {
       final legacyStorage = createSecureStorage();
-      final legacyPassword = await legacyStorage.read(key: _passwordStorageKey);
-      if (legacyPassword != null) {
-        Logs().i('Migrate database key location on iOS...');
-        await legacyStorage.delete(key: _passwordStorageKey);
-        await storage.write(
+      final legacyPassword = await migrateLegacyDatabaseKey(
+        readLegacy: () => legacyStorage.read(key: _passwordStorageKey),
+        writeNew: (value) => storage.write(
           key: _passwordStorageKey,
-          value: legacyPassword,
+          value: value,
           iOptions: iosOptions,
-        );
+        ),
+        readNew: () =>
+            storage.read(key: _passwordStorageKey, iOptions: iosOptions),
+        deleteLegacy: () => legacyStorage.delete(key: _passwordStorageKey),
+      );
+      if (legacyPassword != null) {
         await _markEncryption(markEncryption, clientName, isEncrypted: true);
         return legacyPassword;
       }
@@ -144,6 +162,10 @@ Future<String?> getDatabaseCipher(
     await _markEncryption(markEncryption, clientName, isEncrypted: true);
     return password;
   } on MissingPluginException catch (e) {
+    final state = await _stateOrEncrypted(databaseState);
+    if (state == DatabaseFileState.encrypted) {
+      throw DatabaseKeyUnavailableException(clientName, e);
+    }
     createSecureStorage(
       iOptions: iosOptions,
     ).delete(key: _passwordStorageKey, iOptions: iosOptions).catchError((_) {});

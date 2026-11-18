@@ -15,3 +15,10 @@ FlutterSecureStorage createSecureStorage({
   iOptions: iOptions,
   aOptions: const AndroidOptions(resetOnError: false),
 );
+
+/// Only for the confirmed reset of the local data: with `resetOnError` the
+/// Android plugin repairs a keystore that cannot be initialised by wiping all
+/// of its entries, which also removes the app lock PIN. Everything else uses
+/// [createSecureStorage].
+FlutterSecureStorage createRepairingSecureStorage() =>
+    const FlutterSecureStorage(aOptions: AndroidOptions(resetOnError: true));

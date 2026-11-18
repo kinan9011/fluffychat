@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:io';
+
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n_en.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -108,14 +110,110 @@ void main() {
     },
   );
 
-  test('missing plugin still deletes the key', () async {
+  test('missing plugin and no database still deletes the key (F2)', () async {
     mockMissingPlugin();
 
-    expect(
-      await getDatabaseCipher('a', databaseState: _encryptedDatabase),
-      isNull,
-    );
+    expect(await getDatabaseCipher('a', databaseState: _noDatabase), isNull);
     expect(secureStorageCalls, contains('delete'));
+  });
+
+  test('missing plugin with an encrypted database keeps the key and asks '
+      'the user (F5)', () async {
+    mockMissingPlugin();
+
+    await expectLater(
+      getDatabaseCipher('a', databaseState: _encryptedDatabase),
+      throwsA(isA<DatabaseKeyUnavailableException>()),
+    );
+    expect(secureStorageCalls, isNot(contains('delete')));
+  });
+
+  test('missing plugin with an unreadable database file keeps the key '
+      '(F5)', () async {
+    mockMissingPlugin();
+
+    await expectLater(
+      getDatabaseCipher(
+        'a',
+        databaseState: () async => throw const FileSystemException('x'),
+      ),
+      throwsA(isA<DatabaseKeyUnavailableException>()),
+    );
+    expect(secureStorageCalls, isNot(contains('delete')));
+  });
+
+  group('migrateLegacyDatabaseKey', () {
+    final calls = <String>[];
+    var stored = <String, String>{};
+
+    Future<String?> migrate({
+      String? legacy = 'old-key',
+      Object? writeError,
+      String? Function(String? written)? readBack,
+      Object? deleteError,
+    }) => migrateLegacyDatabaseKey(
+      readLegacy: () async {
+        calls.add('readLegacy');
+        return legacy;
+      },
+      writeNew: (value) async {
+        calls.add('writeNew');
+        if (writeError != null) throw writeError;
+        stored['new'] = value;
+      },
+      readNew: () async {
+        calls.add('readNew');
+        return readBack == null ? stored['new'] : readBack(stored['new']);
+      },
+      deleteLegacy: () async {
+        calls.add('deleteLegacy');
+        if (deleteError != null) throw deleteError;
+      },
+    );
+
+    setUp(() {
+      calls.clear();
+      stored = {};
+    });
+
+    test(
+      'writes and verifies the new key before the old one goes (E1)',
+      () async {
+        expect(await migrate(), 'old-key');
+        expect(calls, ['readLegacy', 'writeNew', 'readNew', 'deleteLegacy']);
+      },
+    );
+
+    test('nothing to migrate returns null and deletes nothing', () async {
+      expect(await migrate(legacy: null), isNull);
+      expect(calls, ['readLegacy']);
+    });
+
+    test('a failing write keeps the old key (E2)', () async {
+      await expectLater(
+        migrate(writeError: PlatformException(code: 'x')),
+        throwsA(isA<PlatformException>()),
+      );
+      expect(calls, isNot(contains('deleteLegacy')));
+    });
+
+    test('a new key that cannot be read back keeps the old key (E3)', () async {
+      await expectLater(
+        migrate(readBack: (_) => null),
+        throwsA(isA<StateError>()),
+      );
+      expect(calls, isNot(contains('deleteLegacy')));
+    });
+
+    test(
+      'a failing delete of the old key still returns the key (E4)',
+      () async {
+        expect(
+          await migrate(deleteError: PlatformException(code: 'x')),
+          'old-key',
+        );
+      },
+    );
   });
 
   test('a keystore error never deletes the key', () async {

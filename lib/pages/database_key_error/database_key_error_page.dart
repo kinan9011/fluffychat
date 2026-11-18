@@ -11,7 +11,17 @@ import 'package:matrix/matrix.dart';
 
 class DatabaseKeyErrorPage extends StatefulWidget {
   final VoidCallback onRetry;
-  final Future<void> Function() onReset;
+
+  /// Returns false when some local data could not be removed.
+  final Future<bool> Function() onReset;
+
+  /// Moves only the account that cannot be opened aside. Null hides the
+  /// button (key problems, the web).
+  final Future<bool> Function()? onSetAside;
+
+  /// The confirmed reset may also remove the app lock PIN (Android repairs a
+  /// broken keystore by wiping it), and the confirmation says so.
+  final bool resetMayRemovePin;
 
   /// True when the system key store failed, false when the database itself
   /// could not be opened (full disk, another process, I/O error).
@@ -21,12 +31,16 @@ class DatabaseKeyErrorPage extends StatefulWidget {
     super.key,
     required this.onRetry,
     required this.onReset,
+    this.onSetAside,
+    this.resetMayRemovePin = false,
     this.keyProblem = true,
   });
 
   static Widget app({
     required VoidCallback onRetry,
-    required Future<void> Function() onReset,
+    required Future<bool> Function() onReset,
+    Future<bool> Function()? onSetAside,
+    bool resetMayRemovePin = false,
     bool keyProblem = true,
   }) => MaterialApp(
     localizationsDelegates: L10n.localizationsDelegates,
@@ -38,6 +52,8 @@ class DatabaseKeyErrorPage extends StatefulWidget {
     home: DatabaseKeyErrorPage(
       onRetry: onRetry,
       onReset: onReset,
+      onSetAside: onSetAside,
+      resetMayRemovePin: resetMayRemovePin,
       keyProblem: keyProblem,
     ),
   );
@@ -48,6 +64,52 @@ class DatabaseKeyErrorPage extends StatefulWidget {
 
 class _DatabaseKeyErrorPageState extends State<DatabaseKeyErrorPage> {
   bool _busy = false;
+  String? _problem;
+  String _busyLabel = '';
+
+  Future<void> _run(
+    Future<bool> Function() action,
+    String Function(L10n l10n) busy,
+    String Function(L10n l10n) failure,
+  ) async {
+    final l10n = L10n.of(context);
+    setState(() {
+      _busyLabel = busy(l10n);
+      _busy = true;
+      _problem = null;
+    });
+    var done = false;
+    try {
+      done = await action();
+    } catch (e) {
+      Logs().e('Local data action failed', e.runtimeType);
+    }
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _problem = done ? null : failure(l10n);
+    });
+  }
+
+  Future<void> _confirmSetAside() async {
+    final onSetAside = widget.onSetAside;
+    if (_busy || onSetAside == null) return;
+    final l10n = L10n.of(context);
+    final result = await showOkCancelAlertDialog(
+      context: context,
+      title: l10n.databaseSetAsideAction,
+      message: l10n.databaseSetAsideConfirm,
+      okLabel: l10n.databaseSetAsideAction,
+      cancelLabel: l10n.cancel,
+      isDestructive: true,
+    );
+    if (result != OkCancelResult.ok || !mounted) return;
+    await _run(
+      onSetAside,
+      (l10n) => l10n.databaseSetAsideBusy,
+      (l10n) => l10n.databaseSetAsideFailed,
+    );
+  }
 
   Future<void> _confirmReset() async {
     if (_busy) return;
@@ -55,19 +117,19 @@ class _DatabaseKeyErrorPageState extends State<DatabaseKeyErrorPage> {
     final result = await showOkCancelAlertDialog(
       context: context,
       title: l10n.databaseKeyResetAction,
-      message: l10n.databaseKeyResetConfirm,
+      message: widget.resetMayRemovePin
+          ? '${l10n.databaseKeyResetConfirm}\n\n${l10n.databaseKeyResetPinNote}'
+          : l10n.databaseKeyResetConfirm,
       okLabel: l10n.databaseKeyResetAction,
       cancelLabel: l10n.cancel,
       isDestructive: true,
     );
     if (result != OkCancelResult.ok || !mounted) return;
-    setState(() => _busy = true);
-    try {
-      await widget.onReset();
-    } catch (e, s) {
-      Logs().e('Unable to reset local data', e, s);
-    }
-    if (mounted) setState(() => _busy = false);
+    await _run(
+      widget.onReset,
+      (l10n) => l10n.databaseKeyResetting,
+      (l10n) => l10n.databaseResetIncomplete,
+    );
   }
 
   @override
@@ -77,65 +139,83 @@ class _DatabaseKeyErrorPageState extends State<DatabaseKeyErrorPage> {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 16,
-                children: [
-                  Icon(
-                    Icons.lock_outline_rounded,
-                    size: 56,
-                    color: theme.colorScheme.primary,
-                  ),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      l10n.databaseKeyUnavailableTitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall,
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 16,
+                  children: [
+                    Icon(
+                      Icons.lock_outline_rounded,
+                      size: 56,
+                      color: theme.colorScheme.primary,
                     ),
-                  ),
-                  Text(
-                    widget.keyProblem
-                        ? l10n.databaseKeyUnavailableBody
-                        : l10n.databaseOpenFailedBody,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    onPressed: _busy ? null : widget.onRetry,
-                    child: Text(l10n.tryAgain),
-                  ),
-                  if (_busy)
                     Semantics(
-                      liveRegion: true,
-                      child: Column(
-                        spacing: 8,
-                        children: [
-                          const CircularProgressIndicator.adaptive(),
-                          Text(
-                            l10n.databaseKeyResetting,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                      header: true,
+                      child: Text(
+                        l10n.databaseKeyUnavailableTitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall,
                       ),
                     ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      foregroundColor: theme.colorScheme.error,
+                    Text(
+                      widget.keyProblem
+                          ? l10n.databaseKeyUnavailableBody
+                          : l10n.databaseOpenFailedBody,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium,
                     ),
-                    onPressed: _busy ? null : _confirmReset,
-                    child: Text(l10n.databaseKeyResetAction),
-                  ),
-                ],
+                    if (_problem case final problem?)
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          problem,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      onPressed: _busy ? null : widget.onRetry,
+                      child: Text(l10n.tryAgain),
+                    ),
+                    if (_busy)
+                      Semantics(
+                        liveRegion: true,
+                        child: Column(
+                          spacing: 8,
+                          children: [
+                            const CircularProgressIndicator.adaptive(),
+                            Text(_busyLabel, textAlign: TextAlign.center),
+                          ],
+                        ),
+                      ),
+                    if (widget.onSetAside != null)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                        ),
+                        onPressed: _busy ? null : _confirmSetAside,
+                        child: Text(l10n.databaseSetAsideAction),
+                      ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                      onPressed: _busy ? null : _confirmReset,
+                      child: Text(l10n.databaseKeyResetAction),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

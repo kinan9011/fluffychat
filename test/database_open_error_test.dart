@@ -3,8 +3,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+// ignore_for_file: depend_on_referenced_packages
+
+import 'dart:async';
+import 'dart:io';
+
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:matrix/src/utils/client_init_exception.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi/src/sqflite_ffi_exception.dart';
 
@@ -125,5 +133,42 @@ void main() {
         expect(classifyDatabaseOpenError(error), DatabaseOpenFailure.other);
       });
     }
+  });
+
+  group('set-aside is offered only when the file itself is unusable (F7)', () {
+    bool offered(Object error) =>
+        DatabaseOpenFailedException('a', error).setAsideMayHelp;
+
+    test('not a database and corrupt files', () {
+      expect(offered(_withCode(26)), isTrue);
+      expect(offered(_withCode(11)), isTrue);
+      expect(offered(_withCode(267)), isTrue);
+      expect(offered(ClientInitException(_withCode(26))), isTrue);
+    });
+
+    test('busy, full, I/O, network and unknown causes only offer Retry', () {
+      for (final code in [1, 5, 6, 8, 10, 13, 14]) {
+        expect(offered(_withCode(code)), isFalse, reason: 'code $code');
+      }
+      for (final error in <Object>[
+        const SocketException('x'),
+        const FileSystemException('x'),
+        TimeoutException('x'),
+        http.ClientException('x'),
+        PlatformException(code: 'keystore'),
+        SqfliteFfiException(code: 'sqlite_error', message: 'x'),
+        ClientInitException(const SocketException('x')),
+        StateError('x'),
+      ]) {
+        expect(offered(error), isFalse, reason: error.runtimeType.toString());
+      }
+    });
+
+    test('main hands the account to the page only when it is offered', () {
+      expect(
+        File('lib/main.dart').readAsStringSync(),
+        contains('e.setAsideMayHelp'),
+      );
+    });
   });
 }

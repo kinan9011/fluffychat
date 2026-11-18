@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:fluffychat/pages/chat/events/voice_bubble_view.dart';
+import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:fluffychat/utils/chat/waveform.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/file_description.dart';
@@ -19,7 +20,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:ogg_caf_converter/ogg_caf_converter.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 import '../../../widgets/fluffy_chat_app.dart';
@@ -171,7 +171,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       final attachmentUrl = widget.event.attachmentOrThumbnailMxcUrl();
 
       if (!kIsWeb && attachmentUrl != null) {
-        final tempDir = await getTemporaryDirectory();
+        final tempDir = await appTempDirectory();
         final fileName = Uri.encodeComponent(attachmentUrl.pathSegments.last);
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 

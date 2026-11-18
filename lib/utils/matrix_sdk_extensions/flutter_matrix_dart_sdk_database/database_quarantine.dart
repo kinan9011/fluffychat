@@ -44,31 +44,46 @@ Future<void> _deleteWithSideFiles(String path) async {
 /// A database that is proven to be damaged is moved aside instead of deleted,
 /// so that the data is still on the device. Copies are numbered with a
 /// sequence (highest existing + 1), never by time, so a clock that jumps
-/// cannot make the newest copy look old. Throws if the database cannot be
-/// moved: nothing is deleted then and the caller fails closed.
+/// cannot make the newest copy look old. [maxCopies] keeps that many of the
+/// newest copies, `null` prunes none. Throws if the database or one of its
+/// side files cannot be moved: everything moved so far is moved back, nothing
+/// is deleted and the caller fails closed.
 Future<void> quarantineDatabase(
   String path, {
   Future<void> Function(File file, String newPath) rename = _renameFile,
+  int? maxCopies = maxQuarantinedDatabases,
 }) async {
   final database = File(path);
   if (!await database.exists()) return;
   final existing = await _copies(path);
   final sequence = existing.keys.fold<int>(0, max) + 1;
   final target = '$path.quarantine-$sequence';
-  await rename(database, target);
-  for (final suffix in _sideFileSuffixes) {
-    final sideFile = File('$path$suffix');
-    try {
-      if (await sideFile.exists()) await rename(sideFile, '$target$suffix');
-    } catch (e, s) {
-      Logs().w('Unable to quarantine a database side file, deleting it', e, s);
-      await _deleteWithSideFiles(path);
+  final moved = <(String, String)>[];
+  try {
+    await rename(database, target);
+    moved.add((path, target));
+    for (final suffix in _sideFileSuffixes) {
+      final sideFile = File('$path$suffix');
+      if (!await sideFile.exists()) continue;
+      await rename(sideFile, '$target$suffix');
+      moved.add(('$path$suffix', '$target$suffix'));
     }
+  } catch (e, s) {
+    Logs().w('Unable to quarantine the database, moving it back', e, s);
+    for (final (original, current) in moved.reversed) {
+      try {
+        await rename(File(current), original);
+      } catch (e, s) {
+        Logs().e('Unable to move a database file back', e, s);
+      }
+    }
+    rethrow;
   }
+  if (maxCopies == null) return;
   try {
     final copies = await _copies(path);
     final newestFirst = copies.keys.toList()..sort((a, b) => b.compareTo(a));
-    for (final old in newestFirst.skip(maxQuarantinedDatabases)) {
+    for (final old in newestFirst.skip(maxCopies)) {
       await _deleteWithSideFiles(copies[old]!);
     }
   } catch (e, s) {

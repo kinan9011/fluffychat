@@ -14,6 +14,26 @@ void main() {
     expect(createSecureStorage().aOptions.params['resetOnError'], 'false');
   });
 
+  test('only the confirmed reset can use the repairing storage', () {
+    expect(
+      createRepairingSecureStorage().aOptions.params['resetOnError'],
+      'true',
+    );
+    final offenders = Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .where(
+          (f) => f.readAsStringSync().contains('createRepairingSecureStorage('),
+        )
+        .map((f) => f.path)
+        .toSet();
+    expect(offenders, {
+      'lib/utils/secure_storage.dart',
+      'lib/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/account_secret_purge.dart',
+    });
+  });
+
   test('a custom iOS option is kept', () {
     const options = IOSOptions(groupId: 'group.test');
     expect(

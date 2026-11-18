@@ -10,6 +10,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/safe_init_client.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:matrix/matrix.dart';
@@ -66,6 +67,11 @@ extension InitWithRestoreExtension on Client {
     );
   }
 
+  Future<void> _settleInitFailure(Object error) async {
+    final client = this;
+    if (client is SafeInitClient) await client.settleInitFailure(error);
+  }
+
   Future<void> initWithRestore({void Function()? onMigration}) async {
     final storageKey =
         '${AppSettings.applicationName.value}_session_backup_$clientName';
@@ -108,6 +114,7 @@ extension InitWithRestoreExtension on Client {
         }
       }
     } catch (e, s) {
+      await _settleInitFailure(e);
       Logs().wtf('Client init failed!', e, s);
       final l10n = await lookupL10n(PlatformDispatcher.instance.locale);
       final sessionBackupString = await storage?.read(key: storageKey);
@@ -142,6 +149,7 @@ extension InitWithRestoreExtension on Client {
           ),
         );
       } catch (e, s) {
+        await _settleInitFailure(e);
         Logs().wtf('Restore client failed!', e, s);
         ClientManager.sendInitNotification(
           l10n.initAppError,

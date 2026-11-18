@@ -31,6 +31,11 @@ const _blockedSchemes = {
   'mk',
   'mhtml',
   'jnlp',
+  'search',
+  'afp',
+  'nfs',
+  'ftp',
+  'ldap',
 };
 
 const _mailtoQueryKeys = {'subject', 'body', 'cc', 'bcc', 'to'};
