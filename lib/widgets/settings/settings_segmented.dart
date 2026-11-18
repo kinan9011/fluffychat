@@ -27,8 +27,8 @@ class SettingsSegmented<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-      padding: const EdgeInsets.all(3),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
         color: tokens.surf2,
         borderRadius: BorderRadius.circular(12),
@@ -48,6 +48,7 @@ class SettingsSegmented<T> extends StatelessWidget {
                   onTap: () => onChanged(item),
                   child: Container(
                     key: segmentKey(item as Object),
+                    margin: const EdgeInsets.symmetric(vertical: 4),
                     constraints: const BoxConstraints(minHeight: 36),
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 6),

@@ -309,6 +309,50 @@ void main() {
     });
   });
 
+  group('hostile timestamps (W13 audit D-1)', () {
+    const policy = RetentionPolicy(day);
+    final far = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
+    final epoch = DateTime.fromMillisecondsSinceEpoch(0);
+
+    test('a timestamp at the end of the DateTime range does not throw', () {
+      expect(policy.hides(event(far), now), isFalse);
+      expect(policy.hidesAt(far, EventTypes.Message, now), isFalse);
+      expect(
+        policy.hidesAt(
+          DateTime.fromMillisecondsSinceEpoch(8640000000000000 - 1000),
+          EventTypes.Message,
+          now,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a timestamp at the start of the range is simply old', () {
+      expect(policy.hides(event(epoch), now), isTrue);
+      final min = DateTime.fromMillisecondsSinceEpoch(-8640000000000000);
+      expect(policy.hidesAt(min, EventTypes.Message, now), isTrue);
+    });
+
+    test('nextExpiry ignores them and still finds the real one', () {
+      final soon = event(now.subtract(const Duration(hours: 20)), id: r'$s:e');
+      expect(
+        policy.nextExpiry([event(far, id: r'$f:e'), soon], now),
+        now.add(const Duration(hours: 4)),
+      );
+    });
+
+    test(
+      'the timeline filter keeps a far-future message and does not throw',
+      () {
+        final visible = [
+          event(far, id: r'$f:e'),
+          event(epoch, id: r'$o:e'),
+        ].where((e) => !policy.hides(e, now)).toList();
+        expect(visible.map((e) => e.eventId), [r'$f:e']);
+      },
+    );
+  });
+
   group('nextExpiry', () {
     const policy = RetentionPolicy(day);
 

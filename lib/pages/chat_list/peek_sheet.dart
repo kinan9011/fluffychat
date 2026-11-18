@@ -9,10 +9,10 @@ import 'dart:ui';
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/chat_list/peek_controller.dart';
 import 'package:fluffychat/utils/chat_list/peek_menu.dart';
+import 'package:fluffychat/utils/glass_policy.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/string_color.dart';
@@ -89,7 +89,7 @@ class _PeekSheetState extends State<_PeekSheet> {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
     final mq = MediaQuery.of(context);
-    final solid = AppSettings.reduceTransparency.value || mq.highContrast;
+    final solid = glassIsSolidNow(context);
     final name = widget.room.getLocalizedDisplayname(MatrixLocals(l10n));
     final scrim = ColoredBox(
       color: AppTokens.overlay(0.32),
@@ -120,18 +120,21 @@ class _PeekSheetState extends State<_PeekSheet> {
               child: Align(
                 alignment: AlignmentDirectional.topStart,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 24, 16, 16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 12,
                     children: [
-                      _PeekCard(
-                        room: widget.room,
-                        name: name,
-                        controller: _controller,
-                        onOpenChat: widget.onOpenChat,
-                        bodyHeight: math.min(270, mq.size.height * 0.4),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 560),
+                        child: _PeekCard(
+                          room: widget.room,
+                          name: name,
+                          controller: _controller,
+                          onOpenChat: widget.onOpenChat,
+                          bodyHeight: math.min(270, mq.size.height * 0.4),
+                        ),
                       ),
                       _PeekMenu(
                         room: widget.room,
@@ -335,7 +338,7 @@ class _Bubble extends StatelessWidget {
       ),
     );
     return Padding(
-      padding: const EdgeInsets.only(top: 5),
+      padding: const EdgeInsetsDirectional.only(top: 5),
       child: Align(
         alignment: outgoing
             ? AlignmentDirectional.centerEnd

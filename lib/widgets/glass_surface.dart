@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/glass_policy.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// The only glass implementation (DESIGN.md 6.1): blur(20) saturate(1.4), a
@@ -50,18 +51,18 @@ class GlassSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: AppSettings.reduceTransparency.listenable,
+    listenable: Listenable.merge([
+      AppSettings.reduceTransparency.listenable,
+      AppSettings.glassMode.listenable,
+    ]),
     builder: _buildSurface,
   );
 
   Widget _buildSurface(BuildContext context, Widget? _) {
     final tokens = AppTokens.of(context);
     // Flutter has no "reduce transparency" platform flag, so we follow the
-    // closest OS signal (increased contrast) plus our own setting.
-    final opaque =
-        solid ||
-        MediaQuery.highContrastOf(context) ||
-        AppSettings.reduceTransparency.value;
+    // closest OS signal (increased contrast), our own settings and the device.
+    final opaque = glassIsSolidNow(context, solidRequested: solid);
     final sigma = clampBlur(blur);
     final filter = ImageFilter.compose(
       outer: const ColorFilter.matrix(saturateMatrix),

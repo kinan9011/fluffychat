@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/main.dart' as app;
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -160,6 +161,19 @@ extension StartTest on WidgetTester {
     // only sends read markers while it is resumed.
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     app.main(['integration_test']);
+    // Every flow starts a new app with new clients. The clients of the flow
+    // before keep syncing with a token that a logout revoked and log
+    // M_UNKNOWN_TOKEN, so each flow disposes its own clients when it ends.
+    addTearDown(() async {
+      final matrix = find.byType(Matrix);
+      if (matrix.evaluate().isEmpty) return;
+      final clients = state<MatrixState>(matrix).widget.clients.toList();
+      for (final client in clients) {
+        try {
+          await client.dispose();
+        } catch (_) {}
+      }
+    });
 
     return FluffyChatTester(this);
   }

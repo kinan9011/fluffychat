@@ -45,7 +45,7 @@ class VoiceBubbleView extends StatelessWidget {
     final colors = BubbleColors.of(tokens, outgoing: outgoing);
     final played = (progress.clamp(0.0, 1.0) * bars.length).round();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(9, 9, 13, 4),
+      padding: const EdgeInsetsDirectional.fromSTEB(9, 9, 13, 4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: 10,

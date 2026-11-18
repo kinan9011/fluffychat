@@ -554,9 +554,26 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
+  Future<void> _prefillComposer(List<ShareItem> items) async {
+    final text = items
+        .whereType<PrefillShareItem>()
+        .map((item) => item.value)
+        .join('\n');
+    if (text.isEmpty) return;
+    await _drafts.ready;
+    if (!mounted || sendController.text.isNotEmpty) return;
+    sendController.resetTo(
+      text.characters.take(DraftStore.maxDraftChars).toString(),
+    );
+  }
+
   Future<void> _shareItems() async {
-    final shareItems = widget.shareItems;
-    if (shareItems == null || shareItems.isEmpty) return;
+    final all = widget.shareItems;
+    if (all == null || all.isEmpty) return;
+    await _prefillComposer(all);
+    if (!mounted) return;
+    final shareItems = all.where((item) => item is! PrefillShareItem).toList();
+    if (shareItems.isEmpty) return;
     if (!room.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(

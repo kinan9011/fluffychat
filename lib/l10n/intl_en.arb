@@ -950,6 +950,8 @@
         }
     },
     "noChatDescriptionYet": "No chat description created yet.",
+    "appLockUnavailable": "Secure storage is not answering",
+    "appLockUnavailableBody": "The app stays closed until your device's secure storage answers, because your app lock cannot be checked. Try again, or restart your device.",
     "tryAgain": "Try again",
     "invalidServerName": "Invalid server name",
     "invited": "Invited",
@@ -1984,6 +1986,7 @@
     "storeInAndroidKeystore": "Store in Android KeyStore",
     "storeInAppleKeyChain": "Store in Apple KeyChain",
     "storeSecurlyOnThisDevice": "Store securely on this device",
+    "storedRecoveryKeyStaysOnDevice": "It stays on this device after you sign out, until you untick this, remove the account or reset local data.",
     "countFiles": "{count} files",
     "@countFiles": {
         "placeholders": {
@@ -2939,6 +2942,11 @@
     },
     "explorePublicSpaces": "Explore public spaces",
     "spaceOverview": "Space overview",
+    "glassEffects": "Glass effects",
+    "glassEffectsAuto": "Auto",
+    "glassEffectsFull": "Full",
+    "glassEffectsLite": "Lite",
+    "glassEffectsDescription": "Blur looks great but costs battery on older devices. Lite uses solid surfaces. Auto picks for your device.",
     "reduceTransparency": "Reduce transparency",
     "reduceTransparencyDescription": "Use solid backgrounds instead of blurred glass",
     "openProfile": "Open profile",
@@ -3181,7 +3189,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "unarchiveOnMentionDescription": "Off: archived chats stay archived.",
+    "unarchiveOnMentionDescription": "An archived chat that mentions you moves back to your chats. Turn this off to keep it archived.",
     "@unarchiveOnMentionDescription": {
         "type": "String",
         "placeholders": {}
@@ -3650,7 +3658,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "appearOfflineDescription": "Others see you as offline even while the app is open. Overrides Show online status.",
+    "appearOfflineDescription": "Others see you as offline even while the app is open. Sending a message can still show recent activity. Overrides Show online status.",
     "@appearOfflineDescription": {
         "type": "String",
         "placeholders": {}
@@ -3825,7 +3833,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "retentionHonestNote": "Messages are hidden in this chat on this device after the timer. Hiding is not deleting: your server and other people's apps may keep them.",
+    "retentionHonestNote": "Messages are hidden in this chat on this device after the timer. Quoted replies, pinned messages, topic previews and notifications that are already shown can still show them. Hiding is not deleting: your server and other people's apps may keep them.",
     "@retentionHonestNote": {
         "type": "String",
         "placeholders": {}
@@ -4076,7 +4084,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "appearanceLocalNote": "Appearance is stored on this device and, for a single chat, in your own account data. Nobody else sees it.",
+    "appearanceLocalNote": "Appearance is stored on this device and, for a single chat, in your own account data. Other people in the chat don't see it.",
     "@appearanceLocalNote": {
         "type": "String",
         "placeholders": {}

@@ -84,7 +84,13 @@ void main() {
       'Unarchive a chat when someone mentions me',
     );
     await tester.ensureVisible(tile);
-    expect(find.text('Off: archived chats stay archived.'), findsOneWidget);
+    expect(
+      find.text(
+        'An archived chat that mentions you moves back to your chats. '
+        'Turn this off to keep it archived.',
+      ),
+      findsOneWidget,
+    );
     await tester.tap(tile);
     await tester.pump();
     expect(AppSettings.unarchiveOnMention.value, isTrue);

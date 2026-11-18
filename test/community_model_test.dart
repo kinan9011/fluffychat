@@ -13,11 +13,13 @@ ChildPowerLevels child(
   String id = '!a:example.org',
   bool joined = true,
   bool isSpace = false,
+  bool encrypted = false,
 }) => ChildPowerLevels(
   roomId: id,
   joined: joined,
   isSpace: isSpace,
   powerLevels: levels,
+  encrypted: encrypted,
 );
 
 AnnouncementsRoom? find(List<ChildPowerLevels> children) =>
@@ -74,6 +76,39 @@ void main() {
           'events_default': 50,
         }),
         50,
+      );
+    });
+  });
+
+  group('encrypted rooms (W13 audit C-11)', () {
+    test('posts in an encrypted room need the m.room.encrypted level', () {
+      final levels = {
+        'events_default': 50,
+        'events': {'m.room.message': 50, 'm.room.encrypted': 0},
+      };
+      expect(find([child(levels)])?.postingLevel, 50);
+      expect(find([child(levels, encrypted: true)]), isNull);
+    });
+
+    test('an encrypted room falls back to events_default', () {
+      expect(
+        find([
+          child({
+            'events_default': 50,
+            'events': {'m.room.message': 0},
+          }, encrypted: true),
+        ])?.postingLevel,
+        50,
+      );
+    });
+
+    test('the plain message override is ignored in an encrypted room', () {
+      expect(
+        CommunityModel.postingLevel({
+          'events_default': 0,
+          'events': {'m.room.message': 100},
+        }, encrypted: true),
+        0,
       );
     });
   });

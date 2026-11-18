@@ -115,6 +115,7 @@ class _KeyBackupBannerState extends State<KeyBackupBanner> {
     );
     return Semantics(
       container: true,
+      liveRegion: true,
       explicitChildNodes: true,
       child: Container(
         margin: const EdgeInsetsDirectional.only(start: 12, end: 12, bottom: 6),
@@ -148,7 +149,7 @@ class _KeyBackupBannerState extends State<KeyBackupBanner> {
                   ),
                   if (big)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsetsDirectional.only(top: 6),
                       child: pill,
                     ),
                 ],

@@ -143,7 +143,7 @@ void main() {
   String path() => Uri(pathSegments: ['rooms', 'space', _space]).toString();
 
   L10n l10n(WidgetTester tester) =>
-      L10n.of(tester.element(find.byType(SpaceOverview)));
+      L10n.of(tester.element(find.byType(SpaceOverview, skipOffstage: false)));
 
   testWidgets('a space with an announcements room is shown as a community', (
     tester,
@@ -456,9 +456,10 @@ void main() {
     addSpace();
     addGroup(_general, levels: {'events_default': 0});
     await harness.open(tester, path: path());
+    final description = l10n(tester).removeFromSpaceDescription;
     await tester.longPress(rowOf(_general));
     await harness.settle(tester, rounds: 3);
-    expect(find.text(l10n(tester).removeFromSpaceDescription), findsNothing);
+    expect(find.text(description), findsNothing);
     expect(api.requests('/state/m.space.child/', method: 'PUT'), isEmpty);
     await harness.finish(tester);
   });

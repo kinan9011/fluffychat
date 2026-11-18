@@ -84,6 +84,7 @@ abstract class AppElevation {
 /// Conversation layout constants (DESIGN.md 5.2, 7.5-7.12).
 abstract class AppChat {
   static const double headerButton = 48;
+  static const double tapTarget = 44;
   static const double headerGap = 8;
   static const double headerTopGap = 4;
   static const double headerAvatar = 38;
@@ -209,6 +210,7 @@ abstract class RichLimits {
   static const int maxParseNodes = 2000;
   static const int maxParseDepth = 20;
   static const int maxParseInputUnits = 65536;
+  static const int maxRenderInputUnits = 24000;
   static const int maxRenderElements = 3000;
   static const int maxRenderDepth = 40;
   static const int maxRenderHeadings = 100;

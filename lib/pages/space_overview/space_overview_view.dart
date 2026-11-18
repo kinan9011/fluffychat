@@ -80,7 +80,7 @@ class SpaceOverviewView extends StatelessWidget {
               ),
               child: ListView(
                 key: listKey,
-                padding: const EdgeInsets.only(bottom: 32),
+                padding: const EdgeInsetsDirectional.only(bottom: 32),
                 children: [
                   if (community) ...[
                     CommunityBanner(
@@ -126,9 +126,9 @@ class SpaceOverviewView extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 16,
+                        end: 16,
                         bottom: 14,
                       ),
                       child: Row(
@@ -176,9 +176,9 @@ class SpaceOverviewView extends StatelessWidget {
                     ),
                     if (c.isAdmin)
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 16,
+                          end: 16,
                           bottom: 14,
                         ),
                         child: Row(
@@ -267,9 +267,9 @@ class SpaceOverviewView extends StatelessWidget {
                       client: client,
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 16,
+                        end: 16,
                         bottom: 14,
                       ),
                       child: Row(
@@ -407,10 +407,10 @@ class SpaceOverviewView extends StatelessWidget {
                     ),
                   if (c.accumulator.capped)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16,
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 16,
                         top: 12,
-                        right: 16,
+                        end: 16,
                       ),
                       child: Text(
                         l10n.spaceListCapped(c.accumulator.children.length),

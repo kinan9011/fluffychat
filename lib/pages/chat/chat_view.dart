@@ -147,6 +147,7 @@ class ChatView extends StatelessWidget {
                                     child: ChatWallpaper(config: accountConfig),
                                   ),
                                   GestureDetector(
+                                    excludeFromSemantics: true,
                                     onTap: controller.clearSingleSelectedEvent,
                                     child: ChatEventList(
                                       controller: controller,
@@ -167,11 +168,12 @@ class ChatView extends StatelessWidget {
                                           ChatHeader(controller),
                                           if (newDevice != null)
                                             Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: AppSpacing.m,
-                                                right: AppSpacing.m,
-                                                top: AppSpacing.s,
-                                              ),
+                                              padding:
+                                                  const EdgeInsetsDirectional.only(
+                                                    start: AppSpacing.m,
+                                                    end: AppSpacing.m,
+                                                    top: AppSpacing.s,
+                                                  ),
                                               child: NewDeviceBanner(
                                                 name: controller.room
                                                     .unsafeGetUserFromMemoryOrFallback(
@@ -280,21 +282,22 @@ class ChatView extends StatelessWidget {
                                       onScrollDown: controller.scrollDown,
                                     ),
                                   ),
-                                  Positioned(
+                                  PositionedDirectional(
                                     bottom: 0,
-                                    left: 0,
-                                    right: 0,
+                                    start: 0,
+                                    end: 0,
                                     child: SizeChangedLayoutNotifier(
                                       child: Container(
                                         key: controller.inputBarKey,
                                         alignment: Alignment.center,
                                         child: Container(
-                                          margin: EdgeInsets.fromLTRB(
-                                            AppSpacing.m,
-                                            0,
-                                            AppSpacing.m,
-                                            bottomSheetPadding,
-                                          ),
+                                          margin:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                AppSpacing.m,
+                                                0,
+                                                AppSpacing.m,
+                                                bottomSheetPadding,
+                                              ),
                                           constraints: const BoxConstraints(
                                             maxWidth:
                                                 FluffyThemes.maxTimelineWidth,
@@ -308,9 +311,9 @@ class ChatView extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  Positioned(
-                                    left: 0,
-                                    right: 0,
+                                  PositionedDirectional(
+                                    start: 0,
+                                    end: 0,
                                     bottom:
                                         (controller.inputBarHeight ??
                                             AppChat.composerHeight) +
@@ -460,7 +463,9 @@ class _Composer extends StatelessWidget {
           valueListenable: controller.composerPanel,
           builder: (context, panel, _) => panel == ComposerPanel.format
               ? Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s),
+                  padding: const EdgeInsetsDirectional.only(
+                    bottom: AppSpacing.s,
+                  ),
                   child: FormatPanel(
                     controller: controller.sendController,
                     availableHeight: availableHeight,
@@ -473,7 +478,7 @@ class _Composer extends StatelessWidget {
           valueListenable: controller.composerPanel,
           builder: (context, panel, _) => panel == ComposerPanel.attach
               ? Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.s),
+                  padding: const EdgeInsetsDirectional.only(top: AppSpacing.s),
                   child: AttachmentTypeBar(
                     types: attachmentTypes(mobile: PlatformInfos.isMobile),
                     onSelected: controller.onAttachmentSelected,

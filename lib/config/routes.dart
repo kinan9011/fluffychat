@@ -91,12 +91,19 @@ abstract class AppRoutes {
     BuildContext context,
     GoRouterState state,
   ) {
+    final target = state.uri;
+    if (target.scheme.isEmpty &&
+        (target.hasAuthority || target.path.contains('//'))) {
+      Logs().w('Ignored a route with an authority or empty segment');
+      return '/rooms';
+    }
+
     // Workaround for content sharings passed to go router:
     if ({
       'content',
       'sharemedia-im.fluffychat.app',
     }.contains(state.uri.scheme)) {
-      Logs().d('Ignore content sharing handling in go router', state.uri);
+      Logs().d('Ignore content sharing handling in go router');
       return '/';
     }
 
@@ -359,7 +366,7 @@ abstract class AppRoutes {
                         : null;
                     if (body != null && body.isNotEmpty) {
                       shareItems ??= [];
-                      shareItems.add(TextShareItem(body));
+                      shareItems.add(PrefillShareItem(body));
                     }
                     return defaultPageBuilder(
                       context,

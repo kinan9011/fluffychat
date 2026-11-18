@@ -105,7 +105,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         child: AlertDialog.adaptive(
           title: Text(rule.getPushRuleName(L10n.of(context))),
           content: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
+            padding: const EdgeInsetsDirectional.only(top: 16.0),
             child: Material(
               borderRadius: BorderRadius.circular(AppConfig.borderRadius),
               color: theme.colorScheme.surfaceContainer,

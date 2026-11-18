@@ -46,8 +46,8 @@ class CommunityBanner extends StatelessWidget {
             height: 170,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
                   color.withValues(alpha: 0.38),
                   color.withValues(alpha: 0.12),
@@ -121,7 +121,7 @@ class AnnouncementsCard extends StatelessWidget {
     final preview = this.preview;
     final time = this.time;
     return Padding(
-      padding: const EdgeInsets.only(left: 14, right: 14, bottom: 14),
+      padding: const EdgeInsetsDirectional.only(start: 14, end: 14, bottom: 14),
       child: Semantics(
         button: true,
         label: '$title, ${preview ?? ''}, ${l10n.communityOnlyModeratorsPost}',

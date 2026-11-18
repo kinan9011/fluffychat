@@ -51,7 +51,7 @@ class SettingsGroup extends StatelessWidget {
       container: true,
       label: header,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -12,6 +12,7 @@ import 'package:archive/archive.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_ui/material_ui.dart';
@@ -206,7 +207,7 @@ class _MxcImageState extends State<MxcImage> {
                 ));
 
     return AnimatedCrossFade(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       firstChild: ClipRRect(
         borderRadius: widget.borderRadius,
         child: imageChild,

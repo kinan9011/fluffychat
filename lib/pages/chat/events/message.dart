@@ -20,6 +20,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -211,7 +212,11 @@ class Message extends StatelessWidget {
                   final replyEvent = snapshot.data;
                   final replyId = event.inReplyToEventId();
                   return Padding(
-                    padding: const EdgeInsets.only(left: 6, top: 6, right: 6),
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 6,
+                      top: 6,
+                      end: 6,
+                    ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: replyId == null
@@ -300,9 +305,9 @@ class Message extends StatelessWidget {
           constraints: const BoxConstraints(
             maxWidth: FluffyThemes.maxTimelineWidth,
           ),
-          padding: EdgeInsets.only(
-            left: 8.0,
-            right: 8.0,
+          padding: EdgeInsetsDirectional.only(
+            start: 8.0,
+            end: 8.0,
             top: nextEventSameSender ? 1.0 : 8.0,
             bottom: previousEventSameSender || previousEvent == null
                 ? 1.0
@@ -425,7 +430,10 @@ class Message extends StatelessWidget {
                                 ),
                               ),
                               AnimatedSize(
-                                duration: FluffyThemes.animationDuration,
+                                duration: motionDuration(
+                                  context,
+                                  FluffyThemes.animationDuration,
+                                ),
                                 curve: FluffyThemes.animationCurve,
                                 alignment: Alignment.bottomCenter,
                                 child: hasReactions
@@ -434,7 +442,9 @@ class Message extends StatelessWidget {
                               ),
                               if (event.status == EventStatus.error)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 2),
+                                  padding: const EdgeInsetsDirectional.only(
+                                    top: 2,
+                                  ),
                                   child: Text(
                                     L10n.of(context).couldNotBeSent,
                                     style: TextStyle(
@@ -471,7 +481,10 @@ class Message extends StatelessWidget {
               ),
               if (enterThread != null)
                 AnimatedSize(
-                  duration: FluffyThemes.animationDuration,
+                  duration: motionDuration(
+                    context,
+                    FluffyThemes.animationDuration,
+                  ),
                   curve: FluffyThemes.animationCurve,
                   alignment: Alignment.bottomCenter,
                   child: threadChildren.isEmpty
@@ -551,7 +564,7 @@ class _SenderName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 2),
+    padding: const EdgeInsetsDirectional.only(start: 8, end: 8, bottom: 2),
     child: FutureBuilder<User?>(
       future: event.fetchSenderUser(),
       builder: (context, snapshot) => Row(
@@ -686,10 +699,10 @@ class _ThreadChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(
+      padding: const EdgeInsetsDirectional.only(
         top: 2.0,
         bottom: 8.0,
-        left: AppChat.bubbleAvatar + AppChat.groupGap + 8,
+        start: AppChat.bubbleAvatar + AppChat.groupGap + 8,
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -771,7 +784,7 @@ class __AnimateInState extends State<_AnimateIn> {
     }
 
     return AnimatedSize(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       curve: FluffyThemes.animationCurve,
       child: _animationFinished ? widget.child : const SizedBox.shrink(),
     );

@@ -177,6 +177,25 @@ void main() {
   Iterable<String> forbidden() =>
       FakeMatrixApi.calledEndpoints.keys.where(_forbidden.hasMatch);
 
+  testWidgets('the peek card stays a card on a wide window (W03-3 i5)', (
+    tester,
+  ) async {
+    await pumpApp(tester, width: 1280);
+    await tester.longPress(row);
+    await settle(tester);
+    final card = find
+        .descendant(
+          of: find.byWidgetPredicate(
+            (widget) => widget.runtimeType.toString() == '_PeekSheet',
+          ),
+          matching: find.byType(DecoratedBox),
+        )
+        .first;
+    expect(tester.getSize(card).width, lessThanOrEqualTo(560));
+    expect(tester.getSize(card).width, greaterThan(300));
+    await finish(tester);
+  });
+
   testWidgets('peeking leaves no read, typing, presence or key signal', (
     tester,
   ) async {

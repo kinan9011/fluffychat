@@ -46,7 +46,7 @@ class ScanConfirmSheet extends StatelessWidget {
       duration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : const Duration(milliseconds: 120),
-      padding: EdgeInsets.only(bottom: insets),
+      padding: EdgeInsetsDirectional.only(bottom: insets),
       child: Material(
         color: tokens.bg,
         borderRadius: const BorderRadius.vertical(
@@ -56,7 +56,7 @@ class ScanConfirmSheet extends StatelessWidget {
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

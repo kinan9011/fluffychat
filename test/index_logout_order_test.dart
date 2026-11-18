@@ -43,7 +43,14 @@ void main() {
     );
     client.backgroundSync = false;
   });
-  tearDownAll(() => client.dispose(closeDatabase: true));
+  // After a real logout `Client.dispose` can wait forever on a busy machine
+  // (SDK behaviour, reproduced with only the SDK calls): the assertions are
+  // done by now, so cleaning up must not hold the whole run.
+  tearDownAll(
+    () => client
+        .dispose(closeDatabase: true)
+        .timeout(const Duration(seconds: 20), onTimeout: () {}),
+  );
 
   testWidgets(
     'the real logout, with a dirty index and its write still pending, leaves '

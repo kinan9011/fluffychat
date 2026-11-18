@@ -8,6 +8,8 @@ import 'dart:async';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/chat_list/unread_counts.dart';
+import 'package:fluffychat/utils/motion.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
@@ -167,7 +169,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final mode = ShellMode.forWidth(mq.size.width);
+    final mode = ShellMode.forSize(mq.size);
     final tabs = AppTab.visible(callsEnabled: AppSettings.callsEnabled.value);
     final selected = _selected;
     return PopScope(
@@ -176,14 +178,26 @@ class _AppShellState extends State<AppShell> {
         if (!didPop) _select(AppTab.chats);
       },
       child: Shortcuts(
-        shortcuts: const {
-          SingleActivator(LogicalKeyboardKey.f6): _FocusNavigationIntent(),
+        shortcuts: {
+          const SingleActivator(LogicalKeyboardKey.f6):
+              const _FocusNavigationIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyK,
+            control: !PlatformInfos.usesCommandKey,
+            meta: PlatformInfos.usesCommandKey,
+          ): const _QuickSwitcherIntent(),
         },
         child: Actions(
           actions: {
             _FocusNavigationIntent: CallbackAction<_FocusNavigationIntent>(
               onInvoke: (_) {
                 _toggleNavigationFocus();
+                return null;
+              },
+            ),
+            _QuickSwitcherIntent: CallbackAction<_QuickSwitcherIntent>(
+              onInvoke: (_) {
+                context.go('/rooms/search');
                 return null;
               },
             ),
@@ -250,6 +264,10 @@ class _FocusNavigationIntent extends Intent {
   const _FocusNavigationIntent();
 }
 
+class _QuickSwitcherIntent extends Intent {
+  const _QuickSwitcherIntent();
+}
+
 /// Only the widgets that show the badge rebuild when the count changes.
 class _ChatsUnread extends StatelessWidget {
   final ValueNotifier<int> count;
@@ -279,9 +297,7 @@ class _MobileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final inset = AppBottomBar.occupiedHeight(context);
-    final duration = mq.disableAnimations
-        ? Duration.zero
-        : FluffyThemes.animationDuration;
+    final duration = motionDuration(context, FluffyThemes.animationDuration);
     return BackdropGroup(
       child: Stack(
         children: [
@@ -296,9 +312,9 @@ class _MobileShell extends StatelessWidget {
               child: navigationShell,
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
+          PositionedDirectional(
+            start: 0,
+            end: 0,
             bottom: 0,
             child: ExcludeSemantics(
               excluding: !showBar,

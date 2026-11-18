@@ -14,6 +14,8 @@ import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/motion.dart';
+import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/hover_builder.dart';
 import 'package:fluffychat/widgets/typing_animation.dart';
@@ -23,6 +25,14 @@ import 'package:matrix/matrix.dart';
 
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
+
+/// The last message of the chat, unless the chat's retention timer hides it.
+Event? _lastVisibleEvent(Room room) {
+  final event = room.lastEvent;
+  if (event == null) return null;
+  final retention = RetentionPolicy.forRoom(room);
+  return retention?.hides(event, DateTime.now()) == true ? null : event;
+}
 
 class ChatListItem extends StatelessWidget {
   static const minHeight = 76.0;
@@ -56,7 +66,7 @@ class ChatListItem extends StatelessWidget {
     final l10n = L10n.of(context);
     final locals = MatrixLocals(l10n);
     final displayname = room.getLocalizedDisplayname(locals);
-    final lastEvent = room.lastEvent;
+    final lastEvent = _lastVisibleEvent(room);
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
     final withSenderPrefix =
@@ -234,6 +244,7 @@ class _RowBody extends StatelessWidget {
       pinned: pinned,
       muted: isMuted,
       markedUnread: room.isUnreadOrInvited,
+      mentioned: room.highlightCount > 0,
     );
     final actions = this.actions;
     final onForget = this.onForget;
@@ -476,7 +487,10 @@ class _RowAvatar extends StatelessWidget {
             child: GestureDetector(
               onTap: () => onMore?.call(context),
               child: AnimatedScale(
-                duration: const Duration(milliseconds: 150),
+                duration: motionDuration(
+                  context,
+                  const Duration(milliseconds: 150),
+                ),
                 scale: hovered ? 1.0 : 0.0,
                 child: Material(
                   color: background,

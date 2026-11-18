@@ -14,8 +14,10 @@ import 'package:fluffychat/utils/app_start_hooks.dart';
 import 'package:fluffychat/utils/chat_list/archive_policy.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/draft_migration.dart';
+import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
+import 'package:fluffychat/utils/logout_cleanup.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -135,7 +137,7 @@ class MatrixState extends State<Matrix> {
 
   void setActiveClient(Client? cl, {bool resetTabs = true}) {
     if (cl == null || !widget.clients.contains(cl)) {
-      Logs().w('Tried to set an unknown client ${cl?.userID} as active');
+      Logs().w('Tried to set an unknown client as active');
       return;
     }
     final before = activeClientOrNull;
@@ -215,6 +217,7 @@ class MatrixState extends State<Matrix> {
     serverCapabilities.forget(c);
     ScheduledQueue.forget(c);
     ScheduledStore.forget(c);
+    DraftStore.forget(c);
     IndexFeeder.forget(c);
     MessageIndex.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;
@@ -311,6 +314,11 @@ class MatrixState extends State<Matrix> {
   final onReceipts = <String, StreamSubscription>{};
   final onUnarchiveSub = <String, StreamSubscription<SyncUpdate>>{};
   final onLogoutSub = <String, StreamSubscription<LoginState>>{};
+
+  /// The account of a client as long as it was signed in: a logout clears
+  /// `userID` before it tells anyone, and a client can sign in after the app
+  /// registered it.
+  final _lastUserId = <String, String>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
 
   String? _cachedPassword;
@@ -411,35 +419,41 @@ class MatrixState extends State<Matrix> {
     IndexFeeder.of(c)
       ..start()
       ..catchUpAfterFirstSync();
-    onLogoutSub[name] ??= c.onLoginStateChanged.stream
-        .where((state) => state == LoginState.loggedOut)
-        .listen((_) {
-          final loggedInWithMultipleClients = widget.clients.length > 1;
+    final knownUserId = c.userID;
+    if (knownUserId != null) _lastUserId[name] = knownUserId;
+    onLogoutSub[name] ??= c.onLoginStateChanged.stream.listen((state) {
+      final userId = c.userID;
+      if (userId != null) _lastUserId[name] = userId;
+      if (state != LoginState.loggedOut) return;
+      final loggedInWithMultipleClients = widget.clients.length > 1;
 
-          unawaited(MessageIndex.of(c).wipe());
-          _cancelSubs(c.clientName);
-          _removeClient(c);
-          ClientManager.removeClientNameFromStore(c.clientName, store);
-          InitWithRestoreExtension.deleteSessionBackup(name);
+      unawaited(MessageIndex.of(c).wipe());
+      unawaited(
+        LogoutCleanup.standard().run(
+          clientName: c.clientName,
+          userId: _lastUserId.remove(name),
+          lastAccount: !loggedInWithMultipleClients,
+        ),
+      );
+      _cancelSubs(c.clientName);
+      _removeClient(c);
+      ClientManager.removeClientNameFromStore(c.clientName, store);
+      InitWithRestoreExtension.deleteSessionBackup(name);
 
-          if (loggedInWithMultipleClients) {
-            final snackbarContext =
-                FluffyChatApp
-                    .router
-                    .routerDelegate
-                    .navigatorKey
-                    .currentContext ??
-                context;
+      if (loggedInWithMultipleClients) {
+        final snackbarContext =
+            FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+            context;
 
-            if (!snackbarContext.mounted) return;
-            final l10n = L10n.of(snackbarContext);
-            ScaffoldMessenger.of(
-              snackbarContext,
-            ).showSnackBar(SnackBar(content: Text(l10n.oneClientLoggedOut)));
-            return;
-          }
-          FluffyChatApp.router.go('/');
-        });
+        if (!snackbarContext.mounted) return;
+        final l10n = L10n.of(snackbarContext);
+        ScaffoldMessenger.of(
+          snackbarContext,
+        ).showSnackBar(SnackBar(content: Text(l10n.oneClientLoggedOut)));
+        return;
+      }
+      FluffyChatApp.router.go('/');
+    });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
     onUnarchiveSub[name] ??= c.onSync.stream.listen(
       UnarchiveOnMention(c).handle,

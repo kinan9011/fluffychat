@@ -250,6 +250,21 @@ void main() {
       await harness.finish(tester);
     });
 
+    testWidgets('an empty query sends nothing, also after the debounce', (
+      tester,
+    ) async {
+      addRoom(_openRoom, 'Open air', encrypted: false);
+      await harness.open(tester, path: '/rooms/search');
+      api.clear();
+      await tester.enterText(find.byKey(GlobalSearchView.fieldKey), 'a');
+      await tester.enterText(find.byKey(GlobalSearchView.fieldKey), '');
+      await tester.pump(const Duration(seconds: 2));
+      expect(api.requests('/search', method: 'POST'), isEmpty);
+      expect(api.requests('/user_directory', method: 'POST'), isEmpty);
+      expect(api.requests('/publicRooms'), isEmpty);
+      await harness.finish(tester);
+    });
+
     testWidgets('nothing found shows the empty state', (tester) async {
       addRoom(_openRoom, 'Open air', encrypted: false);
       await harness.open(tester, path: '/rooms/search');

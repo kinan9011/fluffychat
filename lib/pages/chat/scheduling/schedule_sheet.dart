@@ -190,9 +190,9 @@ class ScheduleSheetView extends StatelessWidget {
       ),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
+          padding: EdgeInsetsDirectional.only(
+            start: 16,
+            end: 16,
             bottom: 16 + MediaQuery.viewInsetsOf(context).bottom,
           ),
           child: Column(
@@ -203,7 +203,7 @@ class ScheduleSheetView extends StatelessWidget {
                 child: Container(
                   width: AppSchedule.sheetHandleWidth,
                   height: AppSchedule.sheetHandleHeight,
-                  margin: const EdgeInsets.only(top: 10, bottom: 12),
+                  margin: const EdgeInsetsDirectional.only(top: 10, bottom: 12),
                   decoration: BoxDecoration(
                     color: tokens.line,
                     borderRadius: BorderRadius.circular(2),
@@ -211,7 +211,7 @@ class ScheduleSheetView extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, bottom: 4),
+                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 4),
                 child: Row(
                   children: [
                     Expanded(
@@ -257,7 +257,11 @@ class ScheduleSheetView extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, right: 4, bottom: 14),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 4,
+                  end: 4,
+                  bottom: 14,
+                ),
                 child: Text(
                   '"${widget.preview}"',
                   maxLines: 1,
@@ -266,7 +270,7 @@ class ScheduleSheetView extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsetsDirectional.only(bottom: 16),
                 child: Wrap(
                   spacing: AppSchedule.presetGap,
                   runSpacing: AppSchedule.presetGap,
@@ -287,7 +291,11 @@ class ScheduleSheetView extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, right: 4, bottom: 6),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 4,
+                  end: 4,
+                  bottom: 6,
+                ),
                 child: Text(
                   l10n.scheduleCustom.toUpperCase(),
                   style: TextStyle(
@@ -318,7 +326,11 @@ class ScheduleSheetView extends StatelessWidget {
                 ),
               if (warning != null)
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, right: 4, bottom: 10),
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 4,
+                    end: 4,
+                    bottom: 10,
+                  ),
                   child: Text(
                     warning,
                     key: const ValueKey('schedule_warning'),
@@ -587,7 +599,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 14, right: 4),
+      padding: const EdgeInsetsDirectional.only(start: 4, top: 14, end: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: AppSpacing.m,
@@ -620,7 +632,7 @@ class _PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsetsDirectional.only(top: 14),
       child: Semantics(
         button: true,
         enabled: enabled,

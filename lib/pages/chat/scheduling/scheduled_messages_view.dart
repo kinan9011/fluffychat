@@ -112,8 +112,10 @@ class _Header extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: SizedBox(
-              height: AppChat.headerButton,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppChat.headerButton,
+              ),
               child: GlassSurface(
                 borderRadius: BorderRadius.circular(AppChat.headerButton / 2),
                 child: Padding(
@@ -191,10 +193,10 @@ class _Banner extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return Container(
-      margin: const EdgeInsets.only(
-        left: AppSpacing.m,
+      margin: const EdgeInsetsDirectional.only(
+        start: AppSpacing.m,
         top: AppSpacing.s,
-        right: AppSpacing.m,
+        end: AppSpacing.m,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -271,7 +273,7 @@ class _Groups extends StatelessWidget {
       (item) => item.sendAt,
     );
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.m,
         AppSpacing.xl,
         AppSpacing.m,
@@ -280,7 +282,7 @@ class _Groups extends StatelessWidget {
       children: [
         for (final group in groups)
           Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
             child: Column(
               spacing: AppChat.groupGap,
               children: [
@@ -364,7 +366,7 @@ class _Entry extends StatelessWidget {
                 onTap: () => c.select(item),
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 44),
-                  padding: const EdgeInsets.fromLTRB(13, 8, 13, 6),
+                  padding: const EdgeInsetsDirectional.fromSTEB(13, 8, 13, 6),
                   decoration: BoxDecoration(
                     color: tokens.outS,
                     borderRadius: const BorderRadiusDirectional.only(
@@ -481,6 +483,7 @@ class _Notice extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     return GlassSurface(
+      solid: true,
       borderRadius: BorderRadius.circular(AppSchedule.chipRadius),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -535,6 +538,7 @@ class _Chip extends StatelessWidget {
           child: Center(
             widthFactor: 1,
             child: GlassSurface(
+              solid: true,
               borderRadius: BorderRadius.circular(AppSchedule.chipRadius),
               child: Padding(
                 padding: EdgeInsets.symmetric(

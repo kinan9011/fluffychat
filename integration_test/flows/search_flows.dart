@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/pages/chat/events/message_bubble.dart';
+import 'package:fluffychat/pages/chat/events/message_footer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/global_search/global_search_view.dart';
 import 'package:fluffychat/pages/global_search/search_filter_sheet.dart';
@@ -24,6 +25,9 @@ Future<void> searchEncryptedFlow(WidgetTester widgetTester) => widgetTester
 
 Future<void> searchServerFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._searchServer());
+
+Future<void> searchWipeFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._searchWipe());
 
 extension on FluffyChatTester {
   Future<void> _untilTrue(
@@ -125,6 +129,67 @@ extension on FluffyChatTester {
       return find.byType(MessageHitTile).evaluate().isNotEmpty;
     }, reason: 'the server search found the message');
     await waitFor('Messages in unencrypted chats are searched on your server.');
+    await _leaveSearch();
+  }
+
+  Future<void> _sendInGroup(String text) async {
+    await tapOn(const Key('chat_input_field'));
+    await enterText(const Key('chat_input_field'), text);
+    await tapOn(const Key('send_button'));
+    await waitFor(
+      find.descendant(
+        of: find.byType(MessageBubble),
+        matching: find.textContaining(text, findRichText: true),
+      ),
+    );
+    await waitForGone(
+      find.descendant(
+        of: find.byType(MessageFooter),
+        matching: find.byType(CircularProgressIndicator),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+
+  /// After a sign out the index of the old session is gone: the needle is not
+  /// found again (the new session is a new device, it cannot read the old
+  /// messages). A message sent by the new session is found, proof that the
+  /// index works again. The wipe itself is proved by `index_logout_order_test`
+  /// and `store_logout_wipe_test`: this flow runs the same path through the
+  /// real app and the real server.
+  Future<void> _searchWipe() async {
+    await ensureLoggedIn();
+    await ensureGroupChatCreated();
+    await openTab('Chats');
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    final needle = 'needletwo$stamp';
+    final fresh = 'freshword$stamp';
+    await tapOn(ChatFlows.groupChatName);
+    await _sendInGroup('find me $needle');
+    await goBack();
+
+    await _openSearch();
+    await enterText(GlobalSearchView.fieldKey, needle);
+    await waitFor(find.byType(MessageHitTile));
+    await _leaveSearch();
+
+    await logout();
+    await ensureLoggedIn();
+    await openTab('Chats');
+
+    await _openSearch();
+    await enterText(GlobalSearchView.fieldKey, needle);
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.byType(MessageHitTile), findsNothing);
+    await waitFor('Nothing found...');
+
+    await _leaveSearch();
+    await tapOn(ChatFlows.groupChatName);
+    await _sendInGroup('find me $fresh');
+    await goBack();
+    await _openSearch();
+    await enterText(GlobalSearchView.fieldKey, fresh);
+    await waitFor(find.byType(MessageHitTile));
     await _leaveSearch();
   }
 }

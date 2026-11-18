@@ -25,6 +25,11 @@ abstract class PlatformInfos {
 
   static bool get isCupertinoStyle => isIOS || isMacOS;
 
+  /// A Mac, also in a browser (a browser on a Mac reports macOS here, while
+  /// [isMacOS] is only the native app): its shortcuts use Cmd, not Ctrl.
+  static bool get usesCommandKey =>
+      defaultTargetPlatform == TargetPlatform.macOS;
+
   static bool get isMobile => isAndroid || isIOS;
 
   /// For desktops which don't support ChachedNetworkImage yet

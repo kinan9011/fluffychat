@@ -9,6 +9,7 @@ import 'package:fluffychat/config/design_constants.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
+import 'package:fluffychat/pages/settings_appearance/glass_mode_row.dart';
 import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/appearance/chat_appearance.dart';
@@ -151,7 +152,12 @@ class SettingsAppearanceView extends StatelessWidget {
               resolved.accentHue.toInt(),
             );
             return Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, AppSpacing.xxxl),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                8,
+                0,
+                8,
+                AppSpacing.xxxl,
+              ),
               child: Wrap(
                 spacing: 14,
                 runSpacing: 14,
@@ -214,6 +220,7 @@ class SettingsAppearanceView extends StatelessWidget {
                 setting: AppSettings.reduceTransparency,
                 defaultValue: AppSettings.reduceTransparency.defaultValue,
               ),
+              const GlassModeRow(),
             ],
           ),
         Padding(
@@ -279,7 +286,7 @@ class _Preview extends StatelessWidget {
     );
     final l10n = L10n.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
       child: Semantics(
         container: true,
         label: l10n.chatAppearance,
@@ -388,7 +395,7 @@ class _WallpaperRow extends StatelessWidget {
         LocalWallpaperStore.supported &&
         controller.scope == AppearanceScope.all;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, AppSpacing.xxl),
+      padding: const EdgeInsetsDirectional.fromSTEB(4, 4, 4, AppSpacing.xxl),
       child: Wrap(
         spacing: 10,
         runSpacing: 14,

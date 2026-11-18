@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 
@@ -33,7 +34,7 @@ class PeekController {
     final timeline = _timeline;
     if (timeline == null || _closed) return;
     events.value = timeline.events
-        .filterByVisibleInGui()
+        .filterByVisibleInGui(retention: RetentionPolicy.forRoom(room))
         .take(limit)
         .toList(growable: false);
   }

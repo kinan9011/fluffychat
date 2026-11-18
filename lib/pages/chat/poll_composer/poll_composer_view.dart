@@ -188,7 +188,7 @@ class _Header extends StatelessWidget {
     final tokens = AppTokens.of(context);
     final l10n = L10n.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsetsDirectional.only(bottom: 6),
       child: Row(
         children: [
           SizedBox(

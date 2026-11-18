@@ -111,7 +111,7 @@ class DialogTextField extends StatelessWidget {
               Text(
                 errorText,
                 style: TextStyle(fontSize: 11, color: theme.colorScheme.error),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
           ],
         );

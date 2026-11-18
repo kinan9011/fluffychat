@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:fluffychat/utils/logged_in_database.dart';
 import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
 import 'package:flutter/foundation.dart';
@@ -213,8 +214,9 @@ class ScheduledEntry {
 }
 
 /// Messages waiting to be sent, one document per account inside that
-/// account's encrypted database. Nothing goes to the shared preferences and
-/// nothing is logged except constant strings.
+/// account's database (encrypted on native platforms, plain on the web or
+/// without a keyring, which the app warns about). Nothing goes to the shared
+/// preferences and nothing is logged except constant strings.
 class ScheduledStore {
   ScheduledStore._(this._database, this._now) {
     ready = _load();
@@ -236,7 +238,10 @@ class ScheduledStore {
   static ScheduledStore of(Client client) {
     final existing = _stores[client];
     if (existing != null) return existing;
-    final store = ScheduledStore._(() => client.database, DateTime.now);
+    final store = ScheduledStore._(
+      () => loggedInDatabase(client),
+      DateTime.now,
+    );
     // The SDK wipes its custom cache objects with `clearCache()`: write the
     // entries again so a cleared cache does not silently drop them.
     client.onCacheCleared.stream.listen(

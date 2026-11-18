@@ -134,7 +134,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       duration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : const Duration(milliseconds: 120),
-      padding: EdgeInsets.only(bottom: insets),
+      padding: EdgeInsetsDirectional.only(bottom: insets),
       child: Material(
         color: tokens.bg,
         borderRadius: const BorderRadius.vertical(
@@ -153,7 +153,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       Container(
                         width: 40,
                         height: 4,
-                        margin: const EdgeInsets.only(top: 8, bottom: 4),
+                        margin: const EdgeInsetsDirectional.only(
+                          top: 8,
+                          bottom: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: tokens.line,
                           borderRadius: BorderRadius.circular(2),
@@ -286,7 +289,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 14),
                 child: Row(
                   spacing: 8,
                   children: [

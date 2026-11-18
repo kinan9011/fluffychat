@@ -66,9 +66,9 @@ class AppBottomBar extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            left: sideInset,
-            right: sideInset,
+          PositionedDirectional(
+            start: sideInset,
+            end: sideInset,
             bottom: bottom,
             height: height,
             child: Semantics(

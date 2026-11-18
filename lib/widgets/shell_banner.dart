@@ -43,14 +43,17 @@ class _ShellBannerState extends State<ShellBanner> {
         if (show)
           SafeArea(
             bottom: false,
-            child: MaterialBanner(
-              backgroundColor: colorScheme.errorContainer,
-              contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onErrorContainer,
+            child: Semantics(
+              liveRegion: true,
+              child: MaterialBanner(
+                backgroundColor: colorScheme.errorContainer,
+                contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onErrorContainer,
+                ),
+                leading: Icon(widget.icon, color: colorScheme.onErrorContainer),
+                content: Text(widget.message),
+                actions: widget.actions(_hide),
               ),
-              leading: Icon(widget.icon, color: colorScheme.onErrorContainer),
-              content: Text(widget.message),
-              actions: widget.actions(_hide),
             ),
           ),
         Expanded(

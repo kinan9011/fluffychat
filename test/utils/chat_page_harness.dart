@@ -84,10 +84,17 @@ class ChatPageHarness {
     Locale? locale,
     int highlightCount = 0,
     String? path,
+    bool reduceMotion = true,
   }) async {
     room.highlightCount = highlightCount;
     tester.view.physicalSize = Size(width, height);
     tester.view.devicePixelRatio = 1.0;
+    // The typing dots (and other timer driven motion) would otherwise be
+    // caught at a different phase whenever the machine is busy, which made
+    // goldens flaky.
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        FakeAccessibilityFeatures(disableAnimations: reduceMotion);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     tester.platformDispatcher.platformBrightnessTestValue = brightness;
     addTearDown(tester.view.reset);
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);

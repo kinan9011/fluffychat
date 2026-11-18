@@ -9,7 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
 import 'package:fluffychat/utils/archive_guard.dart';
-import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/image_pixel_cap.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
@@ -145,14 +145,12 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       try {
         var mxcFile = MatrixImageFile(bytes: file.bytes, name: file.name);
 
-        final thumbnail = (await mxcFile.generateThumbnail(
-          nativeImplementations: ClientManager.nativeImplementations,
-        ));
+        final thumbnail = await emoteThumbnail(mxcFile);
         if (thumbnail == null) {
-          Logs().w('Unable to create thumbnail');
-        } else {
-          mxcFile = thumbnail;
+          Logs().w('Skipped a picture that is too large to shrink');
+          continue;
         }
+        mxcFile = thumbnail;
         final uri = await matrix.client.uploadContent(
           mxcFile.bytes,
           filename: mxcFile.name,
@@ -241,7 +239,7 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
 
     // TODO: support Lottie here as well ...
     return Stack(
-      alignment: Alignment.topRight,
+      alignment: AlignmentDirectional.topEnd,
       children: [
         IconButton(
           onPressed: widget.onRemove,

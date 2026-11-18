@@ -69,7 +69,7 @@ class DummyChatListItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
           ),
           height: 12,
-          margin: const EdgeInsets.only(right: 22),
+          margin: const EdgeInsetsDirectional.only(end: 22),
         ),
       ),
     );

@@ -42,6 +42,50 @@ void main() {
       );
     }
 
+    test('an extension that runs scripts when opened is not kept (B-4)', () {
+      for (final raw in [
+        'evil.html',
+        'EVIL.HTM',
+        'x.xhtml',
+        'pic.svg',
+        'pic.svgz',
+        'a.xml',
+        'a.js',
+        'a.mjs',
+        'a.hta',
+        'a.mht',
+        'a.mhtml',
+        'a.html.png.html',
+        'invite.html.',
+        'invite.html . .',
+      ]) {
+        final name = safeMediaName(3, raw);
+        final extension = name.split('.').last.toLowerCase();
+        expect(
+          {
+            'html',
+            'htm',
+            'xhtml',
+            'svg',
+            'svgz',
+            'xml',
+            'js',
+            'mjs',
+            'hta',
+            'mht',
+            'mhtml',
+          },
+          isNot(contains(extension)),
+          reason: raw,
+        );
+        expect(name, startsWith('000003-'));
+        expect(name, endsWith('.bin'), reason: raw);
+        expect(name, isNot(matches(RegExp(r'[.\s]$'))), reason: raw);
+      }
+      expect(safeMediaName(3, 'photo.png'), '000003-photo.png');
+      expect(safeMediaName(3, 'doc.pdf'), '000003-doc.pdf');
+    });
+
     test('different indexes give different names for the same file', () {
       expect(safeMediaName(1, 'a.png'), isNot(safeMediaName(2, 'a.png')));
     });

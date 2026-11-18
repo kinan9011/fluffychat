@@ -11,6 +11,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -29,13 +30,18 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 typedef CallJoinTarget = ({Client client, String roomId});
 
+bool _isRouteSafeRoomId(String id) =>
+    isMatrixRoomId(id) && !id.contains(RegExp(r'[/?#%\\]'));
+
 CallJoinTarget? callKitJoinTarget(
   CallKitParams call,
   Client? Function(String clientName) clientByName,
 ) {
   final roomId = call.extra?.tryGet<String>('roomId');
   final clientName = call.extra?.tryGet<String>('clientName');
-  if (roomId == null || clientName == null) return null;
+  if (roomId == null || clientName == null || !_isRouteSafeRoomId(roomId)) {
+    return null;
+  }
   final client = clientByName(clientName);
   if (client == null || !client.isLogged()) return null;
   return (client: client, roomId: roomId);

@@ -190,7 +190,7 @@ class SearchResultsList extends StatelessWidget {
     return ListView(
       key: GlobalSearchView.resultsKey,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsetsDirectional.only(bottom: 24),
       children: [
         if (!c.hasSearch && !c.browsesPublic) ...[
           SearchNote(l10n.searchHint),

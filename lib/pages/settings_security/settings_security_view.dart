@@ -57,7 +57,7 @@ class SettingsSecurityView extends StatelessWidget {
       children: [
         if (isDatabaseUnencrypted)
           const Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.xl),
+            padding: EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
             child: DatabaseUnencryptedWarningTile(),
           ),
         const PrivacyToggles(),

@@ -22,7 +22,7 @@ class LinkDeviceCard extends StatelessWidget {
     final tokens = AppTokens.of(context);
     final onOpen = onOpenAccountPage;
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xxl),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxl),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: tokens.surf,
@@ -62,7 +62,7 @@ class LinkDeviceCard extends StatelessWidget {
             ),
           if (onOpen != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsetsDirectional.only(top: 4),
               child: FilledButton(
                 key: const ValueKey('link_device_open_account'),
                 onPressed: onOpen,

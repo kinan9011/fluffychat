@@ -29,7 +29,7 @@ class ProfileView extends StatelessWidget {
         title: Text(l10n.profile),
       ),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(
+        padding: EdgeInsetsDirectional.fromSTEB(
           AppSpacing.xl,
           AppSpacing.xl,
           AppSpacing.xl,

@@ -48,13 +48,13 @@ class NewPrivateChatView extends StatelessWidget {
             child: ListView(
               key: listKey,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsetsDirectional.only(bottom: 24),
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(
-                    left: 8,
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 8,
                     top: 4,
-                    right: 8,
+                    end: 8,
                     bottom: 8,
                   ),
                   child: Row(
@@ -103,9 +103,9 @@ class NewPrivateChatView extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 16,
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 16,
+                    end: 16,
                     bottom: 14,
                   ),
                   child: TextField(
@@ -203,7 +203,11 @@ class _Start extends StatelessWidget {
     return Column(
       children: [
         Container(
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          margin: const EdgeInsetsDirectional.only(
+            start: 16,
+            end: 16,
+            bottom: 16,
+          ),
           decoration: BoxDecoration(
             color: tokens.surf,
             borderRadius: BorderRadius.circular(18),

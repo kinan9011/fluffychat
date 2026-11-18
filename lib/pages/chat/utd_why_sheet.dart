@@ -62,7 +62,11 @@ class UtdWhySheet extends StatelessWidget {
       ),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          padding: const EdgeInsetsDirectional.only(
+            start: 16,
+            end: 16,
+            bottom: 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,7 +75,7 @@ class UtdWhySheet extends StatelessWidget {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(top: 10, bottom: 14),
+                  margin: const EdgeInsetsDirectional.only(top: 10, bottom: 14),
                   decoration: BoxDecoration(
                     color: tokens.line,
                     borderRadius: BorderRadius.circular(2),
@@ -79,7 +83,11 @@ class UtdWhySheet extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, right: 4, bottom: 4),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 4,
+                  end: 4,
+                  bottom: 4,
+                ),
                 child: Text(
                   l10n.whyCantIReadThis,
                   style: TextStyle(
@@ -90,7 +98,11 @@ class UtdWhySheet extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, right: 4, bottom: 12),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 4,
+                  end: 4,
+                  bottom: 12,
+                ),
                 child: Text(
                   l10n.utdIntro,
                   style: TextStyle(color: tokens.mut, fontSize: 13.5),

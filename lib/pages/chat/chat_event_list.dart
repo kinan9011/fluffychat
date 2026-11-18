@@ -133,14 +133,14 @@ class ChatEventList extends StatelessWidget {
           textScaler: TextScaler.linear(AppSettings.fontSizeFactor.value),
         ),
         child: ListView.custom(
-          padding: EdgeInsets.only(
+          padding: EdgeInsetsDirectional.only(
             top: 8 + topPadding,
             bottom:
                 8 +
                 (controller.inputBarHeight ??
                     (72 + (FluffyThemes.isColumnMode(context) ? 16 : 0))),
-            left: horizontalPadding,
-            right: horizontalPadding,
+            start: horizontalPadding,
+            end: horizontalPadding,
           ),
           reverse: true,
           controller: controller.scrollController,
@@ -241,10 +241,13 @@ class ChatEventList extends StatelessWidget {
                   children: [
                     if (!isCollapsed && displayDate)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+                        padding: const EdgeInsetsDirectional.only(
+                          top: 8.0,
+                          bottom: 16.0,
+                        ),
                         child: Center(
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
+                            padding: const EdgeInsetsDirectional.only(top: 4.0),
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),

@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -21,7 +22,7 @@ class ReplyDisplay extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AnimatedSize(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       curve: FluffyThemes.animationCurve,
       clipBehavior: Clip.hardEdge,
       child: controller.editEvent != null || controller.replyEvent != null

@@ -305,7 +305,7 @@ class _ProfileCard extends StatelessWidget {
     final l10n = L10n.of(context);
     final tokens = AppTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
       child: Material(
         color: tokens.surf,
         borderRadius: BorderRadius.circular(AppSettingsLayout.cardRadius),

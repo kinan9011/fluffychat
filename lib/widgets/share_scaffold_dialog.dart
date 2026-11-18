@@ -8,6 +8,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -20,6 +21,13 @@ abstract class ShareItem {}
 class TextShareItem extends ShareItem {
   final String value;
   TextShareItem(this.value);
+}
+
+/// Text that only fills the composer (a link with `?body=`): it is never sent
+/// without the user pressing send.
+class PrefillShareItem extends ShareItem {
+  final String value;
+  PrefillShareItem(this.value);
 }
 
 class ContentShareItem extends ShareItem {
@@ -193,7 +201,7 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
         ],
       ),
       bottomNavigationBar: AnimatedSize(
-        duration: FluffyThemes.animationDuration,
+        duration: motionDuration(context, FluffyThemes.animationDuration),
         curve: FluffyThemes.animationCurve,
         child: selectedRoomId == null
             ? const SizedBox.shrink()

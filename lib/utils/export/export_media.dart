@@ -5,6 +5,11 @@
 
 import 'package:fluffychat/utils/export/export_model.dart';
 
+final _activeExtension = RegExp(
+  r'\.(x?html?|shtml|mht(?:ml)?|svgz?|xml|xsl|xslt|m?js|hta)$',
+  caseSensitive: false,
+);
+
 /// The name of an exported file. It is made from the event's position and a
 /// cleaned copy of the sender's file name: no path separator, no `..`, no
 /// leading dot, ASCII only, at most 80 characters after the index.
@@ -13,9 +18,11 @@ String safeMediaName(int index, String raw) {
       .replaceAll(RegExp(r'[^A-Za-z0-9._ -]'), '_')
       .replaceAll(RegExp(r'\.{2,}'), '.')
       .replaceAll(RegExp(r'^[.\s_-]+'), '')
+      .replaceAll(RegExp(r'[.\s]+$'), '')
       .trim();
-  if (name.length > 80) name = name.substring(name.length - 80);
   if (name.isEmpty) name = 'file';
+  if (_activeExtension.hasMatch(name)) name = '$name.bin';
+  if (name.length > 80) name = name.substring(name.length - 80);
   return '${index.toString().padLeft(6, '0')}-$name';
 }
 

@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:material_ui/material_ui.dart';
@@ -14,7 +15,7 @@ class CallTile extends StatelessWidget {
   final lk.TrackPublication<lk.VideoTrack>? video;
   final lk.TrackPublication<lk.AudioTrack>? audio;
   final User user;
-  final EdgeInsets? margin;
+  final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
   final lk.VideoViewFit fit;
   final double width, height;
@@ -46,7 +47,7 @@ class CallTile extends StatelessWidget {
       height: height,
       child: AnimatedContainer(
         margin: margin,
-        duration: FluffyThemes.animationDuration,
+        duration: motionDuration(context, FluffyThemes.animationDuration),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainer,
           border: BoxBorder.all(
@@ -79,9 +80,9 @@ class CallTile extends StatelessWidget {
                 ),
               ),
               if (handRaised)
-                Positioned(
+                PositionedDirectional(
                   top: 8,
-                  right: 8,
+                  end: 8,
                   child: Material(
                     borderRadius: BorderRadius.circular(32),
                     color: Theme.of(context).colorScheme.surface,
@@ -94,9 +95,9 @@ class CallTile extends StatelessWidget {
                     ),
                   ),
                 ),
-              Positioned(
+              PositionedDirectional(
                 bottom: 8,
-                left: 8,
+                start: 8,
                 child: Material(
                   elevation: theme.appBarTheme.elevation ?? 4,
                   shadowColor: theme.appBarTheme.shadowColor,

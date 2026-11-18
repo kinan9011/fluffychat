@@ -146,6 +146,7 @@ class SpaceOverviewController extends State<SpaceOverview> {
           powerLevels: joinedRoom(
             child.roomId,
           )?.getState(EventTypes.RoomPowerLevels)?.content,
+          encrypted: joinedRoom(child.roomId)?.encrypted ?? false,
         ),
     ], ownUserId: _client.userID ?? '');
   }

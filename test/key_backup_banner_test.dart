@@ -95,6 +95,21 @@ void main() {
     expect(find.text('Set up'), findsOneWidget);
   });
 
+  testWidgets('the banner is announced to screen readers when it appears', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    seam((_) async => false);
+    await pump(tester);
+    final node = tester.getSemantics(
+      find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.liveRegion == true,
+      ),
+    );
+    expect(node.getSemanticsData().flagsCollection.isLiveRegion, isTrue);
+    handle.dispose();
+  });
+
   for (final value in [true, null]) {
     testWidgets('the state $value shows nothing', (tester) async {
       seam((_) async => value);

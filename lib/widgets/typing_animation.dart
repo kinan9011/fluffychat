@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:material_ui/material_ui.dart';
 
 class TypingAnimation extends StatefulWidget {
@@ -19,26 +20,30 @@ class TypingAnimation extends StatefulWidget {
 class _TypingAnimationState extends State<TypingAnimation> {
   int _tick = 0;
 
-  late final Timer _timer;
+  Timer? _timer;
 
   static const Duration animationDuration = Duration(milliseconds: 300);
 
   @override
-  void initState() {
-    _timer = Timer.periodic(animationDuration, (_) {
-      if (!mounted) {
-        return;
-      }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _timer?.cancel();
+      _timer = null;
+      _tick = 0;
+      return;
+    }
+    _timer ??= Timer.periodic(animationDuration, (_) {
+      if (!mounted) return;
       setState(() {
         _tick = (_tick + 1) % 4;
       });
     });
-    super.initState();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -52,7 +57,7 @@ class _TypingAnimationState extends State<TypingAnimation> {
       children: [
         for (var i = 1; i <= 3; i++)
           AnimatedContainer(
-            duration: animationDuration * 1.5,
+            duration: motionDuration(context, animationDuration * 1.5),
             curve: FluffyThemes.animationCurve,
             width: size,
             height: _tick == i ? size * 2 : size,

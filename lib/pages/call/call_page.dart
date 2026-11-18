@@ -258,10 +258,10 @@ class CallPage extends StatelessWidget {
 
                           return focused == null
                               ? Padding(
-                                  padding: EdgeInsets.only(
+                                  padding: EdgeInsetsDirectional.only(
                                     bottom: 84.0,
-                                    left: 16.0,
-                                    right: 16.0,
+                                    start: 16.0,
+                                    end: 16.0,
                                     top: 16.0,
                                   ),
                                   child: LayoutBuilder(
@@ -309,10 +309,10 @@ class CallPage extends StatelessWidget {
                                   ),
                                 )
                               : Padding(
-                                  padding: EdgeInsets.only(
+                                  padding: EdgeInsetsDirectional.only(
                                     bottom: 96.0,
-                                    left: 16.0,
-                                    right: 16.0,
+                                    start: 16.0,
+                                    end: 16.0,
                                     top: 16.0,
                                   ),
                                   child: Flex(
@@ -369,14 +369,16 @@ class CallPage extends StatelessWidget {
                                                       viewModel.setFocusedTrack(
                                                         tiles[i].id,
                                                       ),
-                                                  margin: EdgeInsets.only(
-                                                    right: axis == .vertical
-                                                        ? 16
-                                                        : 0,
-                                                    bottom: axis == .horizontal
-                                                        ? 16
-                                                        : 0,
-                                                  ),
+                                                  margin:
+                                                      EdgeInsetsDirectional.only(
+                                                        end: axis == .vertical
+                                                            ? 16
+                                                            : 0,
+                                                        bottom:
+                                                            axis == .horizontal
+                                                            ? 16
+                                                            : 0,
+                                                      ),
                                                 ),
                                           ),
                                         ),

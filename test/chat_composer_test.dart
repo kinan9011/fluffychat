@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat/composer/attachment_type_bar.dart';
 import 'package:fluffychat/pages/chat/composer/format_panel.dart';
 import 'package:fluffychat/utils/rich_text/format_range.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -149,6 +150,39 @@ void main() {
       RangeKind.underline,
     });
     await harness.finish(tester);
+  });
+
+  testWidgets('on a Mac (also in a browser) Cmd formats, Ctrl does not', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      await harness.open(tester);
+      await tester.enterText(
+        find.byKey(const Key('chat_input_field')),
+        'hello',
+      );
+      final composer = tester
+          .state<ChatController>(find.byType(ChatPageWithRoom))
+          .sendController;
+      composer.value = composer.value.copyWith(
+        selection: const TextSelection(baseOffset: 0, extentOffset: 5),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(composer.format.ranges, isEmpty);
+      composer.value = composer.value.copyWith(
+        selection: const TextSelection(baseOffset: 0, extentOffset: 5),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      expect(composer.format.ranges.map((r) => r.kind), [RangeKind.bold]);
+      await harness.finish(tester);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets('the old attach popup menu is gone', (tester) async {

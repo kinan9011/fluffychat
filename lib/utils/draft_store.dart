@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fluffychat/utils/logged_in_database.dart';
 import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
@@ -27,7 +28,9 @@ class _Draft {
 }
 
 /// Unsent composer text, one document per account inside that account's
-/// encrypted database. Nothing is written to the shared preferences and
+/// database (encrypted on native platforms; on the web and on a fallback
+/// without a keyring it is not, and the app says so). Nothing is written to
+/// the shared preferences and
 /// nothing is logged except constant strings.
 class DraftStore {
   DraftStore._(this._database, this._now) {
@@ -52,7 +55,7 @@ class DraftStore {
   static DraftStore of(Client client) {
     final existing = _stores[client];
     if (existing != null) return existing;
-    final store = DraftStore._(() => client.database, _wallClock);
+    final store = DraftStore._(() => loggedInDatabase(client), _wallClock);
     // The SDK wipes its custom cache objects with `clearCache()`: write the
     // drafts again so a cleared cache does not silently drop them.
     client.onCacheCleared.stream.listen(
@@ -61,7 +64,6 @@ class DraftStore {
     return _stores[client] = store;
   }
 
-  @visibleForTesting
   static void forget(Client client) => _stores[client] = null;
 
   static bool isRoomId(String id) => isMatrixRoomId(id);

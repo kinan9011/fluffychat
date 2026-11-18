@@ -46,7 +46,7 @@ class StatusSheetView extends StatelessWidget {
     final suggestion = controller.suggestion;
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(bottom: inset),
+        padding: EdgeInsetsDirectional.only(bottom: inset),
         child: Column(
           children: [
             Expanded(
@@ -64,7 +64,7 @@ class StatusSheetView extends StatelessWidget {
                       child: Container(
                         width: AppSchedule.sheetHandleWidth,
                         height: AppSchedule.sheetHandleHeight,
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsetsDirectional.only(bottom: 12),
                         decoration: BoxDecoration(
                           color: tokens.line,
                           borderRadius: BorderRadius.circular(2),

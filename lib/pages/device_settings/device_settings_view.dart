@@ -53,7 +53,7 @@ class DevicesSettingsView extends StatelessWidget {
       children: [
         if (controller.loadError != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
             child: SettingsGroup(
               rows: [
                 SettingsRow(
@@ -75,7 +75,7 @@ class DevicesSettingsView extends StatelessWidget {
         if (devices != null) ...[
           if (controller.chatBackupEnabled == false)
             Container(
-              margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+              margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: tokens.warnS,

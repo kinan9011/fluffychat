@@ -77,8 +77,6 @@ class RetentionPolicy {
   bool _canHide(Event event) =>
       _hideableTypes.contains(event.type) && event.status.isSynced;
 
-  DateTime _expiry(Event event) => event.originServerTs.add(maxLifetime);
-
   /// True when [event] is older than the timer. State events, messages that
   /// are still being sent and ones that are not delivered yet stay visible.
   bool hides(Event event, DateTime now) =>
@@ -89,18 +87,22 @@ class RetentionPolicy {
   /// has run out.
   bool hidesAt(DateTime originServerTs, String eventType, DateTime now) =>
       _hideableTypes.contains(eventType) &&
-      !originServerTs.add(maxLifetime).isAfter(now);
+      now.millisecondsSinceEpoch - originServerTs.millisecondsSinceEpoch >=
+          maxLifetime.inMilliseconds;
 
   /// The next moment a visible message expires, if that is within a day.
   DateTime? nextExpiry(Iterable<Event> events, DateTime now) {
-    DateTime? next;
+    final nowMs = now.millisecondsSinceEpoch;
+    int? next;
     for (final event in events) {
       if (!_canHide(event)) continue;
-      final expiry = _expiry(event);
-      if (!expiry.isAfter(now)) continue;
-      if (next == null || expiry.isBefore(next)) next = expiry;
+      final expiry =
+          event.originServerTs.millisecondsSinceEpoch +
+          maxLifetime.inMilliseconds;
+      if (expiry <= nowMs) continue;
+      if (next == null || expiry < next) next = expiry;
     }
-    if (next == null || next.difference(now) > _lookAhead) return null;
-    return next;
+    if (next == null || next - nowMs > _lookAhead.inMilliseconds) return null;
+    return DateTime.fromMillisecondsSinceEpoch(next, isUtc: now.isUtc);
   }
 }

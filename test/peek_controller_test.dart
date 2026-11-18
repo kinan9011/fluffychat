@@ -174,6 +174,48 @@ void main() {
     controller.close();
   });
 
+  test(
+    'messages the retention timer hides are not shown (W13 audit C-11)',
+    () async {
+      final room = spyRoom();
+      room.setState(
+        Event(
+          type: 'm.room.retention',
+          stateKey: '',
+          content: {'max_lifetime': 86400000, 'expire_on_clients': true},
+          room: room,
+          eventId: r'$retention',
+          senderId: '@admin:example.org',
+          originServerTs: DateTime(2020),
+        ),
+      );
+      room.fixture
+        ..clear()
+        ..addAll([
+          Event(
+            type: EventTypes.Message,
+            content: {'msgtype': MessageTypes.Text, 'body': 'fresh'},
+            room: room,
+            eventId: r'$fresh',
+            senderId: '@anna:example.org',
+            originServerTs: DateTime.now(),
+          ),
+          Event(
+            type: EventTypes.Message,
+            content: {'msgtype': MessageTypes.Text, 'body': 'old'},
+            room: room,
+            eventId: r'$old',
+            senderId: '@anna:example.org',
+            originServerTs: DateTime.now().subtract(const Duration(days: 3)),
+          ),
+        ]);
+      final controller = PeekController(room);
+      await controller.open();
+      expect(controller.events.value.map((e) => e.eventId), [r'$fresh']);
+      controller.close();
+    },
+  );
+
   test('a timeline update republishes the list', () async {
     final room = spyRoom();
     final controller = PeekController(room);

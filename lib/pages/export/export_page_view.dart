@@ -37,7 +37,7 @@ class ExportPageView extends StatelessWidget {
       title: l10n.exportChat,
       subtitle: name,
       bottom: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding: const EdgeInsetsDirectional.fromSTEB(
           AppSettingsLayout.sideMargin,
           AppSpacing.s,
           AppSettingsLayout.sideMargin,

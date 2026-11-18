@@ -49,6 +49,7 @@ class StoreRecoveryKeyView extends StatelessWidget {
             value: viewModel.value.recoveryKeyStoredInSecureStorage,
             onChanged: viewModel.toggleRecoveryKeyStoredInSecureStorage,
             title: Text(_getSecureStorageLocalizedName(context)),
+            subtitle: Text(L10n.of(context).storedRecoveryKeyStaysOnDevice),
           ),
       ],
     );

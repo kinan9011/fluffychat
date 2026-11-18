@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:flutter/services.dart';
@@ -163,12 +164,16 @@ class PublicRoomDialog extends StatelessWidget {
                                           children: [
                                             WidgetSpan(
                                               child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 4.0,
-                                                ),
+                                                padding:
+                                                    const EdgeInsetsDirectional.only(
+                                                      end: 4.0,
+                                                    ),
                                                 child: AnimatedScale(
-                                                  duration: FluffyThemes
-                                                      .animationDuration,
+                                                  duration: motionDuration(
+                                                    context,
+                                                    FluffyThemes
+                                                        .animationDuration,
+                                                  ),
                                                   curve: FluffyThemes
                                                       .animationCurve,
                                                   scale: hovered

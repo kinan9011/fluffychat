@@ -142,7 +142,7 @@ class LoadingDialogState<T> extends State<LoadingDialog> {
               child: Text(
                 titleLabel,
                 maxLines: 4,
-                textAlign: exception == null ? TextAlign.left : null,
+                textAlign: exception == null ? TextAlign.start : null,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

@@ -204,7 +204,6 @@ class GlobalSearchController extends State<GlobalSearch> {
       _refreshChats();
       _resetResults();
     });
-    if (!hasSearch && !wantsPublicRooms) return;
     final generation = _generation;
     _timer = Timer(debounce, () => unawaited(_run(generation)));
   }

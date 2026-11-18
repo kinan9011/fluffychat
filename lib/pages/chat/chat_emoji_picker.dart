@@ -8,6 +8,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/sticker_picker_dialog.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -21,7 +22,7 @@ class ChatEmojiPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       curve: FluffyThemes.animationCurve,
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(),

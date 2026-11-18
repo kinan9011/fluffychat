@@ -79,7 +79,7 @@ class MapBubble extends StatelessWidget {
               ],
             ),
             Container(
-              alignment: Alignment.bottomRight,
+              alignment: AlignmentDirectional.bottomEnd,
               child: Text(
                 ' © OpenStreetMap contributors ',
                 style: TextStyle(

@@ -510,6 +510,44 @@ void main() {
     return color;
   }
 
+  testWidgets(
+    'a last message the retention timer hides is not in the preview (W13 audit C-11)',
+    (tester) async {
+      final room = anna();
+      room.setState(
+        Event(
+          type: 'm.room.retention',
+          stateKey: '',
+          content: {'max_lifetime': 86400000, 'expire_on_clients': true},
+          room: room,
+          eventId: r'$retention',
+          senderId: '@admin:example.org',
+          originServerTs: DateTime(2020),
+        ),
+      );
+      room.lastEvent = Event(
+        type: EventTypes.Message,
+        content: {'msgtype': MessageTypes.Text, 'body': 'old secret'},
+        room: room,
+        eventId: r'$old',
+        senderId: '@anna:example.org',
+        originServerTs: DateTime.now().subtract(const Duration(days: 3)),
+      );
+      await pumpRow(tester, room);
+      expect(find.textContaining('old secret'), findsNothing);
+      room.lastEvent = Event(
+        type: EventTypes.Message,
+        content: {'msgtype': MessageTypes.Text, 'body': 'new one'},
+        room: room,
+        eventId: r'$new',
+        senderId: '@anna:example.org',
+        originServerTs: DateTime.now(),
+      );
+      await pumpRow(tester, room);
+      expect(find.textContaining('new one'), findsOneWidget);
+    },
+  );
+
   group('draft (W03-3)', () {
     const draftKey = 'draft_!anna:example.org';
 

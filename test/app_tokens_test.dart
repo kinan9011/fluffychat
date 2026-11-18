@@ -226,6 +226,42 @@ void main() {
     }
   });
 
+  group('contrast sweep over every reachable hue (W01 L1)', () {
+    for (final dark in [false, true]) {
+      test(
+        '${dark ? 'dark' : 'light'}: every pair >= 4.5:1 for hue 0..359',
+        () {
+          final failures = <String>[];
+          for (var hue = 0; hue < 360; hue++) {
+            final t = dark
+                ? AppTokens.dark(hue: hue.toDouble())
+                : AppTokens.light(hue: hue.toDouble());
+            final checks = {
+              'fg on bg': wcagContrast8(t.fg, t.bg),
+              'fg on surf': wcagContrast8(t.fg, t.surf),
+              'fg on surf2': wcagContrast8(t.fg, t.surf2),
+              'onacc on acc': wcagContrast8(t.onacc, t.acc),
+              'outFg on outS': wcagContrast8(t.outFg, t.outS),
+              'mut on bg': wcagContrast8(t.mut, t.bg),
+              'mut on surf': wcagContrast8(t.mut, t.surf),
+              'acc on bg': wcagContrast8(t.acc, t.bg),
+              'acc on surf': wcagContrast8(t.acc, t.surf),
+              'acc on accs': wcagContrast8(t.acc, t.accs),
+              'fg on out': wcagContrast8(t.fg, t.out),
+              'onRed on red': wcagContrast8(t.onRed, t.red),
+            };
+            for (final entry in checks.entries) {
+              if (entry.value < 4.5) {
+                failures.add('hue $hue ${entry.key} ${entry.value}');
+              }
+            }
+          }
+          expect(failures, isEmpty);
+        },
+      );
+    }
+  });
+
   group('DESIGN 13 pairs fixed in W02A (decision log 13)', () {
     for (final dark in [false, true]) {
       test('${dark ? 'dark' : 'light'}: white on mbad is >= 4.5:1', () {

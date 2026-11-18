@@ -10,6 +10,7 @@ import 'package:async/async.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/call_keys_event_content.dart';
+import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
 import 'package:matrix/matrix.dart' hide Result;
 
@@ -308,12 +309,17 @@ extension MatrixRtcRoomExtension on Room {
     );
 
     for (final url in urls) {
+      final serviceUri = safeLiveKitServiceUri(url);
+      if (serviceUri == null) {
+        Logs().w('[Join MatrixRtc Call] Ignoring an unsafe LiveKit URL');
+        continue;
+      }
       try {
         Logs().d(
           '[Join MatrixRtc Call] (4/5) Try authenticate to LiveKit instance $url...',
         );
         final response = await client.httpClient.post(
-          Uri.parse('${url.replaceAll(RegExp(r'/+$'), '')}/sfu/get'),
+          serviceUri.replace(path: '${serviceUri.path}/sfu/get'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'room': id,

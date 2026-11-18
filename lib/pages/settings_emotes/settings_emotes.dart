@@ -10,8 +10,8 @@ import 'package:archive/archive.dart'
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/archive_guard.dart';
-import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/file_selector.dart';
+import 'package:fluffychat/utils/image_pixel_cap.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -317,11 +317,12 @@ class EmotesSettingsController extends State<EmotesSettings> {
             bytes: await pickedFile.readAsBytes(),
             name: pickedFile.name,
           );
-          file =
-              await file.generateThumbnail(
-                nativeImplementations: ClientManager.nativeImplementations,
-              ) ??
-              file;
+          final thumbnail = await emoteThumbnail(file);
+          if (thumbnail == null) {
+            Logs().w('Skipped a picture that is too large to shrink');
+            continue;
+          }
+          file = thumbnail;
           final uri = await matrix.client.uploadContent(
             file.bytes,
             filename: file.name,

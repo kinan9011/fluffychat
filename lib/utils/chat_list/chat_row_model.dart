@@ -38,6 +38,7 @@ String chatRowSemantics(
   required bool pinned,
   required bool muted,
   required bool markedUnread,
+  bool mentioned = false,
 }) {
   final base = unread > 0
       ? l10n.chatRowSemantics(name, unread, preview, time)
@@ -47,5 +48,6 @@ String chatRowSemantics(
     if (unread == 0 && markedUnread) l10n.unread,
     if (pinned) l10n.pinned,
     if (muted) l10n.muted,
+    if (mentioned) l10n.mention,
   ].join(', ');
 }

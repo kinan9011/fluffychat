@@ -34,7 +34,7 @@ class DefaultRetentionSheet extends StatelessWidget {
     final tokens = AppTokens.of(context);
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: const EdgeInsetsDirectional.fromSTEB(
           AppSettingsLayout.sideMargin,
           AppSpacing.xl,
           AppSettingsLayout.sideMargin,
@@ -51,7 +51,9 @@ class DefaultRetentionSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  padding: const EdgeInsetsDirectional.only(
+                    bottom: AppSpacing.xl,
+                  ),
                   child: Text(
                     l10n.defaultDisappearTimer,
                     style: TextStyle(

@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -24,8 +25,8 @@ class StartChatFab extends StatelessWidget {
           ? null
           : const EdgeInsets.symmetric(horizontal: 16),
       label: AnimatedSize(
-        alignment: Alignment.centerLeft,
-        duration: FluffyThemes.animationDuration,
+        alignment: AlignmentDirectional.centerStart,
+        duration: motionDuration(context, FluffyThemes.animationDuration),
         curve: FluffyThemes.animationCurve,
         child: extended ? Text(L10n.of(context).newChat) : SizedBox.shrink(),
       ),

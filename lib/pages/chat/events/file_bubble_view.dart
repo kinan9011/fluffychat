@@ -39,7 +39,7 @@ class FileBubbleView extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 280),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 12, 6),
+            padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 12, 6),
             child: Row(
               spacing: 12,
               children: [

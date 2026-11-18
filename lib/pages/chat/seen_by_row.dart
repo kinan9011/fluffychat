@@ -97,7 +97,7 @@ class SeenByView extends StatelessWidget {
     final more = users.length - maxNames;
     final label = more > 0 ? l10n.seenByMore(names, more) : l10n.seenBy(names);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.s,
         1,
         AppSpacing.s,

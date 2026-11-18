@@ -88,6 +88,8 @@ class SettingsNotificationsView extends StatelessWidget {
                       ),
                       for (final rule in category.rules)
                         ListTile(
+                          onTap: () =>
+                              controller.editPushRule(rule, category.kind),
                           title: Text(rule.getPushRuleName(L10n.of(context))),
                           subtitle: Text.rich(
                             TextSpan(
@@ -98,39 +100,33 @@ class SettingsNotificationsView extends StatelessWidget {
                                   ),
                                 ),
                                 const TextSpan(text: ' '),
-                                WidgetSpan(
-                                  child: InkWell(
-                                    onTap: () => controller.editPushRule(
-                                      rule,
-                                      category.kind,
-                                    ),
-                                    child: Text(
-                                      L10n.of(context).more,
-                                      style: TextStyle(
-                                        color: theme.colorScheme.primary,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor:
-                                            theme.colorScheme.primary,
-                                      ),
-                                    ),
+                                TextSpan(
+                                  text: L10n.of(context).more,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: theme.colorScheme.primary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          trailing: Switch.adaptive(
-                            value: rule.enabled,
-                            onChanged: controller.isLoading
-                                ? null
-                                : rule.ruleId != '.m.rule.master' &&
-                                      Matrix.of(
-                                        context,
-                                      ).client.allPushNotificationsMuted
-                                ? null
-                                : (_) => controller.togglePushRule(
-                                    category.kind,
-                                    rule,
-                                  ),
+                          trailing: Semantics(
+                            label: rule.getPushRuleName(L10n.of(context)),
+                            child: Switch.adaptive(
+                              value: rule.enabled,
+                              onChanged: controller.isLoading
+                                  ? null
+                                  : rule.ruleId != '.m.rule.master' &&
+                                        Matrix.of(
+                                          context,
+                                        ).client.allPushNotificationsMuted
+                                  ? null
+                                  : (_) => controller.togglePushRule(
+                                      category.kind,
+                                      rule,
+                                    ),
+                            ),
                           ),
                         ),
                       Divider(color: theme.dividerColor),
@@ -224,7 +220,9 @@ class SettingsNotificationsView extends StatelessWidget {
                       if (pushers.isEmpty) {
                         return Center(
                           child: Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
+                            padding: const EdgeInsetsDirectional.only(
+                              bottom: 16.0,
+                            ),
                             child: Text(L10n.of(context).noOtherDevicesFound),
                           ),
                         );

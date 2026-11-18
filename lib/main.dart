@@ -9,7 +9,9 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/app_lock_unavailable/app_lock_unavailable_page.dart';
 import 'package:fluffychat/pages/database_key_error/database_key_error_page.dart';
+import 'package:fluffychat/utils/app_lock_settings.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/font_licenses.dart';
@@ -163,22 +165,29 @@ Future<void> _resetDatabasesAndRestart(
 }
 
 /// Fetch the pincode for the applock and start the flutter engine.
-Future<void> startGui(List<Client> clients, SharedPreferences store) async {
+///
+/// [readLock] and [show] are replaced by tests.
+Future<void> startGui(
+  List<Client> clients,
+  SharedPreferences store, {
+  Future<AppLockRead> Function()? readLock,
+  void Function(Widget app) show = runApp,
+}) async {
   // Fetch the pin for the applock if existing for mobile applications.
-  String? pin;
-  var useBiometrics = false;
-  if (PlatformInfos.supportsAppLock) {
-    try {
-      pin = await createSecureStorage().read(key: 'chat.fluffy.app_lock');
-      useBiometrics =
-          (await createSecureStorage().read(
-            key: 'chat.fluffy.use_biometrics',
-          )) ==
-          'true';
-    } catch (e, s) {
-      Logs().d('Unable to read PIN from Secure storage', e, s);
-    }
+  final lock = await (readLock ?? _readPlatformLock)();
+  if (appLockMustBlock(
+    lock,
+    signedIn: clients.any((client) => client.isLogged()),
+  )) {
+    show(
+      AppLockUnavailablePage.app(
+        onRetry: () => startGui(clients, store, readLock: readLock, show: show),
+      ),
+    );
+    return;
   }
+  final pin = lock.pincode;
+  final useBiometrics = lock.useBiometrics;
 
   if (PlatformInfos.isLinux || PlatformInfos.isWindows) {
     JustAudioMediaKit.ensureInitialized();
@@ -189,7 +198,7 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
-  runApp(
+  show(
     FluffyChatApp(
       clients: clients,
       appLockSettings: (pincode: pin, useBiometrics: useBiometrics),
@@ -227,3 +236,7 @@ class AppStarter with WidgetsBindingObserver {
     guiStarted = true;
   }
 }
+
+Future<AppLockRead> _readPlatformLock() async => PlatformInfos.supportsAppLock
+    ? readAppLockSettings(createSecureStorage())
+    : (pincode: null, useBiometrics: false, failed: false);

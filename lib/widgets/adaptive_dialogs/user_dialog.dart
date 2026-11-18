@@ -7,6 +7,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/utils/retention/default_retention.dart';
 import 'package:fluffychat/utils/status/status_policy.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
@@ -120,12 +121,15 @@ class UserDialog extends StatelessWidget {
                                     children: [
                                       WidgetSpan(
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 4.0,
-                                          ),
+                                          padding:
+                                              const EdgeInsetsDirectional.only(
+                                                end: 4.0,
+                                              ),
                                           child: AnimatedScale(
-                                            duration:
-                                                FluffyThemes.animationDuration,
+                                            duration: motionDuration(
+                                              context,
+                                              FluffyThemes.animationDuration,
+                                            ),
                                             curve: FluffyThemes.animationCurve,
                                             scale: hovered
                                                 ? 1.33

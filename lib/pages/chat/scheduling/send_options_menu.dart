@@ -7,8 +7,8 @@ import 'dart:ui';
 
 import 'package:fluffychat/config/app_tokens.dart';
 import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/glass_policy.dart';
 import 'package:fluffychat/utils/scheduling/send_options.dart';
 import 'package:fluffychat/widgets/glass_menu.dart';
 import 'package:material_ui/material_ui.dart';
@@ -60,7 +60,7 @@ Future<SendOption?> showSendOptionsMenu(
       children: [
         Positioned.fill(
           child: IgnorePointer(
-            child: AppSettings.reduceTransparency.value
+            child: glassIsSolidNow(context)
                 ? dim
                 : BackdropFilter(
                     filter: ImageFilter.blur(

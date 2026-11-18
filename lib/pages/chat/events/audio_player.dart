@@ -361,9 +361,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                 ),
                 if (fileDescription != null)
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: 13,
-                      right: 13,
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 13,
+                      end: 13,
                       bottom: 4,
                     ),
                     child: Linkify(

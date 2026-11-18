@@ -57,7 +57,7 @@ class EmotesSettingsView extends StatelessWidget {
         actions: [
           if (controller.showSave)
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+              padding: const EdgeInsetsDirectional.only(end: 16.0),
               child: TextButton(
                 onPressed: () => controller.save(context),
                 style: ElevatedButton.styleFrom(

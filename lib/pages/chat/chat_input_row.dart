@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart
 import 'package:fluffychat/pages/chat/recording_input_row.dart';
 import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/pages/chat/scheduling/send_button.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rich_text/format_range.dart';
@@ -206,12 +207,13 @@ class ChatInputRow extends StatelessWidget {
                                     focusNode: controller.inputFocus,
                                     controller: controller.sendController,
                                     decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.only(
-                                        left: 6.0,
-                                        right: 6.0,
-                                        bottom: 6.0,
-                                        top: 3.0,
-                                      ),
+                                      contentPadding:
+                                          const EdgeInsetsDirectional.only(
+                                            start: 6.0,
+                                            end: 6.0,
+                                            bottom: 6.0,
+                                            top: 3.0,
+                                          ),
                                       counter: const SizedBox.shrink(),
                                       hintText: controller.room.encrypted
                                           ? L10n.of(context).encryptedMessage
@@ -271,7 +273,10 @@ class ChatInputRow extends StatelessWidget {
                               height: height,
                             ),
                             AnimatedContainer(
-                              duration: FluffyThemes.animationDuration,
+                              duration: motionDuration(
+                                context,
+                                FluffyThemes.animationDuration,
+                              ),
                               curve: FluffyThemes.animationCurve,
                               width: textMessageOnly ? 0 : 48,
                               height: height,
@@ -322,10 +327,10 @@ class ChatInputRow extends StatelessWidget {
                                   : () => ScaffoldMessenger.of(context)
                                         .showSnackBar(
                                           SnackBar(
-                                            margin: EdgeInsets.only(
+                                            margin: EdgeInsetsDirectional.only(
                                               bottom: height + 16,
-                                              left: 16,
-                                              right: 16,
+                                              start: 16,
+                                              end: 16,
                                               top: 16,
                                             ),
                                             showCloseIcon: true,
@@ -436,8 +441,8 @@ Map<ShortcutActivator, VoidCallback> _formatShortcuts(
   ])
     SingleActivator(
       key,
-      control: !PlatformInfos.isMacOS,
-      meta: PlatformInfos.isMacOS,
+      control: !PlatformInfos.usesCommandKey,
+      meta: PlatformInfos.usesCommandKey,
     ): () =>
         composer.toggleInline(kind),
 };

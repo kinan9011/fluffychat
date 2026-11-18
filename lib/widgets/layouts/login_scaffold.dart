@@ -49,8 +49,8 @@ class LoginScaffold extends StatelessWidget {
                 theme.colorScheme.surfaceContainer,
                 theme.colorScheme.surfaceContainerHighest,
               ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
             ),
           ),
           child: Stack(

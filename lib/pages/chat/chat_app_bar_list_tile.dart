@@ -13,7 +13,7 @@ class ChatAppBarListTile extends StatelessWidget {
   final Widget? trailing;
   final void Function()? onTap;
 
-  static const double fixedHeight = 40.0;
+  static const double fixedHeight = 44.0;
 
   const ChatAppBarListTile({
     super.key,

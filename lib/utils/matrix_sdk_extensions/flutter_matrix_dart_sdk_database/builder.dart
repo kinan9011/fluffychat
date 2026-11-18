@@ -257,6 +257,11 @@ Future<void> resetLocalDatabases(
   }
 }
 
+/// Quarantined copies of one account's database: they are encrypted with the
+/// key that outlives a logout, so they go with the account.
+Future<void> deleteQuarantinedCopiesOf(String clientName) async =>
+    deleteQuarantinedDatabases(await _getDatabasePath(clientName));
+
 Future<String> _getDatabaseDirectory() async {
   if (PlatformInfos.isIOS) {
     final containerPath = await PathProviderFoundation().getContainerPath(

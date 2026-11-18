@@ -142,10 +142,10 @@ extension SendOptionsFlow on ChatController {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        margin: const EdgeInsets.only(
-          left: AppSpacing.xxl,
+        margin: const EdgeInsetsDirectional.only(
+          start: AppSpacing.xxl,
           top: AppSpacing.xxl,
-          right: AppSpacing.xxl,
+          end: AppSpacing.xxl,
           bottom: AppChat.composerHeight + AppSpacing.huge,
         ),
         content: Text(message),

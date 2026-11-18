@@ -148,7 +148,7 @@ class RetentionSheetView extends StatelessWidget {
                 child: Container(
                   width: AppSchedule.sheetHandleWidth,
                   height: AppSchedule.sheetHandleHeight,
-                  margin: const EdgeInsets.only(top: 10, bottom: 12),
+                  margin: const EdgeInsetsDirectional.only(top: 10, bottom: 12),
                   decoration: BoxDecoration(
                     color: tokens.line,
                     borderRadius: BorderRadius.circular(2),

@@ -52,7 +52,7 @@ class MessageFooter extends StatelessWidget {
               onTap: onEditedTap,
               radius: 20,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(4, 3, 7, 3),
+                padding: const EdgeInsetsDirectional.fromSTEB(4, 3, 7, 3),
                 child: Text(
                   l10n.edited,
                   style: TextStyle(

@@ -24,6 +24,11 @@ enum ShellMode {
     return mobile;
   }
 
+  /// A window shorter than [FluffyThemes.compactHeight] (a phone held
+  /// sideways) keeps the mobile shell whatever its width.
+  static ShellMode forSize(Size size) =>
+      size.height < FluffyThemes.compactHeight ? mobile : forWidth(size.width);
+
   bool get hasRail => this == rail || this == wide;
 }
 
@@ -36,6 +41,8 @@ abstract class FluffyThemes {
   static const double listColumnWidth = 350.0;
   static const double detailsPanelWidth = 340.0;
 
+  static const double compactHeight = 480.0;
+
   static const double twoPaneBreakpoint = 600.0;
   static const double railBreakpoint = 900.0;
   static const double threePaneBreakpoint = 1280.0;
@@ -46,10 +53,10 @@ abstract class FluffyThemes {
       width >= threePaneBreakpoint;
 
   static bool isColumnMode(BuildContext context) =>
-      isColumnModeByWidth(MediaQuery.sizeOf(context).width);
+      ShellMode.forSize(MediaQuery.sizeOf(context)) != ShellMode.mobile;
 
   static bool isThreeColumnMode(BuildContext context) =>
-      isThreeColumnModeByWidth(MediaQuery.sizeOf(context).width);
+      ShellMode.forSize(MediaQuery.sizeOf(context)) == ShellMode.wide;
 
   static LinearGradient backgroundGradient(BuildContext context, int alpha) {
     final colorScheme = Theme.of(context).colorScheme;

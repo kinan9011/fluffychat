@@ -7,6 +7,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/utils/retention/retention_labels.dart';
 import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -31,7 +32,7 @@ class StateMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedSize(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       curve: FluffyThemes.animationCurve,
       child: isCollapsed
           ? const SizedBox.shrink()
@@ -70,7 +71,9 @@ class StateMessage extends StatelessWidget {
                             else ...[
                               WidgetSpan(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(right: 4.0),
+                                  padding: const EdgeInsetsDirectional.only(
+                                    end: 4.0,
+                                  ),
                                   child: Avatar(
                                     name: event.senderFromMemoryOrFallback
                                         .calcDisplayname(),
@@ -88,7 +91,9 @@ class StateMessage extends StatelessWidget {
                               if (!event.redacted)
                                 WidgetSpan(
                                   child: Padding(
-                                    padding: const EdgeInsets.only(left: 4.0),
+                                    padding: const EdgeInsetsDirectional.only(
+                                      start: 4.0,
+                                    ),
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(7),
                                       onTap: () =>

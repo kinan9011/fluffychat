@@ -189,7 +189,11 @@ class EditHistoryView extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          padding: const EdgeInsetsDirectional.only(
+            start: 16,
+            end: 16,
+            bottom: 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,7 +202,7 @@ class EditHistoryView extends StatelessWidget {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(top: 10, bottom: 12),
+                  margin: const EdgeInsetsDirectional.only(top: 10, bottom: 12),
                   decoration: BoxDecoration(
                     color: tokens.line,
                     borderRadius: BorderRadius.circular(2),
@@ -206,7 +210,7 @@ class EditHistoryView extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -403,7 +407,7 @@ class _VersionBlock extends StatelessWidget {
             ),
           );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsetsDirectional.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 6,

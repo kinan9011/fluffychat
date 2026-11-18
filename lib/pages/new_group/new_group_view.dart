@@ -7,6 +7,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:material_ui/material_ui.dart';
@@ -57,22 +58,25 @@ class NewGroupView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            InkWell(
-              borderRadius: BorderRadius.circular(90),
-              onTap: controller.loading ? null : controller.selectPhoto,
-              child: CircleAvatar(
-                radius: Avatar.defaultSize,
-                child: avatar == null
-                    ? const Icon(Icons.add_a_photo_outlined)
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(90),
-                        child: Image.memory(
-                          avatar,
-                          width: Avatar.defaultSize * 2,
-                          height: Avatar.defaultSize * 2,
-                          fit: BoxFit.cover,
+            Tooltip(
+              message: L10n.of(context).editRoomAvatar,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(90),
+                onTap: controller.loading ? null : controller.selectPhoto,
+                child: CircleAvatar(
+                  radius: Avatar.defaultSize,
+                  child: avatar == null
+                      ? const Icon(Icons.add_a_photo_outlined)
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(90),
+                          child: Image.memory(
+                            avatar,
+                            width: Avatar.defaultSize * 2,
+                            height: Avatar.defaultSize * 2,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
             const SizedBox(height: 32),
@@ -104,7 +108,7 @@ class NewGroupView extends StatelessWidget {
               onChanged: controller.loading ? null : controller.setPublicGroup,
             ),
             AnimatedSize(
-              duration: FluffyThemes.animationDuration,
+              duration: motionDuration(context, FluffyThemes.animationDuration),
               curve: FluffyThemes.animationCurve,
               child: controller.publicGroup
                   ? SwitchListTile.adaptive(
@@ -121,7 +125,7 @@ class NewGroupView extends StatelessWidget {
                   : const SizedBox.shrink(),
             ),
             AnimatedSize(
-              duration: FluffyThemes.animationDuration,
+              duration: motionDuration(context, FluffyThemes.animationDuration),
               curve: FluffyThemes.animationCurve,
               child: controller.createGroupType == CreateGroupType.space
                   ? const SizedBox.shrink()
@@ -142,7 +146,7 @@ class NewGroupView extends StatelessWidget {
                     ),
             ),
             AnimatedSize(
-              duration: FluffyThemes.animationDuration,
+              duration: motionDuration(context, FluffyThemes.animationDuration),
               curve: FluffyThemes.animationCurve,
               child: controller.createGroupType == CreateGroupType.space
                   ? ListTile(
@@ -176,7 +180,7 @@ class NewGroupView extends StatelessWidget {
               ),
             ),
             AnimatedSize(
-              duration: FluffyThemes.animationDuration,
+              duration: motionDuration(context, FluffyThemes.animationDuration),
               curve: FluffyThemes.animationCurve,
               child: error == null
                   ? const SizedBox.shrink()

@@ -15,6 +15,7 @@ import 'package:matrix/matrix.dart';
 
 import '../../../config/app_config.dart';
 import '../../../utils/event_checkbox_extension.dart';
+import '../../../utils/html_limits.dart';
 import '../../../utils/platform_infos.dart';
 import '../../../utils/url_launcher.dart';
 import 'audio_player.dart';
@@ -168,9 +169,13 @@ class MessageContent extends StatelessWidget {
                 fontSize: fontSize,
               );
             }
-            var html = AppSettings.renderHtml.value && event.isRichMessage
-                ? event.formattedText
-                : event.body.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+            var html =
+                capHtmlInput(
+                  AppSettings.renderHtml.value && event.isRichMessage
+                      ? event.formattedText
+                      : null,
+                ) ??
+                event.body.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
             if (event.messageType == MessageTypes.Emote) {
               html = '* $html';
             }
@@ -179,7 +184,11 @@ class MessageContent extends StatelessWidget {
                 !event.isRichMessage && bigEmojis.contains(event.body);
 
             return Padding(
-              padding: const EdgeInsets.only(left: 13, top: 8, right: 13),
+              padding: const EdgeInsetsDirectional.only(
+                start: 13,
+                top: 8,
+                end: 13,
+              ),
               child: HtmlMessage(
                 html: html,
                 textColor: textColor,

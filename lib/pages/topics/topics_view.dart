@@ -264,7 +264,7 @@ class _List extends StatelessWidget {
           }
           final general = _general(context, room);
           return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 96),
+            padding: const EdgeInsetsDirectional.only(bottom: 96),
             itemCount: topics.length + 1 + (topics.isEmpty ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == 0) {

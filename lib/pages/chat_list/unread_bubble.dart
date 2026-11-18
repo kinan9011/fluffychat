@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -22,7 +23,7 @@ class UnreadBubble extends StatelessWidget {
               : 14.0
         : 0.0;
     return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
+      duration: motionDuration(context, FluffyThemes.animationDuration),
       curve: FluffyThemes.animationCurve,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 7),

@@ -256,7 +256,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                   const SizedBox(height: 12),
                   if (uniqueFileType == 'image')
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsetsDirectional.only(bottom: 16.0),
                       child: SizedBox(
                         height: 256,
                         child: Center(
@@ -265,7 +265,9 @@ class SendFileDialogState extends State<SendFileDialog> {
                             itemCount: _files.length,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, i) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
+                              padding: const EdgeInsetsDirectional.only(
+                                end: 8.0,
+                              ),
                               child: Stack(
                                 children: [
                                   Material(
@@ -329,9 +331,9 @@ class SendFileDialogState extends State<SendFileDialog> {
                                       },
                                     ),
                                   ),
-                                  Positioned(
+                                  PositionedDirectional(
                                     top: 4,
-                                    right: 4,
+                                    end: 4,
                                     child: Material(
                                       color: Colors.black54,
                                       shape: const CircleBorder(),
@@ -355,7 +357,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                     ),
                   if (uniqueFileType != 'image')
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsetsDirectional.only(bottom: 16.0),
                       child: Row(
                         children: [
                           Icon(
@@ -393,7 +395,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                     ),
                   if (_files.length == 1)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
+                      padding: const EdgeInsetsDirectional.only(bottom: 8.0),
                       child: DialogTextField(
                         controller: _labelTextController,
                         labelText: L10n.of(context).optionalMessage,
@@ -437,7 +439,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                                   Text(
                                     L10n.of(context).compress,
                                     style: theme.textTheme.titleMedium,
-                                    textAlign: TextAlign.left,
+                                    textAlign: TextAlign.start,
                                   ),
                                 ],
                               ),
@@ -710,7 +712,7 @@ class _ImageEditPageState extends State<_ImageEditPage> {
             : PreferredSize(
                 preferredSize: const Size.fromHeight(48),
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsetsDirectional.only(bottom: 8.0),
                   child: SegmentedButton<_EditMode>(
                     segments: [
                       ButtonSegment(

@@ -282,7 +282,7 @@ class InputBar extends StatelessWidget {
             Text(suggestion['name']!),
             Expanded(
               child: Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: Opacity(
                   opacity: suggestion['pack_avatar_url'] != null ? 0.8 : 0.5,
                   child: suggestion['pack_avatar_url'] != null

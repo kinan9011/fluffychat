@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data
 import 'package:fluffychat/pages/sign_in/view_model/sign_in_view_model.dart';
 import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/utils/sign_in_flows/check_homeserver.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -204,7 +205,7 @@ class SignInPage extends StatelessWidget {
             ),
           ),
           bottomNavigationBar: AnimatedSize(
-            duration: FluffyThemes.animationDuration,
+            duration: motionDuration(context, FluffyThemes.animationDuration),
             curve: FluffyThemes.animationCurve,
             child:
                 selectedHomserver == null ||

@@ -46,7 +46,7 @@ class ParticipantListItem extends StatelessWidget {
           if (user.room.client.userDeviceKeys[user.id]?.masterKey?.verified ==
               true)
             Padding(
-              padding: const EdgeInsets.only(right: 2.0),
+              padding: const EdgeInsetsDirectional.only(end: 2.0),
               child: Icon(
                 Icons.verified,
                 color: Theme.of(context).colorScheme.primary,

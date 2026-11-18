@@ -62,10 +62,10 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
+                  padding: const EdgeInsetsDirectional.only(
                     bottom: 16.0,
-                    left: 16,
-                    right: 16,
+                    start: 16,
+                    end: 16,
                   ),
                   child: SizedBox(
                     width: double.infinity,

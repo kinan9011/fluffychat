@@ -10,7 +10,7 @@ import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _legacyPrefix = 'draft_';
+const legacyDraftKeyPrefix = 'draft_';
 const _maxScannedKeys = 1000;
 
 Future<int>? _running;
@@ -65,7 +65,7 @@ Future<int> _migrate(
 
 List<String> _legacyKeys(SharedPreferences prefs) => prefs
     .getKeys()
-    .where((key) => key.startsWith(_legacyPrefix))
+    .where((key) => key.startsWith(legacyDraftKeyPrefix))
     .take(_maxScannedKeys)
     .toList();
 
@@ -78,7 +78,7 @@ Future<int> _movePass(
   var moved = 0;
   for (final key in _legacyKeys(prefs)) {
     final value = prefs.get(key);
-    final roomId = key.substring(_legacyPrefix.length);
+    final roomId = key.substring(legacyDraftKeyPrefix.length);
     if (value is! String ||
         !DraftStore.isRoomId(roomId) ||
         value.trim().isEmpty) {

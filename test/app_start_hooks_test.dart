@@ -69,6 +69,23 @@ void main() {
       );
     });
 
+    test('a room id that is not a room id never becomes a route (H-2)', () {
+      for (final roomId in [
+        'x?client=evil',
+        '!r:x/../settings',
+        '!r:x#frag',
+        '',
+        '//evil.example',
+        r'!r:x\y',
+      ]) {
+        expect(
+          callKitJoinTarget(call(roomId: roomId), clientByName),
+          isNull,
+          reason: roomId,
+        );
+      }
+    });
+
     test('an accept event does not need isAccepted', () {
       final target = callKitJoinTarget(call(), clientByName);
       expect(target?.client, clientA);

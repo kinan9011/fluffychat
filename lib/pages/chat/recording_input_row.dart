@@ -75,7 +75,7 @@ class RecordingInputRow extends StatelessWidget {
                       .reversed
                       .map(
                         (amplitude) => Container(
-                          margin: const EdgeInsets.only(left: 2),
+                          margin: const EdgeInsetsDirectional.only(start: 2),
                           width: width.toDouble(),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primary,

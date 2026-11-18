@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/design_constants.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat/scheduling/scheduled_messages_page.dart';
 import 'package:fluffychat/utils/scheduling/delayed_events_api.dart';
 import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
@@ -120,6 +121,40 @@ void main() {
     expect(find.byKey(const Key('scheduled_empty')), findsOneWidget);
     expect(find.text('No scheduled messages'), findsOneWidget);
     expect(find.text('0 in Design crew'), findsOneWidget);
+  });
+
+  Future<void> addMany(WidgetTester tester, int count) async {
+    for (var i = 0; i < count; i++) {
+      await put(
+        tester,
+        f().entry(
+          'entry-bulk${i.toString().padLeft(4, '0')}',
+          'Scheduled text number $i',
+          at: DateTime(2025, 11, 14 + i % 3, 9, i),
+        ),
+      );
+    }
+  }
+
+  testWidgets('30 rows cost no more blur than 3 (glass budget, W13)', (
+    tester,
+  ) async {
+    await addMany(tester, 3);
+    await open(tester);
+    final few = find.byType(BackdropFilter).evaluate().length;
+    await tester.pumpWidget(const SizedBox());
+    await addMany(tester, 27);
+    await open(tester);
+    expect(find.byType(BackdropFilter).evaluate().length, few);
+    expect(few, lessThanOrEqualTo(4));
+  });
+
+  testWidgets('the lite glass mode blurs nothing on the page', (tester) async {
+    await AppSettings.glassMode.setItem('lite');
+    addTearDown(() => AppSettings.glassMode.setItem('auto'));
+    await addMany(tester, 5);
+    await open(tester);
+    expect(find.byType(BackdropFilter), findsNothing);
   });
 
   testWidgets('messages are grouped by day with their time', (tester) async {

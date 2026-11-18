@@ -60,7 +60,7 @@ class ImageViewerView extends StatelessWidget {
             if (PlatformInfos.isMobile)
               // Use builder context to correctly position the share dialog on iPad
               Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsetsDirectional.only(end: 8.0),
                 child: Builder(
                   builder: (context) => IconButton(
                     style: iconButtonStyle,
@@ -92,7 +92,9 @@ class ImageViewerView extends StatelessWidget {
                       switch (event.messageType) {
                         case MessageTypes.Video:
                           return Padding(
-                            padding: const EdgeInsets.only(top: 52.0),
+                            padding: const EdgeInsetsDirectional.only(
+                              top: 52.0,
+                            ),
                             child: Center(
                               child: GestureDetector(
                                 // Ignore taps to not go back here:

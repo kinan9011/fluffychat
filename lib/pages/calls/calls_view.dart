@@ -23,7 +23,7 @@ class CallsView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false, title: Text(l10n.calls)),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(
+        padding: EdgeInsetsDirectional.fromSTEB(
           AppSpacing.xl,
           AppSpacing.xl,
           AppSpacing.xl,
@@ -31,7 +31,7 @@ class CallsView extends StatelessWidget {
         ),
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: const EdgeInsetsDirectional.fromSTEB(
               AppSpacing.xl,
               AppSpacing.s,
               AppSpacing.xl,

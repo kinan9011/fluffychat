@@ -6,6 +6,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/typing_animation.dart';
@@ -41,14 +42,14 @@ class TypingIndicators extends StatelessWidget {
               maxWidth: FluffyThemes.maxTimelineWidth,
             ),
             height: typingUsers.isEmpty ? 0 : avatarSize + 8,
-            duration: FluffyThemes.animationDuration,
+            duration: motionDuration(context, FluffyThemes.animationDuration),
             curve: FluffyThemes.animationCurve,
             alignment:
                 controller.timeline!.events.isNotEmpty &&
                     controller.timeline!.events.first.senderId ==
                         Matrix.of(context).client.userID
-                ? Alignment.topRight
-                : Alignment.topLeft,
+                ? AlignmentDirectional.topEnd
+                : AlignmentDirectional.topStart,
             clipBehavior: Clip.hardEdge,
             decoration: const BoxDecoration(),
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -69,7 +70,7 @@ class TypingIndicators extends StatelessWidget {
                         ),
                       if (typingUsers.length == 2)
                         Padding(
-                          padding: const EdgeInsets.only(left: 16),
+                          padding: const EdgeInsetsDirectional.only(start: 16),
                           child: Avatar(
                             size: avatarSize,
                             mxContent: typingUsers.length == 2

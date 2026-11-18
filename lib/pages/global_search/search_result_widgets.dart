@@ -245,7 +245,7 @@ class SearchNote extends StatelessWidget {
         spacing: 6,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 1),
+            padding: const EdgeInsetsDirectional.only(top: 1),
             child: Icon(
               Icons.info_outline_rounded,
               size: 15,
@@ -315,8 +315,10 @@ class ChatStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
+    const nameLines = 12 * 1.2 * 2;
     return SizedBox(
-      height: 98,
+      height:
+          98 - nameLines + MediaQuery.textScalerOf(context).scale(nameLines),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

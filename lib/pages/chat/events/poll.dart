@@ -179,7 +179,7 @@ class PollView extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 280),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 12, 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

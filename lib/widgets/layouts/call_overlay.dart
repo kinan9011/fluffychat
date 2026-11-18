@@ -6,6 +6,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/call/call_page.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -29,7 +30,10 @@ class CallOverlay extends StatelessWidget {
               children: [
                 child,
                 AnimatedPositioned(
-                  duration: FluffyThemes.animationDuration,
+                  duration: motionDuration(
+                    context,
+                    FluffyThemes.animationDuration,
+                  ),
                   curve: FluffyThemes.animationCurve,
                   top: callFullScreen
                       ? 0

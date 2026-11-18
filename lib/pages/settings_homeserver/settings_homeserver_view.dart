@@ -64,7 +64,7 @@ class SettingsHomeserverView extends StatelessWidget {
       ],
       children: [
         Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.xxl),
+          margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxl),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: tokens.surf,
@@ -147,7 +147,7 @@ class SettingsHomeserverView extends StatelessWidget {
           footer: l10n.homeserverChecksNote(AppSettings.applicationName.value),
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+          padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
           child: Align(
             alignment: AlignmentDirectional.centerStart,
             child: TextButton(

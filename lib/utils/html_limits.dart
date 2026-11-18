@@ -46,6 +46,12 @@ String _textOf(dom.Element root, {required int max}) {
   return text.length > max ? text.substring(0, max) : text;
 }
 
+/// The formatted body of someone else's message, or null when it is longer
+/// than any client of this app sends: parsing is the expensive part, so an
+/// over-long one is shown as its plain body instead.
+String? capHtmlInput(String? html) =>
+    html != null && html.length > RichLimits.maxRenderInputUnits ? null : html;
+
 /// Caps what an incoming formatted message can ask the renderer to build:
 /// element count, nesting, headings, spoilers and maths. Runs iteratively, so
 /// a hostile nesting cannot overflow the stack. Elements cut down to text keep

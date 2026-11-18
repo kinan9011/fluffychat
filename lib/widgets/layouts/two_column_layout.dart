@@ -27,17 +27,28 @@ class TwoColumnLayout extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          if (rail != null) ...[rail!, divider],
+          if (rail != null) ...[_ReadingOrderColumn(rail!), divider],
           Container(
             clipBehavior: Clip.antiAlias,
             decoration: const BoxDecoration(),
             width: FluffyThemes.listColumnWidth,
-            child: mainView,
+            child: _ReadingOrderColumn(mainView),
           ),
           divider,
-          Expanded(child: ClipRRect(child: sideView)),
+          Expanded(child: ClipRRect(child: _ReadingOrderColumn(sideView))),
         ],
       ),
     );
   }
+}
+
+/// Tab walks one column completely before it enters the next one.
+class _ReadingOrderColumn extends StatelessWidget {
+  final Widget child;
+
+  const _ReadingOrderColumn(this.child);
+
+  @override
+  Widget build(BuildContext context) =>
+      FocusTraversalGroup(policy: ReadingOrderTraversalPolicy(), child: child);
 }

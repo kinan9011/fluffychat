@@ -140,9 +140,9 @@ class ChatDetailsView extends StatelessWidget {
                                   room.canChangeStateEvent(
                                     EventTypes.RoomAvatar,
                                   ))
-                                Positioned(
+                                PositionedDirectional(
                                   bottom: 0,
-                                  right: 0,
+                                  end: 0,
                                   child: avatarActions.length == 1
                                       ? IconButton(
                                           style: avatarButtonStyle,
@@ -242,13 +242,15 @@ class ChatDetailsView extends StatelessWidget {
                                       ).colorScheme.primary,
                                       size: 18,
                                     ),
-                                  Text(
-                                    displayname,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.normal,
+                                  Flexible(
+                                    child: Text(
+                                      displayname,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.normal,
+                                      ),
                                     ),
                                   ),
                                 ],

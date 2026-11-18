@@ -51,6 +51,7 @@ void main() {
     testWidgets('Direct chat with the default timer', directChatFlow);
     testWidgets('Search encrypted chats', searchEncryptedFlow);
     testWidgets('Search unencrypted chats', searchServerFlow);
+    testWidgets('Search index wiped on logout', searchWipeFlow);
     testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
     testWidgets('Settings homeserver features', settingsHomeserverFlow);

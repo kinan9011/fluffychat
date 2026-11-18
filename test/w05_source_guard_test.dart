@@ -71,7 +71,7 @@ void main() {
       );
     }
     final migration = code(File('lib/utils/draft_migration.dart'));
-    expect(migration, contains("_legacyPrefix = 'draft_'"));
+    expect(migration, contains("legacyDraftKeyPrefix = 'draft_'"));
     expect(migration, isNot(contains('setString')));
     expect(migration, isNot(contains('setInt')));
   });

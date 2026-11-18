@@ -40,7 +40,7 @@ class SearchFooter extends StatelessWidget {
           children: [
             if (searchedUntil != null)
               Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+                padding: const EdgeInsetsDirectional.only(bottom: 8.0),
                 child: Text(
                   L10n.of(
                     context,

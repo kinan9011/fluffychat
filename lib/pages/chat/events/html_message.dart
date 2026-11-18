@@ -13,6 +13,7 @@ import 'package:fluffychat/utils/code_highlight_theme.dart';
 import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/utils/html_image_size.dart';
 import 'package:fluffychat/utils/html_limits.dart';
+import 'package:fluffychat/utils/motion.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -243,7 +244,11 @@ class HtmlMessage extends StatelessWidget {
             message: href,
             child: InkWell(
               splashColor: Colors.transparent,
-              onTap: () => UrlLauncher(context, href, node.text).launchUrl(),
+              onTap: () => UrlLauncher(
+                context,
+                href,
+                node.children.isEmpty ? node.text : _formattedLinkLabel,
+              ).launchUrl(),
               child: Text.rich(
                 TextSpan(
                   children: _renderWithLineBreaks(
@@ -277,7 +282,8 @@ class HtmlMessage extends StatelessWidget {
                 (event) => event.checkedCheckboxId == checkboxIndex,
               );
         final staticallyChecked =
-            isCheckbox && node.children.first.attributes['checked'] == 'true';
+            isCheckbox &&
+            node.children.firstOrNull?.attributes['checked'] == 'true';
 
         return WidgetSpan(
           child: Padding(
@@ -652,8 +658,8 @@ class HtmlMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final element = parser.parse(html).body ?? dom.Element.html('');
-    limitHtmlImages(element);
     limitHtmlElements(element);
+    limitHtmlImages(element);
     final configuredMaxLines = AppSettings.messagePreviewMaxLines.value;
     final maxLines = configuredMaxLines <= 0 ? null : configuredMaxLines;
     final span = _renderHtml(element, context);
@@ -724,7 +730,7 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedSize(
-          duration: FluffyThemes.animationDuration,
+          duration: motionDuration(context, FluffyThemes.animationDuration),
           curve: FluffyThemes.animationCurve,
           alignment: AlignmentDirectional.topStart,
           child: Text.rich(
@@ -804,13 +810,17 @@ class MatrixPill extends StatelessWidget {
   }
 }
 
+final _sixDigitHex = RegExp(r'^#?([0-9a-fA-F]{6})$');
+
+/// A link with markup inside can show less text than it carries (transparent
+/// or collapsed parts), so the user is always asked where it goes.
+const _formattedLinkLabel = '\u2026';
+
 extension on String {
   Color? get hexToColor {
-    var hexCode = this;
-    if (hexCode.startsWith('#')) hexCode = hexCode.substring(1);
-    if (hexCode.length == 6) hexCode = 'FF$hexCode';
-    final colorValue = int.tryParse(hexCode, radix: 16);
-    return colorValue == null ? null : Color(colorValue);
+    final match = _sixDigitHex.firstMatch(this);
+    if (match == null) return null;
+    return Color(0xFF000000 | int.parse(match.group(1)!, radix: 16));
   }
 }
 

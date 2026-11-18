@@ -15,12 +15,16 @@ class ChildPowerLevels {
     required this.joined,
     required this.isSpace,
     required this.powerLevels,
+    this.encrypted = false,
   });
 
   final String roomId;
   final bool joined;
   final bool isSpace;
   final Map<String, Object?>? powerLevels;
+
+  /// In an encrypted room, posts are `m.room.encrypted` events.
+  final bool encrypted;
 }
 
 @immutable
@@ -46,11 +50,17 @@ abstract final class CommunityModel {
   static int _level(Object? value) => value is int ? value : 0;
 
   /// The level that is needed to send a message: the override for
-  /// `m.room.message` when there is one, else `events_default`.
-  static int postingLevel(Map<String, Object?>? powerLevels) {
+  /// `m.room.message` (`m.room.encrypted` in an encrypted room) when there is
+  /// one, else `events_default`.
+  static int postingLevel(
+    Map<String, Object?>? powerLevels, {
+    bool encrypted = false,
+  }) {
     if (powerLevels == null) return 0;
     final events = powerLevels['events'];
-    final override = events is Map ? events['m.room.message'] : null;
+    final override = events is Map
+        ? events[encrypted ? 'm.room.encrypted' : 'm.room.message']
+        : null;
     return override is int ? override : _level(powerLevels['events_default']);
   }
 
@@ -73,7 +83,7 @@ abstract final class CommunityModel {
       if (!child.joined || child.isSpace) continue;
       final levels = child.powerLevels;
       if (levels == null) continue;
-      final posting = postingLevel(levels);
+      final posting = postingLevel(levels, encrypted: child.encrypted);
       if (posting < moderatorLevel) continue;
       if (_level(levels['users_default']) >= posting) continue;
       return AnnouncementsRoom(
