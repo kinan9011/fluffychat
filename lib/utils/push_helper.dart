@@ -20,6 +20,7 @@ import 'package:fluffychat/utils/notification_avatar_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/scheduling/silent_notification.dart';
+import 'package:fluffychat/utils/server_capabilities/call_support.dart';
 import 'package:fluffychat/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
@@ -181,9 +182,19 @@ Future<void> _tryPushHelper(
   }
   final silent = notifySilently(event, highlight: pushAction.highlight);
 
-  if (event.type == RtcNotificationContent.eventType &&
-      event.tryParseRtcNotificationContent()?.notificationType == .ring &&
-      PlatformInfos.isMobile) {
+  final callPlan = planCallNotification(
+    event,
+    callsAvailable:
+        !event.isRtcNotificationEvent || await clientSupportsCalls(client),
+    canRing: PlatformInfos.isMobile,
+  );
+  if (callPlan == CallNotificationPlan.drop) {
+    Logs().v(
+      'Push helper: call notification dropped, calls are not available.',
+    );
+    return;
+  }
+  if (callPlan == CallNotificationPlan.ring) {
     _showIncomingCall(event, l10n);
     return;
   }

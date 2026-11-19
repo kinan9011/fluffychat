@@ -2924,7 +2924,12 @@
     "calls": "Calls",
     "profile": "Profile",
     "ongoingGroupCalls": "Ongoing group calls",
-    "noOngoingGroupCalls": "No group calls are running right now.",
+    "groupCallsComingLater": "Group calls arrive in a later update",
+    "@groupCallsComingLater": {
+        "type": "String",
+        "description": "Shown on the Calls page of a server with calls, until the list of running group calls exists. Must not claim that no call is running.",
+        "placeholders": {}
+    },
     "groupCallsNotSupported": "Your server isn't set up for group calls. One-to-one calls still work.",
     "myQrCode": "My QR code",
     "accounts": "Accounts",
@@ -5046,6 +5051,48 @@
     "qrOpenAlias": "This code points to a chat address. Look it up? You are asked again before you join.",
     "@qrOpenAlias": {
         "type": "String",
+        "placeholders": {}
+    },
+    "permissionGroupCall": "Create or join a group call",
+    "@permissionGroupCall": {
+        "type": "String",
+        "description": "Name of the room permission that lets people start or join a group call.",
+        "placeholders": {}
+    },
+    "chatSettingsSectionChatList": "Chat list",
+    "@chatSettingsSectionChatList": {
+        "type": "String",
+        "description": "Header of the settings group that controls how chats are grouped into tabs and folders.",
+        "placeholders": {}
+    },
+    "chatSettingsFooterChatList": "How your chats are grouped into tabs and folders.",
+    "@chatSettingsFooterChatList": {
+        "type": "String",
+        "description": "Short explanation under the chat list settings group.",
+        "placeholders": {}
+    },
+    "chatSettingsSectionMessages": "Messages",
+    "@chatSettingsSectionMessages": {
+        "type": "String",
+        "description": "Header of the settings group that controls what is shown in a conversation.",
+        "placeholders": {}
+    },
+    "chatSettingsFooterMessages": "What is shown in the conversation. Hiding messages only changes what you see here.",
+    "@chatSettingsFooterMessages": {
+        "type": "String",
+        "description": "Short explanation under the messages settings group.",
+        "placeholders": {}
+    },
+    "chatSettingsSectionWriting": "Writing and replying",
+    "@chatSettingsSectionWriting": {
+        "type": "String",
+        "description": "Header of the settings group for sending, replying and reacting.",
+        "placeholders": {}
+    },
+    "chatSettingsFooterWriting": "How you send, reply and react.",
+    "@chatSettingsFooterWriting": {
+        "type": "String",
+        "description": "Short explanation under the writing and replying settings group.",
         "placeholders": {}
     }
 }

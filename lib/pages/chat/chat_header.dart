@@ -15,8 +15,10 @@ import 'package:fluffychat/pages/chat/retention_sheet.dart';
 import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:fluffychat/widgets/calls_gate.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/glass_surface.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/pulsating_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -57,7 +59,7 @@ class _ChatHeaderState extends State<ChatHeader> {
       canCall:
           !hasActiveCall &&
           room.hasPermissionForMatrixRtcCall &&
-          controller.supportLiveKitCalls,
+          Matrix.of(context).callsAvailableFor(room.client),
       showDetails: true,
       joined: room.membership == Membership.join,
       left: room.membership == Membership.leave,
@@ -241,26 +243,31 @@ class _TitlePill extends StatelessWidget {
           child: Row(
             children: [
               Expanded(child: ChatAppBarTitle(controller)),
-              if (room.hasActiveMatrixRtcCall && !room.isArchived)
-                PulsatingWidget(
-                  color: tokens.red,
-                  child: TextButton.icon(
-                    icon: Icon(switch (room.activeMatrixRtcCallIntent) {
-                      .voice => Icons.video_call_outlined,
-                      _ => Icons.mic_outlined,
-                    }),
-                    label: Text(
-                      room.getActiveMatrixRtcMembers().length.toString(),
-                    ),
-                    onPressed: room.hasPermissionForMatrixRtcCall
-                        ? controller.startOrJoinVideoCall
-                        : null,
-                    style: TextButton.styleFrom(
-                      backgroundColor: tokens.red,
-                      foregroundColor: tokens.onRed,
-                    ),
-                  ),
-                ),
+              CallsGate(
+                client: room.client,
+                builder: (context, available) =>
+                    available && room.hasActiveMatrixRtcCall && !room.isArchived
+                    ? PulsatingWidget(
+                        color: tokens.red,
+                        child: TextButton.icon(
+                          icon: Icon(switch (room.activeMatrixRtcCallIntent) {
+                            .voice => Icons.video_call_outlined,
+                            _ => Icons.mic_outlined,
+                          }),
+                          label: Text(
+                            room.getActiveMatrixRtcMembers().length.toString(),
+                          ),
+                          onPressed: room.hasPermissionForMatrixRtcCall
+                              ? controller.startOrJoinVideoCall
+                              : null,
+                          style: TextButton.styleFrom(
+                            backgroundColor: tokens.red,
+                            foregroundColor: tokens.onRed,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         ),

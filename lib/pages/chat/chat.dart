@@ -683,12 +683,9 @@ class ChatController extends State<ChatPageWithRoom>
     _loadDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _shareItems();
-      _checkMatrixRtcCallSupport();
       unawaited(_loadCapabilities());
       unawaited(_openRequestedThread());
-      if (widget.action == 'call') {
-        Matrix.of(context).activeCallRoomId.value = room.id;
-      }
+      if (widget.action == 'call') unawaited(_startRequestedCall());
     });
     web.window.addEventListener('paste', _handleClipboardFilePasteWeb);
 
@@ -717,18 +714,6 @@ class ChatController extends State<ChatPageWithRoom>
     ScheduledStore.revision.addListener(syncScheduled);
     unawaited(_loadScheduled());
     _tryLoadTimeline();
-  }
-
-  Future<void> _checkMatrixRtcCallSupport() async {
-    try {
-      final urls = await room.client.getLiveKitServiceUrls();
-      if (urls.isEmpty) return;
-      setState(() {
-        supportLiveKitCalls = true;
-      });
-    } catch (e) {
-      Logs().d('Unable to check MatrixRTC call support', e);
-    }
   }
 
   final Set<String> expandedEventIds = {};
@@ -944,8 +929,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // Do not set read marker on rtc notification while call is active. This
-    // mutes callkit.
+    // mutes callkit. Without calls there is no ring to mute.
     if (room.hasActiveMatrixRtcCall &&
+        Matrix.of(context).callsAvailableFor(room.client) &&
         timeline.events.first.type == RtcNotificationContent.eventType) {
       return;
     }
@@ -2061,11 +2047,18 @@ class ChatController extends State<ChatPageWithRoom>
     editEvent = null;
   });
 
-  void startOrJoinVideoCall() {
-    Matrix.of(context).activeCallRoomId.value = room.id;
+  Future<void> _startRequestedCall() async {
+    final matrix = Matrix.of(context);
+    if (!await matrix.callsAvailableAfterLoad(room.client)) return;
+    if (!mounted) return;
+    matrix.activeCallRoomId.value = room.id;
   }
 
-  bool supportLiveKitCalls = false;
+  void startOrJoinVideoCall() {
+    final matrix = Matrix.of(context);
+    if (!matrix.callsAvailableFor(room.client)) return;
+    matrix.activeCallRoomId.value = room.id;
+  }
 
   Future<void> _cancelEditWithConfirmation() async {
     final original = EditPrefill.of(

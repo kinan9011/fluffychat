@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' show MatrixSdkDatabase;
 
+import 'utils/call_support_fakes.dart';
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';
 
@@ -22,6 +23,7 @@ void main() {
   setUpAll(harness.setUpAll);
   setUp(() async {
     harness.setUp();
+    FakeCallCapabilities.uninstall();
     await AppSettings.store.clear();
     api.clear();
     api.getOverrides.clear();

@@ -12,6 +12,7 @@ import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
 import 'package:fluffychat/widgets/layouts/app_shell.dart';
 import 'package:fluffychat/widgets/layouts/app_tab.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,7 @@ GoRouter _router(
   VoidCallback? onFirstShown,
   Stream<int>? chatsUnread,
   void Function()? onLeftColumnBuilt,
+  required ValueListenable<bool> calls,
 }) {
   GoRoute tab(String path, {List<RouteBase> routes = const []}) => GoRoute(
     path: path,
@@ -42,6 +44,7 @@ GoRouter _router(
           accountSwitched: accountChanges.stream,
           activeClientChanged: clientChanges.stream,
           onFirstShown: onFirstShown,
+          callsAvailable: calls,
           chatsUnread: chatsUnread ?? const Stream<int>.empty(),
           profileAvatar: (size) =>
               SizedBox.square(key: ValueKey('avatar_$size'), dimension: size),
@@ -74,6 +77,7 @@ void main() {
   late StreamController<Object?> clientChanges;
   var shownCalls = 0;
   late GoRouter router;
+  late ValueNotifier<bool> calls;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -81,15 +85,17 @@ void main() {
     accountChanges = StreamController<Object?>.broadcast();
     clientChanges = StreamController<Object?>.broadcast();
     shownCalls = 0;
+    calls = ValueNotifier(true);
     router = _router(
       accountChanges,
       clientChanges,
       onFirstShown: () => shownCalls++,
+      calls: calls,
     );
   });
 
   tearDown(() async {
-    await AppSettings.callsEnabled.setItem(true);
+    calls.dispose();
     accountChanges.close();
     clientChanges.close();
     router.dispose();
@@ -174,7 +180,7 @@ void main() {
           .map((t) => t.message)
           .toList();
       expect(tooltips, ['Profile', 'Chats', 'Calls', 'Settings']);
-      await AppSettings.callsEnabled.setItem(false);
+      calls.value = false;
       await pumpShell(tester, 1001);
       final withoutCalls = tester
           .widgetList<Tooltip>(
@@ -412,7 +418,7 @@ void main() {
     });
 
     testWidgets('a disabled calls tab is left alone', (tester) async {
-      await AppSettings.callsEnabled.setItem(false);
+      calls.value = false;
       await pumpShell(tester, 400);
       router.go('/settings/style');
       await tester.pumpAndSettle();
@@ -420,6 +426,62 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(find.text('PAGE /settings/style'), findsOneWidget);
+    });
+  });
+
+  group('calls availability (T216)', () {
+    Finder barCalls() =>
+        find.descendant(of: bar(), matching: find.text('Calls'));
+
+    testWidgets('the bar loses the Calls item live and gets it back', (
+      tester,
+    ) async {
+      await pumpShell(tester, 400);
+      expect(barCalls(), findsOneWidget);
+      calls.value = false;
+      await tester.pumpAndSettle();
+      expect(barCalls(), findsNothing);
+      calls.value = true;
+      await tester.pumpAndSettle();
+      expect(barCalls(), findsOneWidget);
+    });
+
+    testWidgets('the rail loses the Calls item live', (tester) async {
+      await pumpShell(tester, 1280);
+      String? calls0() => tester
+          .widgetList<Tooltip>(
+            find.descendant(of: rail(), matching: find.byType(Tooltip)),
+          )
+          .map((t) => t.message)
+          .firstWhere((m) => m == 'Calls', orElse: () => null);
+      expect(calls0(), 'Calls');
+      calls.value = false;
+      await tester.pumpAndSettle();
+      expect(calls0(), isNull);
+    });
+
+    testWidgets('being on Calls when it turns unavailable leaves it', (
+      tester,
+    ) async {
+      await pumpShell(tester, 400);
+      router.go('/calls');
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /calls'), findsOneWidget);
+      calls.value = false;
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /rooms'), findsOneWidget);
+      expect(find.text('PAGE /calls'), findsNothing);
+    });
+
+    testWidgets('another tab stays where it is when Calls turns off', (
+      tester,
+    ) async {
+      await pumpShell(tester, 400);
+      router.go('/settings');
+      await tester.pumpAndSettle();
+      calls.value = false;
+      await tester.pumpAndSettle();
+      expect(find.text('PAGE /settings'), findsOneWidget);
     });
   });
 
@@ -560,6 +622,7 @@ void main() {
         accountChanges,
         clientChanges,
         chatsUnread: Stream.value(count),
+        calls: calls,
       );
       await pumpShell(tester, width);
     }
@@ -576,6 +639,7 @@ void main() {
         clientChanges,
         chatsUnread: counts.stream,
         onLeftColumnBuilt: () => builds++,
+        calls: calls,
       );
       await pumpShell(tester, 700);
       final before = builds;

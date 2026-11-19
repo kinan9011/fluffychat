@@ -7,6 +7,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:fluffychat/utils/draft_migration.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -16,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// What an account leaves on the device besides the database the SDK clears at
 /// logout: quarantined database copies (they open with the key that survives),
 /// decrypted media in the app temp directory, the status timer (it holds the
-/// Matrix ID), legacy plaintext drafts and the
+/// Matrix ID), legacy plaintext drafts, the stored call support answer and the
 /// notifications that show message previews. The recovery key the user chose
 /// to remember on this device stays, as upstream does (W13-SECURITY C-4).
 /// Every step is attempted; none of them throws.
@@ -67,10 +68,24 @@ class LogoutCleanup {
       ]);
     });
     await _attempt('temp files', deleteTempFiles);
+    await _attempt(
+      'call support',
+      () => prefs.remove(
+        '${ServerCapabilitiesService.callSupportKeyPrefix}$clientName',
+      ),
+    );
     if (!lastAccount) return;
     await _attempt('legacy drafts', () async {
       final keys = prefs.getKeys().where(
         (key) => key.startsWith(legacyDraftKeyPrefix),
+      );
+      for (final key in keys.toList()) {
+        await prefs.remove(key);
+      }
+    });
+    await _attempt('call support of every account', () async {
+      final keys = prefs.getKeys().where(
+        (key) => key.startsWith(ServerCapabilitiesService.callSupportKeyPrefix),
       );
       for (final key in keys.toList()) {
         await prefs.remove(key);

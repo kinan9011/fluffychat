@@ -12,11 +12,13 @@ import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/call_support_fakes.dart';
 import 'utils/test_client.dart';
 
 const _tabRoots = ['/rooms', '/calls', '/settings', '/profile'];
@@ -51,7 +53,14 @@ void main() {
     client.backgroundSync = false;
   });
 
+  late FakeCallCapabilities capabilities;
+
+  setUp(() {
+    capabilities = FakeCallCapabilities(pure: true)..install();
+  });
+
   tearDown(() {
+    FakeCallCapabilities.uninstall();
     AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
   });
 
@@ -136,6 +145,41 @@ void main() {
       expect(await goTo(tester, '/calls'), '/rooms');
       await AppSettings.callsEnabled.setItem(true);
       expect(await goTo(tester, '/calls'), '/calls');
+    });
+
+    routeTest('calls tab redirects to chats when the server has no calls', (
+      tester,
+    ) async {
+      capabilities.set(client, supported: false);
+      await pumpApp(tester);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(await goTo(tester, '/calls'), '/rooms');
+      expect(find.byType(CallsPage), findsNothing);
+    });
+
+    routeTest('/calls with an unknown capability goes to chats (cold start)', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      capabilities.offline.add(client);
+      await pumpApp(tester);
+      expect(await goTo(tester, '/calls'), '/rooms');
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(await goTo(tester, '/calls'), '/rooms');
+      expect(find.byType(CallsPage), findsNothing);
+    });
+
+    routeTest('calls tab follows the server capability live', (tester) async {
+      await pumpApp(tester);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(await goTo(tester, '/calls'), '/calls');
+      capabilities.set(client, supported: false);
+      final matrix = tester.state<MatrixState>(find.byType(Matrix));
+      await tester.runAsync(
+        () => matrix.serverCapabilities.load(client, force: true),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(await goTo(tester, '/calls'), '/rooms');
     });
 
     routeTest('desktop width: rail, list column and pane for every tab', (

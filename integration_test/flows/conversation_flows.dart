@@ -147,6 +147,17 @@ extension on FluffyChatTester {
     await tapOn('👍');
     await waitForGone(find.byType(ReactionBar));
     await waitFor('👍');
+    final bubble = tester.getRect(
+      find
+          .ancestor(
+            of: find.text('bubble from bob'),
+            matching: find.byType(MessageBubble),
+          )
+          .first,
+    );
+    final chip = tester.getRect(find.byKey(const ValueKey('reaction_chip_👍')));
+    expect(chip.top, inInclusiveRange(bubble.bottom - 6, bubble.bottom + 1));
+    expect(chip.left - bubble.left, inInclusiveRange(-1, 12));
 
     // Reply puts the quote above the composer and into the next bubble.
     await longPressOn(_inBubble('bubble from bob'));

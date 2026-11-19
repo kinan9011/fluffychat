@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_page.dart';
@@ -84,6 +83,12 @@ abstract class AppRoutes {
     BuildContext context,
     GoRouterState state,
   ) => isLoggedIn(context) ? null : '/home';
+
+  static bool _callsAvailable(BuildContext context) {
+    final matrix = Matrix.of(context);
+    final client = matrix.activeClientOrNull;
+    return client != null && matrix.callsAvailableFor(client);
+  }
 
   static const _legacySettingsPath = '/rooms/settings';
 
@@ -520,7 +525,7 @@ abstract class AppRoutes {
               path: '/calls',
               redirect: (context, state) =>
                   loggedOutRedirect(context, state) ??
-                  (AppSettings.callsEnabled.value ? null : '/rooms'),
+                  (_callsAvailable(context) ? null : '/rooms'),
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
                 state,
@@ -604,17 +609,22 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
+                  path: 'emotes',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    const EmotesSettings(roomId: null),
+                  ),
+                  redirect: loggedOutRedirect,
+                ),
+                GoRoute(
                   path: 'chat',
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, state, const SettingsChat()),
                   routes: [
                     GoRoute(
                       path: 'emotes',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        state,
-                        EmotesSettings(roomId: state.pathParameters['roomid']),
-                      ),
+                      redirect: (context, state) => '/settings/emotes',
                     ),
                     GoRoute(
                       path: 'folders',

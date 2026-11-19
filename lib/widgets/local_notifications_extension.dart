@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_download_content_extension.dart';
@@ -11,6 +13,7 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/utils/scheduling/silent_notification.dart';
+import 'package:fluffychat/utils/server_capabilities/call_support.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/incoming_call_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -26,8 +29,13 @@ extension LocalNotificationsExtension on MatrixState {
     ..load();
 
   Future<void> showLocalNotification(Event event) async {
-    if (event.type == RtcNotificationContent.eventType &&
-        event.tryParseRtcNotificationContent()?.notificationType == .ring) {
+    final callPlan = planCallNotification(
+      event,
+      callsAvailable: callsAvailableFor(event.room.client),
+      canRing: true,
+    );
+    if (callPlan == CallNotificationPlan.drop) return;
+    if (callPlan == CallNotificationPlan.ring) {
       final context =
           FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
           this.context;
@@ -37,7 +45,7 @@ extension LocalNotificationsExtension on MatrixState {
       ).then((accepted) {
         if (accepted != true) return;
         if (!context.mounted) return;
-        joinCall(event.room.client, event.room.id);
+        unawaited(joinCall(event.room.client, event.room.id));
       });
     }
 

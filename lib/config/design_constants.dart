@@ -121,6 +121,10 @@ abstract class AppChat {
   static const double bubbleMaxFraction = 0.82;
   static const int waveformBars = 26;
   static const int maxReactionKeys = 24;
+  static const double reactionOverlap = 4;
+  static const double reactionChipHeight = 28;
+  static const double reactionChipMinWidth = 44;
+  static const double reactionGap = 4;
   static const int maxMentionScan = 500;
   static const int maxWallpaperDots = 40000;
 

@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,6 +18,9 @@ Future<void> shellNavigation(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
     .then((tester) => tester._shellNavigation());
 
+Future<void> callsHiddenFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._callsHidden());
+
 extension ShellFlows on FluffyChatTester {
   Finder get _visibleBar => find.byType(AppBottomBar).hitTestable();
 
@@ -25,6 +29,51 @@ extension ShellFlows on FluffyChatTester {
     final inRail = find.byTooltip(label).hitTestable();
     if (inBar.evaluate().isEmpty && inRail.evaluate().isEmpty) await goBack();
     await tapOn(inBar.evaluate().isNotEmpty ? inBar : inRail);
+  }
+
+  /// The Synapse of the integration tests has no call service, so no Calls
+  /// tab is offered anywhere.
+  void _expectNoCallsTab() {
+    expect(
+      find.descendant(of: _visibleBar, matching: find.text('Calls')),
+      findsNothing,
+    );
+    expect(find.byTooltip('Calls'), findsNothing);
+  }
+
+  Future<void> _callsHidden() async {
+    await ensureLoggedIn();
+    await ensureGroupChatCreated();
+    await openTab('Chats');
+    await waitFor(ChatFlows.groupChatName);
+    _expectNoCallsTab();
+
+    FluffyChatApp.router.go('/calls');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      FluffyChatApp.router.routeInformationProvider.value.uri.path,
+      '/rooms',
+      reason: 'the Calls route is deactivated',
+    );
+    await waitFor(ChatFlows.groupChatName);
+
+    await tapOn(ChatFlows.groupChatName);
+    await waitFor(find.byKey(const Key('chat_input_field')));
+    await tapOn(const Key('chat_overflow_button'));
+    await waitFor('Mute');
+    expect(find.text('Video call'), findsNothing);
+    expect(find.byIcon(Icons.videocam_rounded), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pump(const Duration(seconds: 1));
+    await goBack();
+
+    await openTab('Settings');
+    await scrollUntilVisible('Homeserver');
+    await tapOn('Homeserver');
+    await waitFor('Group calls');
+    await goBack();
+    await openTab('Chats');
   }
 
   Finder get _chatsBadge => find.byWidgetPredicate(
@@ -60,8 +109,7 @@ extension ShellFlows on FluffyChatTester {
     await goBack();
     await waitForGone(_chatsBadge);
 
-    await openTab('Calls');
-    await waitFor('Ongoing group calls');
+    _expectNoCallsTab();
     await openTab('Profile');
     await waitFor('Accounts');
     await openTab('Settings');

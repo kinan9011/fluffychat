@@ -61,6 +61,7 @@ class ChatListViewBody extends StatelessWidget {
         AppSettings.showFoldersAfterSpaces.listenable,
         AppSettings.showTabUnreadCounts.listenable,
         AppSettings.hideRoomsInSpaces.listenable,
+        Matrix.of(context).callsAvailability,
       ]),
       builder: (context, _) => StreamBuilder(
         key: ValueKey(client.userID.toString()),
@@ -278,6 +279,9 @@ class ChatListViewBody extends StatelessWidget {
                                   controller.rowActions.peek(room.id, context)
                             : null,
                         activeChat: controller.activeChat == room.id,
+                        showCallIndicator: Matrix.of(
+                          context,
+                        ).callsAvailableFor(client),
                       );
                     },
                   ),

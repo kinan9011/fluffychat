@@ -5,7 +5,6 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/chat_list/unread_counts.dart';
 import 'package:fluffychat/utils/motion.dart';
@@ -17,6 +16,7 @@ import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/own_avatar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,6 +29,7 @@ class AppShell extends StatefulWidget {
   final Stream<Object?>? accountSwitched;
   final Stream<Object?>? activeClientChanged;
   final VoidCallback? onFirstShown;
+  final ValueListenable<bool>? callsAvailable;
 
   final Widget Function(BuildContext context, AppTab tab) leftColumn;
   final Widget Function(double size) profileAvatar;
@@ -45,6 +46,7 @@ class AppShell extends StatefulWidget {
     this.accountSwitched,
     this.activeClientChanged,
     this.onFirstShown,
+    this.callsAvailable,
     super.key,
   });
 
@@ -134,9 +136,27 @@ class _AppShellState extends State<AppShell> {
     FocusManager.instance.primaryFocus?.nextFocus();
   }
 
+  late final Listenable _callsListenable =
+      widget.callsAvailable ?? Matrix.of(context).callsAvailability;
+
+  bool get _callsOn {
+    final injected = widget.callsAvailable;
+    if (injected != null) return injected.value;
+    final matrix = Matrix.of(context);
+    final active = matrix.activeClientOrNull;
+    return active != null && matrix.callsAvailableFor(active);
+  }
+
+  void _onCallsAvailabilityChanged() {
+    if (!mounted) return;
+    setState(() {});
+    if (_selected == AppTab.calls && !_callsOn) _select(AppTab.chats);
+  }
+
   @override
   void initState() {
     super.initState();
+    _callsListenable.addListener(_onCallsAvailabilityChanged);
     _watchUnread();
     _accountSubscription =
         (widget.accountSwitched ?? Matrix.of(context).onAccountSwitched).listen(
@@ -158,6 +178,7 @@ class _AppShellState extends State<AppShell> {
 
   @override
   void dispose() {
+    _callsListenable.removeListener(_onCallsAvailabilityChanged);
     _accountSubscription?.cancel();
     _clientSubscription?.cancel();
     _unreadSubscription?.cancel();
@@ -170,7 +191,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final mode = ShellMode.forSize(mq.size);
-    final tabs = AppTab.visible(callsEnabled: AppSettings.callsEnabled.value);
+    final tabs = AppTab.visible(callsEnabled: _callsOn);
     final selected = _selected;
     return PopScope(
       canPop: selected == AppTab.chats || !AppTab.isRoot(widget.location),

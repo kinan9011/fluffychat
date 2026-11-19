@@ -14,6 +14,19 @@ import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart'
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
 import 'package:matrix/matrix.dart' hide Result;
 
+/// Used where no app state exists (the push isolate): calls are on and the
+/// homeserver (or the configured fallback) names a usable LiveKit service.
+Future<bool> clientSupportsCalls(Client client) async {
+  if (!AppSettings.callsEnabled.value) return false;
+  try {
+    final urls = await client.getLiveKitServiceUrls();
+    return urls.any((url) => safeLiveKitServiceUri(url) != null);
+  } catch (e) {
+    Logs().d('Unable to check MatrixRTC call support (${e.runtimeType})');
+    return false;
+  }
+}
+
 extension MatrixRtcClientExtension on Client {
   Future<List<String>> getLiveKitServiceUrls() async {
     final wellKnown = await getWellknown();

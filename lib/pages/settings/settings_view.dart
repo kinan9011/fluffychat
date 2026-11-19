@@ -114,7 +114,7 @@ class SettingsView extends StatelessWidget {
             _NavRow(
               icon: Icons.add_reaction_rounded,
               title: l10n.settingsEmotesAndStickers,
-              path: '/settings/chat/emotes',
+              path: '/settings/emotes',
             ),
             _NavRow(
               icon: Icons.storage_rounded,

@@ -8,6 +8,7 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -99,5 +100,61 @@ void main() {
     final clients = await load({'a': const FormatException('x')});
 
     expect(clients, hasLength(1));
+  });
+
+  group('persisted call support of a client that is not logged in', () {
+    const prefix = ServerCapabilitiesService.callSupportKeyPrefix;
+
+    Future<void> seed(List<String> names) async {
+      for (final name in names) {
+        await AppSettings.store.setString('$prefix$name', 'supported');
+      }
+      await AppSettings.store.setString('${prefix}c', 'supported');
+    }
+
+    test('is dropped at start with several accounts', () async {
+      await seed(['a', 'b']);
+
+      await load({});
+
+      expect(AppSettings.store.getString('${prefix}a'), isNull);
+      expect(AppSettings.store.getString('${prefix}b'), isNull);
+      expect(
+        AppSettings.store.getString('${prefix}c'),
+        'supported',
+        reason: 'only the clients of this start are touched',
+      );
+    });
+
+    test('is dropped at start with a single account', () async {
+      await AppSettings.store.setStringList(ClientManager.clientNamespace, [
+        'a',
+      ]);
+      await seed(['a']);
+
+      final clients = await load({});
+
+      expect(clients, hasLength(1));
+      expect(AppSettings.store.getString('${prefix}a'), isNull);
+    });
+
+    test(
+      'is kept when the clients are not initialized (push isolate)',
+      () async {
+        await seed(['a']);
+
+        await ClientManager.getClients(
+          initialize: false,
+          store: AppSettings.store,
+          create: (name) => ClientManager.createClient(
+            name,
+            AppSettings.store,
+            database: _Database(null),
+          ),
+        );
+
+        expect(AppSettings.store.getString('${prefix}a'), 'supported');
+      },
+    );
   });
 }

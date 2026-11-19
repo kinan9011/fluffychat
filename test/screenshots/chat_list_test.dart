@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
@@ -11,6 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/call_support_fakes.dart';
 import '../utils/golden_locales.dart';
 import '../utils/test_client.dart';
 
@@ -22,7 +24,9 @@ void main() {
     setUpAll(() async {
       client = await prepareTestClient();
       client.backgroundSync = false;
+      FakeCallCapabilities().install();
     });
+    tearDownAll(FakeCallCapabilities.uninstall);
     testGoldens('ChatList Screenshot', (tester) async {
       for (final locale in goldenLocals) {
         for (final device in GoldenScreenshotDevices.values) {
@@ -30,6 +34,10 @@ void main() {
             client.userDeviceKeys.clear(); // Hide unverified warning
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('theme_mode', themeMode.name);
+            await prefs.setString(
+              '${ServerCapabilitiesService.callSupportKeyPrefix}${client.clientName}',
+              'supported',
+            );
             await tester.pumpWidget(
               ScreenshotApp.withConditionalTitlebar(
                 title: AppSettings.applicationName.value,

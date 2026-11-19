@@ -23,6 +23,7 @@ void main() {
   setUpAll(harness.setUpAll);
   setUp(() async {
     harness.setUp();
+    harness.capabilities.set(harness.client, supported: false);
     await AppSettings.sendTypingNotifications.setItem(false);
   });
   tearDown(() async {

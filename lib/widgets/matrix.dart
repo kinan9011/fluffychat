@@ -30,6 +30,7 @@ import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
@@ -47,6 +48,7 @@ import '../utils/scheduling/scheduled_queue.dart';
 import '../utils/scheduling/scheduled_store.dart';
 import '../utils/search/index_feeder.dart';
 import '../utils/search/message_index.dart';
+import '../utils/server_capabilities/call_support.dart';
 import '../utils/server_capabilities/server_capabilities_service.dart';
 import 'local_notifications_extension.dart';
 
@@ -108,8 +110,29 @@ class MatrixState extends State<Matrix> {
   int getClientIndexByMatrixId(String matrixId) =>
       widget.clients.indexWhere((client) => client.userID == matrixId);
 
-  final ServerCapabilitiesService serverCapabilities =
-      ServerCapabilitiesService();
+  @visibleForTesting
+  static ServerCapabilitySource Function(Client)? capabilitySourceFor;
+
+  late final ServerCapabilitiesService serverCapabilities =
+      ServerCapabilitiesService(store: store, sourceFor: capabilitySourceFor);
+
+  final ValueNotifier<int> _activeClientRevision = ValueNotifier(0);
+
+  late final Listenable callsAvailability = Listenable.merge([
+    serverCapabilities,
+    AppSettings.callsEnabled.listenable,
+    _activeClientRevision,
+  ]);
+
+  bool callsAvailableFor(Client client) => callsAvailable(
+    enabled: AppSettings.callsEnabled.value,
+    capabilities: serverCapabilities.cached(client),
+  );
+
+  Future<bool> callsAvailableAfterLoad(Client client) async {
+    await serverCapabilities.load(client);
+    return callsAvailableFor(client);
+  }
 
   final StreamController<Client> _activeClientChanged =
       StreamController.broadcast();
@@ -128,9 +151,23 @@ class MatrixState extends State<Matrix> {
 
   void notifyOwnProfileChanged() => _ownProfileChanged.add(client);
 
+  // Pages switch the account while they are built, and listeners must not
+  // mark widgets dirty during a build.
+  void _bumpActiveClientRevision() {
+    if (SchedulerBinding.instance.schedulerPhase !=
+        SchedulerPhase.persistentCallbacks) {
+      _activeClientRevision.value++;
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _activeClientRevision.value++;
+    });
+  }
+
   void _emitIfChanged(Client? before, {required bool resetTabs}) {
     final after = activeClientOrNull;
     if (after == null || identical(before, after)) return;
+    _bumpActiveClientRevision();
     _activeClientChanged.add(after);
     if (resetTabs) _accountSwitched.add(after);
   }
@@ -176,6 +213,7 @@ class MatrixState extends State<Matrix> {
   Future<void> _runAccountHooks(Client client) async {
     if (!_hookedClients.add(client.clientName)) return;
     unawaited(_migrateDrafts());
+    unawaited(serverCapabilities.load(client));
     try {
       await accountHooks(this, client, _hookContext);
     } catch (e, s) {
@@ -200,9 +238,12 @@ class MatrixState extends State<Matrix> {
     if (active != null) unawaited(_runAccountHooks(active));
   }
 
-  void joinCall(Client client, String roomId) {
+  /// False when calls are not available: nothing was joined.
+  Future<bool> joinCall(Client client, String roomId) async {
+    if (!await callsAvailableAfterLoad(client)) return false;
     setActiveClient(client, resetTabs: false);
     FluffyChatApp.router.go('/rooms/$roomId?action=call');
+    return true;
   }
 
   void _updateAccountCount() => loggedInAccountCount.value = widget.clients
@@ -349,9 +390,14 @@ class MatrixState extends State<Matrix> {
     AppSettings.shareOnlineStatus.listenable.addListener(_applyPresence);
     AppSettings.appearOffline.listenable.addListener(_applyPresence);
     AppSettings.presenceAway.listenable.addListener(_applyPresence);
+    AppSettings.callsEnabled.listenable.addListener(_endCallWhenDisabled);
     initMatrix();
     _applyPresence();
     _clearDueStatuses();
+  }
+
+  void _endCallWhenDisabled() {
+    if (!AppSettings.callsEnabled.value) activeCallRoomId.value = null;
   }
 
   void _clearDueStatuses() {
@@ -557,7 +603,11 @@ class MatrixState extends State<Matrix> {
       backgroundPush?.openRoomFromNotification(newActivity: true);
     }
     final foreground = state == AppLifecycleState.resumed;
-    if (foreground) _clearDueStatuses();
+    if (foreground) {
+      _clearDueStatuses();
+      final active = activeClientOrNull;
+      if (active != null) unawaited(serverCapabilities.load(active));
+    }
     for (final client in widget.clients) {
       if (foreground) unawaited(ScheduledQueue.of(client).evaluate());
       if (PlatformInfos.isMobile) {
@@ -575,6 +625,7 @@ class MatrixState extends State<Matrix> {
     AppSettings.shareOnlineStatus.listenable.removeListener(_applyPresence);
     AppSettings.appearOffline.listenable.removeListener(_applyPresence);
     AppSettings.presenceAway.listenable.removeListener(_applyPresence);
+    AppSettings.callsEnabled.listenable.removeListener(_endCallWhenDisabled);
 
     for (final sub in onRoomKeyRequestSub.values) {
       sub.cancel();
@@ -608,6 +659,7 @@ class MatrixState extends State<Matrix> {
 
     voiceMessageEventId.dispose();
     serverCapabilities.dispose();
+    _activeClientRevision.dispose();
     for (final client in widget.clients) {
       ScheduledQueue.forget(client);
       IndexFeeder.forget(client);

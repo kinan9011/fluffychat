@@ -174,7 +174,7 @@ class AppSettingToggleRow extends StatelessWidget {
       icon: icon,
       title: title,
       subtitle: subtitle,
-      value: setting.value ?? defaultValue,
+      value: setting.value ?? setting.defaultValue ?? defaultValue,
       onChanged: (value) async {
         onChanged?.call(value);
         await setting.setItem(value);

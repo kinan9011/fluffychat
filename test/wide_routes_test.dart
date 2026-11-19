@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/call_support_fakes.dart';
 import 'utils/test_client.dart';
 
 void main() {
@@ -50,9 +51,13 @@ void main() {
     return room.id;
   }
 
-  setUp(() => MatrixState.accountHooks = (_, _, _) async {});
+  setUp(() {
+    MatrixState.accountHooks = (_, _, _) async {};
+    FakeCallCapabilities(pure: true).install();
+  });
 
   tearDown(() async {
+    FakeCallCapabilities.uninstall();
     MatrixState.accountHooks = MatrixState.defaultAccountHooks;
     await AppSettings.displayChatDetailsColumn.setItem(false);
   });

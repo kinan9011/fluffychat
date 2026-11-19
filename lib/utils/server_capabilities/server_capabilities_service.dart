@@ -6,8 +6,11 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/server_capabilities/call_support.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
+import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerCapabilitiesUnavailable implements Exception {
   const ServerCapabilitiesUnavailable();
@@ -93,25 +96,59 @@ class _Entry {
   int generation = 0;
 }
 
-class ServerCapabilitiesService {
+class ServerCapabilitiesService extends ChangeNotifier {
+  static const callSupportKeyPrefix = 'chat.fluffy.call_support.';
+
   final Duration maxAge;
   final Duration incompleteMaxAge;
   final Duration retryAfterFailure;
   final DateTime Function() _clock;
   final ServerCapabilitySource Function(Client) _sourceFor;
   final Map<Client, _Entry> _entries = Map.identity();
+  final SharedPreferences? _store;
+  bool _disposed = false;
 
   ServerCapabilitiesService({
+    SharedPreferences? store,
     this.maxAge = const Duration(hours: 6),
     this.incompleteMaxAge = const Duration(minutes: 10),
     this.retryAfterFailure = const Duration(minutes: 1),
     DateTime Function()? clock,
     ServerCapabilitySource Function(Client)? sourceFor,
-  }) : _clock = clock ?? DateTime.now,
+  }) : _store = store,
+       _clock = clock ?? DateTime.now,
        _sourceFor = sourceFor ?? SdkServerCapabilitySource.new;
 
+  /// The last known call support of an account, kept so the Calls tab does
+  /// not pop in and out on every start. Only the support level is stored.
+  ServerCapabilities? _persisted(Client client) {
+    final raw = _store?.getString('$callSupportKeyPrefix${client.clientName}');
+    final support = FeatureSupport.values.where((v) => v.name == raw);
+    if (support.isEmpty || support.first == FeatureSupport.unknown) return null;
+    return ServerCapabilities.unknown.withFeature(
+      ServerFeature.groupCalls,
+      support.first,
+    );
+  }
+
+  void _persist(Client client, ServerCapabilities value) {
+    final support = value[ServerFeature.groupCalls];
+    if (support == FeatureSupport.unknown) return;
+    unawaited(
+      _store?.setString(
+        '$callSupportKeyPrefix${client.clientName}',
+        support.name,
+      ),
+    );
+  }
+
+  bool _callsShown(ServerCapabilities? value) =>
+      value != null && callsAvailable(enabled: true, capabilities: value);
+
   ServerCapabilities cached(Client client) =>
-      _entries[client]?.value ?? ServerCapabilities.unknown;
+      _entries[client]?.value ??
+      _persisted(client) ??
+      ServerCapabilities.unknown;
 
   Future<ServerCapabilities> load(Client client, {bool force = false}) {
     final entry = _entries.putIfAbsent(client, _Entry.new);
@@ -136,13 +173,17 @@ class ServerCapabilitiesService {
     final generation = entry.generation;
     try {
       final inputs = await _sourceFor(client).fetch();
-      final previous = entry.value;
+      final previous = entry.value ?? _persisted(client);
       final derived = ServerCapabilities.derive(inputs);
       final merged = previous == null
           ? derived
           : derived.fillUnknownFrom(previous);
       if (entry.generation != generation) return ServerCapabilities.unknown;
       entry.value = merged;
+      _persist(client, merged);
+      if (_callsShown(previous) != _callsShown(merged) && !_disposed) {
+        notifyListeners();
+      }
       entry.fetchedAt = _clock();
       entry.retryAt = null;
       entry.ttl = inputs.isComplete ? maxAge : incompleteMaxAge;
@@ -158,15 +199,20 @@ class ServerCapabilitiesService {
   }
 
   void forget(Client client) {
+    unawaited(_store?.remove('$callSupportKeyPrefix${client.clientName}'));
     final entry = _entries.remove(client);
     if (entry == null) return;
     entry.generation++;
   }
 
+  @override
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
     for (final entry in _entries.values) {
       entry.generation++;
     }
     _entries.clear();
+    super.dispose();
   }
 }

@@ -47,6 +47,20 @@ void main() {
       await golden(tester, 'settings_root', '/settings', brightness, suffix);
     });
 
+    testWidgets('chat settings $suffix', (tester) async {
+      await harness.open(
+        tester,
+        path: '/settings/chat',
+        brightness: brightness,
+        height: 1500,
+      );
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/settings_chat_$suffix.png'),
+      );
+      await harness.finish(tester);
+    });
+
     testWidgets('privacy and security $suffix', (tester) async {
       await golden(
         tester,

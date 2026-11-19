@@ -29,6 +29,7 @@ void main() {
     testWidgets('Login and logout flow', loginAndChatBackup);
     testWidgets('Basic Messaging', basicMessaging);
     testWidgets('Shell navigation', shellNavigation);
+    testWidgets('Calls hidden without a call service', callsHiddenFlow);
     testWidgets('Chat list tabs', chatListTabs);
     testWidgets('Chat list folders', chatListFolders);
     testWidgets('Chat list swipe and archive', chatListSwipeArchive);
@@ -54,6 +55,7 @@ void main() {
     testWidgets('Search index wiped on logout', searchWipeFlow);
     testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
+    testWidgets('Settings chat', settingsChatFlow);
     testWidgets('Settings homeserver features', settingsHomeserverFlow);
     testWidgets('Settings export chat', settingsExportFlow);
     // Signs out every other session of the user: keep it after the flows that

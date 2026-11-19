@@ -196,7 +196,42 @@ void main() {
       expect(caps[ServerFeature.groupCalls], FeatureSupport.unsupported);
     });
 
-    test('plain http counts, like in the call code', () {
+    test('a cleartext remote or credentialed url is not support', () {
+      for (final url in [
+        'http://lk.example',
+        'https://user:pw@lk.example',
+        'ftp://lk.example',
+      ]) {
+        final foci = derive(
+          versions: _tuwunelVersions,
+          wellKnown: {
+            'org.matrix.msc4143.rtc_foci': [
+              {'livekit_service_url': url},
+            ],
+          },
+        );
+        final transports = derive(
+          versions: _tuwunelVersions,
+          transports: {
+            'transports': [
+              {'type': 'm.livekit', 'url': url},
+            ],
+          },
+        );
+        expect(
+          foci[ServerFeature.groupCalls],
+          FeatureSupport.unsupported,
+          reason: url,
+        );
+        expect(
+          transports[ServerFeature.groupCalls],
+          FeatureSupport.unsupported,
+          reason: url,
+        );
+      }
+    });
+
+    test('plain http counts for the local machine only, like the join', () {
       final caps = derive(
         versions: _tuwunelVersions,
         wellKnown: {

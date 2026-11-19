@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/logout_cleanup.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -119,5 +120,35 @@ void main() {
 
     expect(deletedQuarantine, ['alice']);
     expect(notificationsCancelled, 1);
+  });
+
+  group('persisted call support', () {
+    const prefix = ServerCapabilitiesService.callSupportKeyPrefix;
+
+    setUp(() async {
+      await prefs.setString('${prefix}alice', 'supported');
+      await prefs.setString('${prefix}bob', 'partial');
+    });
+
+    test('only the account that left is removed while others remain', () async {
+      await cleanup.run(
+        clientName: 'alice',
+        userId: '@alice:example.org',
+        lastAccount: false,
+      );
+      expect(prefs.getString('${prefix}alice'), isNull);
+      expect(prefs.getString('${prefix}bob'), 'partial');
+    });
+
+    test('the last account sweeps every stored answer', () async {
+      await prefs.setString('${prefix}orphan', 'unsupported');
+      await cleanup.run(
+        clientName: 'alice',
+        userId: '@alice:example.org',
+        lastAccount: true,
+      );
+      expect(prefs.getKeys().where((k) => k.startsWith(prefix)), isEmpty);
+      expect(prefs.getString('unrelated'), 'stays');
+    });
   });
 }

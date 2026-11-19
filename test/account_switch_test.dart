@@ -20,6 +20,7 @@ import 'package:fluffychat/utils/draft_store.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
 import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
 import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
@@ -35,6 +36,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/call_support_fakes.dart';
 import 'utils/chat_row_fixtures.dart';
 import 'utils/space_fixtures.dart';
 import 'utils/test_client.dart';
@@ -68,7 +70,18 @@ void main() {
     stranger = await prepareTestClient(clientName: 'Stranger');
   });
 
+  setUp(() async {
+    FakeCallCapabilities(pure: true).install();
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in prefs.getKeys().where(
+      (key) => key.startsWith(ServerCapabilitiesService.callSupportKeyPrefix),
+    )) {
+      await prefs.remove(key);
+    }
+  });
+
   tearDown(() async {
+    FakeCallCapabilities.uninstall();
     AppRoutes.isLoggedIn = AppRoutes.defaultIsLoggedIn;
     MatrixState.startupHooks = MatrixState.defaultStartupHooks;
     MatrixState.accountHooks = MatrixState.defaultAccountHooks;
@@ -658,6 +671,36 @@ void main() {
       expect(controller.cryptoIdentityConnected, false);
       return matrix;
     });
+
+    accountTest(
+      'the Calls tab follows the active account: one with calls, one without',
+      (tester, matrix) async {
+        Finder barCalls() => find.descendant(
+          of: find.byType(AppBottomBar),
+          matching: find.text('Calls'),
+        );
+        await tester.runAsync(() => matrix.serverCapabilities.load(first));
+        await tester.runAsync(() => matrix.serverCapabilities.load(second));
+        await settle(tester);
+        expect(matrix.client, first);
+        expect(barCalls(), findsOneWidget);
+        await goTo(tester, '/calls');
+        await settle(tester);
+        expect(find.byType(CallsPage), findsOneWidget);
+        matrix.setActiveClient(second, resetTabs: false);
+        await settle(tester);
+        expect(barCalls(), findsNothing);
+        expect(find.byType(CallsPage), findsNothing);
+        expect(location(), '/rooms');
+        matrix.setActiveClient(first, resetTabs: false);
+        await settle(tester);
+        expect(barCalls(), findsOneWidget);
+        return matrix;
+      },
+      beforePump: () => (FakeCallCapabilities(pure: true)
+        ..set(second, supported: false)
+        ..install()),
+    );
 
     accountTest('Calls loads the capabilities of the new account', (
       tester,
@@ -1609,6 +1652,66 @@ void main() {
 
       expect(location(), before);
       expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an accept event with calls off ends the entry', (
+      tester,
+      matrix,
+    ) async {
+      await AppSettings.callsEnabled.setItem(false);
+      final ended = <String>[];
+      final before = location();
+
+      await onCallKitEvent(
+        matrix,
+        CallEventActionCallAccept(call(id: 'c1', accepted: false)),
+        endCall: (id) async => ended.add(id),
+      );
+      await settle(tester);
+
+      expect(ended, ['c1']);
+      expect(location(), before);
+      expect(matrix.client, first);
+      return matrix;
+    });
+
+    accountTest('an accept event with calls on does not end the entry', (
+      tester,
+      matrix,
+    ) async {
+      final ended = <String>[];
+
+      await onCallKitEvent(
+        matrix,
+        CallEventActionCallAccept(call(id: 'c1', accepted: false)),
+        endCall: (id) async => ended.add(id),
+      );
+      await settle(tester);
+
+      expect(ended, isEmpty);
+      expect(location(), '/rooms/$roomId?action=call');
+      return matrix;
+    });
+
+    accountTest('an accepted entry is ended when calls are off', (
+      tester,
+      matrix,
+    ) async {
+      await AppSettings.callsEnabled.setItem(false);
+      final ended = <String>[];
+      final before = location();
+
+      await rejoinAcceptedCall(
+        [call(id: 'c1', accepted: true)],
+        matrix,
+        hasActiveCall: (_, _) async => true,
+        endCall: (id) async => ended.add(id),
+      );
+      await settle(tester);
+
+      expect(ended, ['c1']);
+      expect(location(), before);
       return matrix;
     });
 

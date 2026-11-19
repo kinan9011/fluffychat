@@ -218,7 +218,6 @@ class SettingsAppearanceView extends StatelessWidget {
                 title: l10n.reduceTransparency,
                 subtitle: l10n.reduceTransparencyDescription,
                 setting: AppSettings.reduceTransparency,
-                defaultValue: AppSettings.reduceTransparency.defaultValue,
               ),
               const GlassModeRow(),
             ],

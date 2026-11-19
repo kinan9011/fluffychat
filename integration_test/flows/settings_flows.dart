@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/export/export_page.dart';
 import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:fluffychat/utils/export/export_model.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:fluffychat/widgets/settings/settings_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,6 +26,9 @@ Future<void> settingsAppearanceFlow(WidgetTester widgetTester) =>
 
 Future<void> settingsHomeserverFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._homeserver());
+
+Future<void> settingsChatFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._chatSettings());
 
 Future<void> settingsExportFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._export());
@@ -81,6 +85,27 @@ extension on FluffyChatTester {
     expect(AppSettings.bubbleCorners.value, 'standard');
     await goBack();
     await goBack();
+    await openTab('Chats');
+  }
+
+  Future<void> _chatSettings() async {
+    await ensureLoggedIn();
+    await openTab('Settings');
+    await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
+    await waitFor('CHAT LIST');
+    await scrollUntilVisible('MESSAGES');
+    await scrollUntilVisible('WRITING AND REPLYING');
+    expect(find.text('Custom emojis and stickers'), findsNothing);
+    await scrollUntilVisible('Send on enter');
+    await tapOn(find.text('Send on enter'));
+    await tapOn(find.text('Send on enter'));
+    await goBack();
+
+    await scrollUntilVisible('Emotes and stickers');
+    await tapOn(find.widgetWithText(SettingsRow, 'Emotes and stickers'));
+    await waitFor('Custom emojis and stickers');
+    await goBack();
+    await waitFor('Chat backup');
     await openTab('Chats');
   }
 

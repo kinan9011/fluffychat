@@ -19,7 +19,10 @@ void main() {
   final harness = ChatPageHarness();
 
   setUpAll(harness.setUpAll);
-  setUp(harness.setUp);
+  setUp(() {
+    harness.setUp();
+    harness.capabilities.set(harness.client, supported: false);
+  });
   tearDown(() async {
     await harness.tearDown();
     await AppSettings.reduceTransparency.setItem(false);

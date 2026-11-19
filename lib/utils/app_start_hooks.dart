@@ -92,7 +92,9 @@ Future<void> rejoinAcceptedCall(
       return;
     }
     if (!matrix.mounted) return;
-    matrix.joinCall(target.client, target.roomId);
+    if (!await matrix.joinCall(target.client, target.roomId)) {
+      await endCall(call.id);
+    }
     return;
   }
 }
@@ -173,14 +175,21 @@ void _listenToCallKit(MatrixState matrix) {
 }
 
 @visibleForTesting
-Future<void> onCallKitEvent(MatrixState matrix, CallEvent? event) async {
+Future<void> onCallKitEvent(
+  MatrixState matrix,
+  CallEvent? event, {
+  Future<void> Function(String id) endCall = _endCallKitCall,
+}) async {
   switch (event) {
     case CallEventActionCallAccept():
       final target = callKitJoinTarget(
         event.callKitParams,
         matrix.getClientByName,
       );
-      if (target != null) matrix.joinCall(target.client, target.roomId);
+      if (target == null) break;
+      if (!await matrix.joinCall(target.client, target.roomId)) {
+        await endCall(event.callKitParams.id);
+      }
       break;
     case CallEventActionCallEnded():
       final roomId = event.callKitParams.extra?.tryGet<String>('roomId');

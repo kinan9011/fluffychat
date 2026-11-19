@@ -14,6 +14,7 @@ import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_memb
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/privacy/presence_policy.dart';
+import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -87,6 +88,13 @@ abstract class ClientManager {
     } on DatabaseKeyUnavailableException {
       await _disposeAll(clients);
       rethrow;
+    }
+    if (initialize) {
+      for (final client in clients.where((c) => !c.isLogged())) {
+        await store.remove(
+          '${ServerCapabilitiesService.callSupportKeyPrefix}${client.clientName}',
+        );
+      }
     }
     if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
       final loggedOutClients = clients.where((c) => !c.isLogged()).toList();

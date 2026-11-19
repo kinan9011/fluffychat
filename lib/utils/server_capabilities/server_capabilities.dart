@@ -5,6 +5,8 @@
 
 import 'dart:collection';
 
+import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart';
+
 enum FeatureSupport { supported, partial, unsupported, unknown }
 
 enum ServerFeature {
@@ -64,6 +66,11 @@ class ServerCapabilities {
               ? previous[feature]
               : this[feature],
       }, loginTokenEnabled ?? previous.loginTokenEnabled);
+
+  ServerCapabilities withFeature(
+    ServerFeature feature,
+    FeatureSupport support,
+  ) => ServerCapabilities._({...features, feature: support}, loginTokenEnabled);
 
   FeatureSupport operator [](ServerFeature feature) =>
       features[feature] ?? FeatureSupport.unknown;
@@ -149,16 +156,21 @@ class ServerCapabilities {
   ) {
     final foci = wellKnown?['org.matrix.msc4143.rtc_foci'];
     final fociMaps = foci is List ? foci : [foci];
-    if (fociMaps.any((f) => _isWebUrl(_map(f)?['livekit_service_url']))) {
+    if (fociMaps.any((f) => _isSafeLiveKit(_map(f)?['livekit_service_url']))) {
       return true;
     }
     final list = transports?['transports'];
     if (list is! List) return false;
     return list.any((t) {
       final map = _map(t);
-      return map?['type'] == 'm.livekit' && _isWebUrl(map?['url']);
+      return map?['type'] == 'm.livekit' && _isSafeLiveKit(map?['url']);
     });
   }
+
+  static bool _isSafeLiveKit(Object? value) =>
+      value is String &&
+      value.length <= maxStringLength &&
+      safeLiveKitServiceUri(value) != null;
 
   static bool _isWebUrl(Object? value) {
     if (value is! String || value.length > maxStringLength) return false;

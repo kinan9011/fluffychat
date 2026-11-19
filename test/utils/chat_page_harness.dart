@@ -16,6 +16,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'call_support_fakes.dart';
 import 'test_client.dart';
 
 /// The whole app on a fake server, opened on a chat. Shared by the conversation
@@ -66,12 +67,18 @@ class ChatPageHarness {
     return room;
   }
 
+  /// The fake homeserver of conversation tests has a call service unless a
+  /// test says otherwise, so the shell shows its four tabs.
+  late FakeCallCapabilities capabilities;
+
   void setUp() {
+    capabilities = FakeCallCapabilities()..install();
     DraftStore.forget(client);
     MatrixState.accountHooks = (_, _, _) async {};
   }
 
   Future<void> tearDown() async {
+    FakeCallCapabilities.uninstall();
     MatrixState.accountHooks = MatrixState.defaultAccountHooks;
     unawaited(DraftStore.of(client).remove(room.id));
   }

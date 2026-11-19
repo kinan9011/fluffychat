@@ -320,11 +320,16 @@ void main() {
         find
             .descendant(
               of: find.byType(ReactionPills),
-              matching: find.byType(ConstrainedBox),
+              matching: find.byType(GestureDetector),
             )
             .first,
       );
       expect(size.height, greaterThanOrEqualTo(44));
+      expect(size.width, greaterThanOrEqualTo(44));
+      final chip = tester.getSize(
+        find.byKey(const ValueKey('reaction_chip_👍')),
+      );
+      expect(chip.height, 28, reason: 'the chip is smaller than its hit box');
       await tester.tap(find.text('2'));
       expect(taps, ['👍']);
     });

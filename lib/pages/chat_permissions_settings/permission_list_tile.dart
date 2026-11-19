@@ -69,7 +69,7 @@ class PermissionsListTile extends StatelessWidget {
         case 'm.room.server_acl':
           return L10n.of(context).editBlockedServers;
         case MatrixRtcCallMember.eventType:
-          return 'Create or join a group call';
+          return L10n.of(context).permissionGroupCall;
       }
     }
     return permissionKey;

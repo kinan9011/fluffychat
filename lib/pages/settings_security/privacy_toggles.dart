@@ -25,7 +25,6 @@ class PrivacyToggles extends StatelessWidget {
           title: l10n.sendTypingNotifications,
           subtitle: l10n.sendTypingNotificationsDescription,
           setting: AppSettings.sendTypingNotifications,
-          defaultValue: AppSettings.sendTypingNotifications.defaultValue,
         ),
         AppSettingToggleRow(
           icon: Icons.done_all_rounded,
@@ -33,21 +32,18 @@ class PrivacyToggles extends StatelessWidget {
           subtitle:
               '${l10n.sendReadReceiptsDescription} ${l10n.readReceiptsPrivateNote}',
           setting: AppSettings.sendPublicReadReceipts,
-          defaultValue: AppSettings.sendPublicReadReceipts.defaultValue,
         ),
         AppSettingToggleRow(
           icon: Icons.circle_outlined,
           title: l10n.showOnlineStatus,
           subtitle: l10n.showOnlineStatusDescription,
           setting: AppSettings.shareOnlineStatus,
-          defaultValue: AppSettings.shareOnlineStatus.defaultValue,
         ),
         AppSettingToggleRow(
           icon: Icons.visibility_off_rounded,
           title: l10n.appearOffline,
           subtitle: l10n.appearOfflineDescription,
           setting: AppSettings.appearOffline,
-          defaultValue: AppSettings.appearOffline.defaultValue,
         ),
       ],
     );

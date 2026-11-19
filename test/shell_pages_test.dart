@@ -16,6 +16,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/call_support_fakes.dart';
 import 'utils/test_client.dart';
 
 void main() {
@@ -27,9 +28,15 @@ void main() {
     client.backgroundSync = false;
   });
 
-  setUp(() => MatrixState.accountHooks = (_, _, _) async {});
+  setUp(() {
+    MatrixState.accountHooks = (_, _, _) async {};
+    FakeCallCapabilities(pure: true).install();
+  });
 
-  tearDown(() => MatrixState.accountHooks = MatrixState.defaultAccountHooks);
+  tearDown(() {
+    MatrixState.accountHooks = MatrixState.defaultAccountHooks;
+    FakeCallCapabilities.uninstall();
+  });
 
   Future<void> pumpApp(WidgetTester tester, String location) async {
     tester.view.physicalSize = const Size(400, 800);
@@ -113,12 +120,7 @@ void main() {
       expect(find.byType(CallsPage), findsOneWidget);
       expect(find.text('Ongoing group calls'), findsOneWidget);
       await settleRequests(tester);
-      expect(
-        find.text(
-          "Your server isn't set up for group calls. One-to-one calls still work.",
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('Group calls arrive in a later update'), findsOneWidget);
     });
 
     pageTest('loads the capabilities of the active account', (tester) async {

@@ -47,6 +47,7 @@ class ChatListItem extends StatelessWidget {
   final void Function() onTap;
   final ChatRowActions? actions;
   final DraftStore? drafts;
+  final bool showCallIndicator;
 
   const ChatListItem(
     this.room, {
@@ -58,6 +59,7 @@ class ChatListItem extends StatelessWidget {
     this.space,
     this.actions,
     this.drafts,
+    this.showCallIndicator = false,
     super.key,
   });
 
@@ -109,6 +111,7 @@ class ChatListItem extends StatelessWidget {
                 onPeek: onPeek,
                 onForget: onForget,
                 actions: actions,
+                showCallIndicator: showCallIndicator,
               );
               if (rowActions == null || !room.canSwipe) return row;
               return SwipeActionRow(
@@ -203,6 +206,7 @@ class _RowBody extends StatelessWidget {
   final void Function(BuildContext context)? onPeek;
   final void Function()? onForget;
   final ChatRowActions? actions;
+  final bool showCallIndicator;
 
   const _RowBody({
     required this.room,
@@ -218,6 +222,7 @@ class _RowBody extends StatelessWidget {
     required this.onPeek,
     required this.onForget,
     required this.actions,
+    required this.showCallIndicator,
   });
 
   @override
@@ -365,7 +370,8 @@ class _RowBody extends StatelessWidget {
                             Row(
                               spacing: 6,
                               children: [
-                                if (room.hasActiveMatrixRtcCall)
+                                if (showCallIndicator &&
+                                    room.hasActiveMatrixRtcCall)
                                   ActiveCallIndicator(room: room),
                                 Expanded(
                                   child: _Line2(

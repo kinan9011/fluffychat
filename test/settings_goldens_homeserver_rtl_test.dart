@@ -18,6 +18,7 @@ void main() {
   setUpAll(harness.setUpAll);
   setUp(() async {
     harness.setUp();
+    harness.capabilities.set(harness.client, supported: false);
     await AppSettings.store.clear();
     api.clear();
     api.getOverrides.clear();

@@ -58,7 +58,7 @@ class CallsView extends StatelessWidget {
                   return Text(
                     unsupported
                         ? l10n.groupCallsNotSupported
-                        : l10n.noOngoingGroupCalls,
+                        : l10n.groupCallsComingLater,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: tokens.mut,
                     ),

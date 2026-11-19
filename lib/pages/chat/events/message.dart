@@ -429,16 +429,32 @@ class Message extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              AnimatedSize(
-                                duration: motionDuration(
-                                  context,
-                                  FluffyThemes.animationDuration,
+                              Transform.translate(
+                                offset: const Offset(
+                                  0,
+                                  -AppChat.reactionOverlap,
                                 ),
-                                curve: FluffyThemes.animationCurve,
-                                alignment: Alignment.bottomCenter,
-                                child: hasReactions
-                                    ? MessageReactions(event, timeline)
-                                    : const SizedBox.shrink(),
+                                child: AnimatedSize(
+                                  duration: motionDuration(
+                                    context,
+                                    FluffyThemes.animationDuration,
+                                  ),
+                                  curve: FluffyThemes.animationCurve,
+                                  alignment: ownMessage
+                                      ? AlignmentDirectional.bottomEnd
+                                      : AlignmentDirectional.bottomStart,
+                                  child: hasReactions
+                                      ? ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: bubbleMax,
+                                          ),
+                                          child: MessageReactions(
+                                            event,
+                                            timeline,
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(),
+                                ),
                               ),
                               if (event.status == EventStatus.error)
                                 Padding(
