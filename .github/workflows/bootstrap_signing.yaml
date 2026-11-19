@@ -1,0 +1,52 @@
+name: Bootstrap Signing
+
+on:
+  workflow_dispatch:
+    inputs:
+      key_id:
+        description: App Store Connect API Key ID
+        type: string
+        required: true
+      issuer_id:
+        description: App Store Connect API Issuer ID
+        type: string
+        required: true
+
+jobs:
+  match:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        platform: [ios, macos]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install Fastlane
+        run: gem install fastlane -NV
+      - name: Write API key file
+        env:
+          KEY_ID: ${{ inputs.key_id }}
+          ISSUER_ID: ${{ inputs.issuer_id }}
+          APP_STORE_API_KEY: ${{ secrets.APP_STORE_API_KEY }}
+        run: |
+          jq -n --arg k "$KEY_ID" --arg i "$ISSUER_ID" --arg c "$APP_STORE_API_KEY" \
+            '{key_id:$k,issuer_id:$i,key:$c,in_house:false}' > "$RUNNER_TEMP/api_key.json"
+      - name: Create or fetch certificates and profiles
+        working-directory: ${{ matrix.platform }}
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_PASSWORD: ${{ secrets.FASTLANE_MATCH_PASSWORD }}
+          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
+        run: |
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            fastlane match appstore --platform macos --additional_cert_types mac_installer_distribution --api_key_path "$RUNNER_TEMP/api_key.json"
+          else
+            fastlane match appstore --api_key_path "$RUNNER_TEMP/api_key.json"
+          fi
+      - name: Remove API key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/api_key.json"
