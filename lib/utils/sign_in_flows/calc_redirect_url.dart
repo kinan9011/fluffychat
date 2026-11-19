@@ -15,7 +15,7 @@ import 'package:universal_html/html.dart' as html;
       ? Uri.parse(html.window.location.href.split('#').first.split('?').first)
       : (PlatformInfos.isMobile || PlatformInfos.isMacOS)
       ? Uri.parse('${AppConfig.appSsoUrlScheme.toLowerCase()}:/login')
-      : Uri.parse('http://localhost:3001/login');
+      : Uri.parse('http://127.0.0.1:3001/login');
 
   if (kIsWeb && withAuthHtmlPath) {
     redirectUrl = redirectUrl.resolveUri(Uri(pathSegments: ['auth.html']));
@@ -24,7 +24,7 @@ import 'package:universal_html/html.dart' as html;
   final urlScheme =
       (PlatformInfos.isMobile || PlatformInfos.isWeb || PlatformInfos.isMacOS)
       ? redirectUrl.scheme
-      : 'http://localhost:3001';
+      : 'http://127.0.0.1:3001';
 
   return (redirectUrl, urlScheme);
 }
