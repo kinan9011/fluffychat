@@ -23,13 +23,13 @@ String _release(
       'name': asset,
       'browser_download_url':
           url ??
-          'https://github.com/swovo/odango/releases/download/$tag/$asset',
+          'https://github.com/kinan9011/odango/releases/download/$tag/$asset',
     },
   ],
 });
 
 void main() {
-  final repo = RepoLinks.parse('https://github.com/swovo/odango');
+  final repo = RepoLinks.parse('https://github.com/kinan9011/odango');
   final requests = <Uri>[];
 
   http.Client client(String body, {int status = 200}) =>
@@ -47,19 +47,19 @@ void main() {
       currentVersion: '1.0.0',
     );
     expect(requests.map((uri) => uri.toString()), [
-      'https://api.github.com/repos/swovo/odango/releases/latest',
+      'https://api.github.com/repos/kinan9011/odango/releases/latest',
     ]);
     expect(update?.version, '2.0.0');
     expect(
       update?.downloadUrl,
-      'https://github.com/swovo/odango/releases/download/v2.0.0/odango-windows-x64-setup.exe',
+      'https://github.com/kinan9011/odango/releases/download/v2.0.0/odango-windows-x64-setup.exe',
     );
   });
 
   test('a repository that is not valid makes no request at all', () async {
     final update = await checkForUpdate(
       client: client(_release('v2.0.0')),
-      repo: RepoLinks.parse('http://evil.example/swovo/odango'),
+      repo: RepoLinks.parse('http://evil.example/kinan9011/odango'),
       currentVersion: '1.0.0',
     );
     expect(update, isNull);
@@ -93,10 +93,10 @@ void main() {
 
   test('a download link that leaves the repository is refused', () async {
     for (final url in [
-      'https://evil.example/swovo/odango/releases/download/v2/x.exe',
-      'http://github.com/swovo/odango/releases/download/v2/x.exe',
+      'https://evil.example/kinan9011/odango/releases/download/v2/x.exe',
+      'http://github.com/kinan9011/odango/releases/download/v2/x.exe',
       'https://github.com/other/repo/releases/download/v2/x.exe',
-      'https://github.com/swovo/odango/raw/main/x.exe',
+      'https://github.com/kinan9011/odango/raw/main/x.exe',
       'javascript:alert(1)',
     ]) {
       expect(

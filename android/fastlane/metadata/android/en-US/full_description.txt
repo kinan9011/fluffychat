@@ -15,4 +15,4 @@ Based on the open Matrix protocol, Odango works with any Matrix server and is co
 Odango is a fork of FluffyChat and keeps its AGPL-3.0 licence and upstream attribution. Part of the support you give Odango goes on to support the FluffyChat source it is built on.
 
 Website: https://odango.swovo.de
-Source: https://github.com/swovo/odango
+Source: https://github.com/kinan9011/odango

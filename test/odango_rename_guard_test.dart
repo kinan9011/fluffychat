@@ -115,6 +115,13 @@ const _storeTextRoots = [
   'integration_test/flows/odango_flows.dart',
 ];
 
+/// The upstream monitor has to name the project it watches, with the same
+/// credit rules as documents (the exact repository link).
+const _upstreamMonitorFiles = [
+  '.github/workflows/upstream-monitor.yml',
+  '.github/scripts/upstream-monitor.sh',
+];
+
 /// The one place a test asserts the old name is absent.
 final _absenceAssertion = RegExp(
   r"find\.textContaining\('FluffyChat'\), findsNothing",
@@ -294,7 +301,8 @@ void main() {
             ..._uncreditedLines(
               path,
               RegExp('fluffychat', caseSensitive: false),
-              _storeTextRoots.any(path.startsWith)
+              (_storeTextRoots.any(path.startsWith) ||
+                      _upstreamMonitorFiles.contains(path))
                   ? RegExp(
                       '${_docCredit.pattern}|${_absenceAssertion.pattern}',
                       caseSensitive: false,
@@ -391,7 +399,7 @@ void main() {
       );
       expect(
         AppSettings.repositoryUrl.defaultValue,
-        'https://github.com/swovo/odango',
+        'https://github.com/kinan9011/odango',
       );
       expect(AppSettings.koFiUrl.defaultValue, isEmpty);
       expect(AppSettings.buyMeACoffeeUrl.defaultValue, isEmpty);

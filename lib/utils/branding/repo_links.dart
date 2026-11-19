@@ -15,7 +15,7 @@ class RepoLinks {
   final String owner;
   final String name;
 
-  static const defaultRepo = RepoLinks._('swovo', 'odango');
+  static const defaultRepo = RepoLinks._('kinan9011', 'odango');
 
   static final _segment = RegExp(r'^[A-Za-z0-9._-]{1,100}$');
 
@@ -43,9 +43,9 @@ class RepoLinks {
   static RepoLinks? fromSettings() => parse(AppSettings.repositoryUrl.value);
 
   /// The repository for requests the app makes on its own (update check,
-  /// homeserver list, issue search). The built-in repository is only assumed
-  /// to belong to the owner, so nothing is requested until `repositoryConfirmed`
-  /// says the owner verified it.
+  /// homeserver list, issue search). A build that points `repositoryUrl` at a
+  /// repository it does not own turns `repositoryConfirmed` off, and then
+  /// nothing is requested.
   static RepoLinks? confirmed() =>
       AppSettings.repositoryConfirmed.value ? fromSettings() : null;
 

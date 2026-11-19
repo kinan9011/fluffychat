@@ -61,7 +61,7 @@ platform :mac do
       app_platform: "osx",
       distribute_external: true,
       groups: "Beta",
-      changelog: "Please search for regressions and report them on: https://github.com/swovo/odango/issues"
+      changelog: "Please search for regressions and report them on: https://github.com/kinan9011/odango/issues"
     )
   end
 

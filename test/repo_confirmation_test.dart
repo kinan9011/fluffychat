@@ -16,8 +16,9 @@ import 'package:odango/utils/branding/repo_links.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The repository default of this build is only assumed to belong to the
-/// owner. Until the owner confirms it, nothing is fetched from it on its own.
+/// The built-in repository is the owner's, so it is confirmed by default. A
+/// build that points `repositoryUrl` elsewhere turns the setting off, and then
+/// nothing is fetched from that repository on its own.
 void main() {
   final requests = <Uri>[];
   final client = MockClient((request) async {
@@ -28,7 +29,7 @@ void main() {
           {'name': 'listed.example.org', 'reg_method': 'open'},
         ],
         'items': [
-          {'html_url': 'https://github.com/swovo/odango/issues/7'},
+          {'html_url': 'https://github.com/kinan9011/odango/issues/7'},
         ],
       }),
       200,
@@ -43,15 +44,19 @@ void main() {
   });
 
   group('the setting', () {
-    test('is off by default', () {
-      expect(AppSettings.repositoryConfirmed.defaultValue, isFalse);
-      expect(AppSettings.repositoryConfirmed.value, isFalse);
+    test('is on by default', () {
+      expect(AppSettings.repositoryConfirmed.defaultValue, isTrue);
+      expect(AppSettings.repositoryConfirmed.value, isTrue);
+      expect(RepoLinks.confirmed()?.owner, 'kinan9011');
+    });
+
+    test('turning it off stops automatic requests', () async {
+      await AppSettings.repositoryConfirmed.setItem(false);
       expect(RepoLinks.confirmed(), isNull);
     });
 
-    test('turns the repository on for automatic requests', () async {
-      await AppSettings.repositoryConfirmed.setItem(true);
-      expect(RepoLinks.confirmed()?.owner, 'swovo');
+    test('follows the configured repository', () async {
+      expect(RepoLinks.confirmed()?.owner, 'kinan9011');
       await AppSettings.repositoryUrl.setItem('https://github.com/acme/chat');
       expect(RepoLinks.confirmed()?.owner, 'acme');
     });
@@ -62,13 +67,15 @@ void main() {
       expect(RepoLinks.confirmed(), isNull);
     });
 
-    test('links the user opens by hand still work while it is off', () {
+    test('links the user opens by hand still work while it is off', () async {
+      await AppSettings.repositoryConfirmed.setItem(false);
       expect(RepoLinks.configured.page.toString(), startsWith('https://'));
     });
   });
 
   group('the recommended homeserver list', () {
     test('is not requested while the repository is unconfirmed', () async {
+      await AppSettings.repositoryConfirmed.setItem(false);
       expect(
         await fetchPublicHomeservers(client, RepoLinks.confirmed()),
         isNull,
@@ -77,24 +84,23 @@ void main() {
     });
 
     test('is requested from the confirmed repository only', () async {
-      await AppSettings.repositoryConfirmed.setItem(true);
       final list = await fetchPublicHomeservers(client, RepoLinks.confirmed());
       expect(list?.map((server) => server.name), ['listed.example.org']);
       expect(
         requests.single.toString(),
-        startsWith('https://raw.githubusercontent.com/swovo/odango/'),
+        startsWith('https://raw.githubusercontent.com/kinan9011/odango/'),
       );
     });
   });
 
   group('issue search', () {
     test('makes no request while the repository is unconfirmed', () async {
+      await AppSettings.repositoryConfirmed.setItem(false);
       expect(await findExistingIssue('abc', client: client), isNull);
       expect(requests, isEmpty);
     });
 
     test('searches the confirmed repository', () async {
-      await AppSettings.repositoryConfirmed.setItem(true);
       expect(await findExistingIssue('abc', client: client), isNotNull);
       expect(requests, hasLength(1));
     });

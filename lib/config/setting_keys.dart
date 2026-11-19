@@ -125,9 +125,9 @@ enum AppSettings<T> {
   tos<String>('com.swovo.odango.tos_url', 'https://odango.swovo.de/tos'),
   repositoryUrl<String>(
     'com.swovo.odango.repository_url',
-    'https://github.com/swovo/odango',
+    'https://github.com/kinan9011/odango',
   ),
-  repositoryConfirmed<bool>('com.swovo.odango.repository_confirmed', false),
+  repositoryConfirmed<bool>('com.swovo.odango.repository_confirmed', true),
   koFiUrl<String>('com.swovo.odango.ko_fi_url', ''),
   buyMeACoffeeUrl<String>('com.swovo.odango.buy_me_a_coffee_url', ''),
   sendTimelineEventTimeout<int>(

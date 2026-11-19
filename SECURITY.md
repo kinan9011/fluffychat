@@ -11,7 +11,7 @@ If you believe you have discovered a security vulnerability in Odango, **do not 
 
 To report a security issue responsibly, please go to the Security tab or visit:
 
-https://github.com/swovo/odango/security/advisories/new
+https://github.com/kinan9011/odango/security/advisories/new
 
 The following information can help us address the issue:
 

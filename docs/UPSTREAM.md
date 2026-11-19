@@ -107,7 +107,7 @@ Turn on `git config rerere.enabled true` so Git remembers how you resolved a con
 ## 8. Maintaining the monitor
 
 - **Schedule:** edit `cron` in `.github/workflows/upstream-monitor.yml` (UTC, avoid the top of the hour).
-- **Different upstream:** change `UPSTREAM_REPO` in the workflow.
+- **Different upstream:** change `UPSTREAM_URL` (full `https://github.com/<owner>/<repo>` address) in the workflow.
 - **Label or limits:** `LABEL` and `MAX_LINES` are environment variables of the script.
 - **Silence it:** `gh workflow disable upstream-monitor.yml`.
 - **Test it:** `gh workflow run upstream-monitor.yml`, then `gh run list --workflow upstream-monitor.yml`.

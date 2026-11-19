@@ -18,8 +18,8 @@ AppVersion={#AppVersion}
 AppVerName=Odango {#AppVersion}
 AppPublisher=Odango contributors
 AppPublisherURL=https://odango.swovo.de
-AppSupportURL=https://github.com/swovo/odango/issues
-AppUpdatesURL=https://github.com/swovo/odango/releases
+AppSupportURL=https://github.com/kinan9011/odango/issues
+AppUpdatesURL=https://github.com/kinan9011/odango/releases
 VersionInfoVersion={#AppVersion}
 ; Per-user installation into %LOCALAPPDATA%\Programs, so that neither the
 ; installation nor updates require admin rights.

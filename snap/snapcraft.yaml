@@ -22,7 +22,7 @@ description: |
   Odango is a fork of FluffyChat and keeps its AGPL-3.0 licence and upstream attribution: https://github.com/krille-chan/fluffychat
 
   Website: https://odango.swovo.de
-  Source: https://github.com/swovo/odango
+  Source: https://github.com/kinan9011/odango
 
 grade: stable
 confinement: strict

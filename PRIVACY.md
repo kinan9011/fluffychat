@@ -12,7 +12,7 @@ Odango is a client for the Matrix network. This is what it does and does not do 
 - **Your messages and account** go only to the homeserver you sign in to. Odango has no server of its own. What your homeserver and the servers of the people you talk to do with your data is up to them.
 - **No analytics and no tracking.** Odango includes no analytics or advertising code.
 - **No automatic crash reports.** Reports are off by default and, if you turn them on, still only open a prefilled issue on the project repository when you tap *Report*.
-- **Requests to the project repository on GitHub** are off until the owner of this build confirms the repository (`repositoryConfirmed`, see the README). The built-in repository address is only assumed, so a fresh build makes none of them. Once confirmed, GitHub sees these requests like any other website visit:
+- **Requests to the project repository on GitHub** are on for the built-in repository, which belongs to the Odango owner (`repositoryConfirmed`, see the README). A build that points `repositoryUrl` at another repository should turn `repositoryConfirmed` off, and then makes none of them. While on, GitHub sees these requests like any other website visit:
   - the sign-in and sign-up page loads the list of recommended homeservers from `raw.githubusercontent.com` every time it opens;
   - tapping *Report* on an error searches existing issues at `api.github.com/search/issues` with a short hash of the error, not its text;
   - on Windows, once a day Odango asks the releases of the repository whether a newer installer exists (turn it off with `checkForUpdates`).

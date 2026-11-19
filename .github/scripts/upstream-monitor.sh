@@ -4,16 +4,17 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Reports new upstream (FluffyChat) commits as ONE GitHub issue. Read-only for
+# Reports new commits of the FluffyChat project as ONE GitHub issue. Read-only for
 # the repository contents: it never merges, pushes or changes a branch.
 # Needs: git, gh (GH_TOKEN, GH_REPO), checkout with full history.
 
 set -euo pipefail
 
-UPSTREAM_REPO="${UPSTREAM_REPO:-krille-chan/fluffychat}"
+UPSTREAM_URL="${UPSTREAM_URL:-https://github.com/krille-chan/fluffychat}"
+UPSTREAM_REPO="${UPSTREAM_URL#https://github.com/}"
 LABEL="${LABEL:-upstream-sync}"
 MAX_LINES="${MAX_LINES:-150}"
-UPSTREAM_URL="https://github.com/${UPSTREAM_REPO}.git"
+GIT_URL="${UPSTREAM_URL}.git"
 ZWSP=$'\xe2\x80\x8b'
 SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/null}"
 WORK="$(mktemp -d)"
@@ -27,13 +28,13 @@ clean() {
   printf '%s' "$s" | sed -e 's/</\&lt;/g' -e "s/#\([0-9]\)/#${ZWSP}\1/g" -e "s/\`/'/g"
 }
 
-branch="$(git ls-remote --symref "$UPSTREAM_URL" HEAD | awk '/^ref:/ { sub("refs/heads/", "", $2); print $2; exit }')"
+branch="$(git ls-remote --symref "$GIT_URL" HEAD | awk '/^ref:/ { sub("refs/heads/", "", $2); print $2; exit }')"
 if [ -z "$branch" ]; then
   echo "::error::Could not determine the default branch of $UPSTREAM_REPO"
   exit 1
 fi
 
-git fetch --no-tags --quiet "$UPSTREAM_URL" "+refs/heads/${branch}:refs/remotes/upstream/${branch}"
+git fetch --no-tags --quiet "$GIT_URL" "+refs/heads/${branch}:refs/remotes/upstream/${branch}"
 tip="$(git rev-parse "refs/remotes/upstream/${branch}")"
 base="$(git merge-base HEAD "$tip" || true)"
 

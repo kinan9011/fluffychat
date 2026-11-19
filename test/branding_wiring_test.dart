@@ -66,17 +66,19 @@ void main() {
         return http.Response(
           jsonEncode({
             'items': [
-              {'html_url': 'https://github.com/swovo/odango/issues/7'},
+              {'html_url': 'https://github.com/kinan9011/odango/issues/7'},
             ],
           }),
           200,
         );
       });
       final found = await findExistingIssue('abc', client: client);
-      expect(found.toString(), 'https://github.com/swovo/odango/issues/7');
+      expect(found.toString(), 'https://github.com/kinan9011/odango/issues/7');
       expect(
         requests.single.toString(),
-        startsWith('https://api.github.com/search/issues?q=repo:swovo/odango+'),
+        startsWith(
+          'https://api.github.com/search/issues?q=repo:kinan9011/odango+',
+        ),
       );
 
       await AppSettings.repositoryUrl.setItem('https://github.com/acme/chat');

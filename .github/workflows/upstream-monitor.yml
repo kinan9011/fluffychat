@@ -1,6 +1,6 @@
 name: Upstream Monitor
 
-# Reports new FluffyChat commits as one issue. Never merges or pushes.
+# Reports new commits of the FluffyChat project as one issue. Never merges or pushes.
 # Scheduled workflows in public repos are disabled after 60 days without
 # repository activity: re-enable with `gh workflow enable upstream-monitor.yml`.
 
@@ -31,5 +31,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          UPSTREAM_REPO: krille-chan/fluffychat
+          UPSTREAM_URL: https://github.com/krille-chan/fluffychat
         run: bash .github/scripts/upstream-monitor.sh
