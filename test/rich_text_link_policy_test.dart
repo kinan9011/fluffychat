@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/rich_text/link_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/rich_text/link_policy.dart';
 
 void main() {
   group('LinkPolicy accepts', () {

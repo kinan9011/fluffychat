@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
 
 Future<bool> deleteFolder(
   BuildContext context,

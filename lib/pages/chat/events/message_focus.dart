@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 
 /// The keyboard and screen reader path to the message menu: the bubble takes
 /// focus with Tab, Enter, the context menu key or Shift+F10 open the menu, and

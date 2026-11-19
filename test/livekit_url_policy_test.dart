@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/matrix_live_kit_calls/livekit_service_url.dart';
 
 void main() {
   group('safeLiveKitServiceUri', () {

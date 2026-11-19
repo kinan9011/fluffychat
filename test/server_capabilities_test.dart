@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 
 const _synapseVersions = <String, Object?>{
   'versions': ['r0.6.1', 'v1.1', 'v1.4', 'v1.10', 'v1.12'],

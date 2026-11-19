@@ -5,10 +5,10 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
 
 /// 20 px on every corner, the sender-side bottom corner of the last bubble of
 /// a run is the 6 px tail (DESIGN.md 7.5). Directional so RTL mirrors.

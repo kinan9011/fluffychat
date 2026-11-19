@@ -6,13 +6,14 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
-import 'package:fluffychat/pages/sign_in/view_model/sign_in_state.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:odango/pages/sign_in/view_model/sign_in_state.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class SignInViewModel extends ValueNotifier<SignInState> {
   final MatrixState matrixService;
@@ -60,45 +61,49 @@ class SignInViewModel extends ValueNotifier<SignInState> {
     final defaultHomeserverData = PublicHomeserverData(
       name: AppSettings.defaultHomeserver.value,
     );
+    List<PublicHomeserverData>? publicHomeservers;
     try {
-      final client = await matrixService.getLoginClient();
-      final response = await client.httpClient.get(AppConfig.homeserverList);
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final homeserverJsonList = json['public_servers'] as List;
-
-      final publicHomeservers = homeserverJsonList
-          .map((json) => PublicHomeserverData.fromJson(json))
-          .toList();
-
-      if (signUp) {
-        publicHomeservers.removeWhere((server) {
-          return server.regMethod == null;
-        });
+      final repo = RepoLinks.confirmed();
+      if (repo != null) {
+        final client = await matrixService.getLoginClient();
+        publicHomeservers = await fetchPublicHomeservers(
+          client.httpClient,
+          repo,
+        );
       }
-
-      final defaultServer = publicHomeservers.singleWhereOrNull(
-        (server) => server.name == AppSettings.defaultHomeserver.value,
-      );
-
-      if (defaultServer == null) {
-        publicHomeservers.insert(0, defaultHomeserverData);
-      }
-
-      value.selectedHomeserver =
-          value.selectedHomeserver ?? publicHomeservers.first;
-      value.publicHomeservers = AsyncSnapshot.withData(
-        ConnectionState.done,
-        publicHomeservers,
-      );
-      notifyListeners();
     } catch (e, s) {
       Logs().w('Unable to fetch public homeservers...', e, s);
+    }
+
+    if (publicHomeservers == null) {
       value.selectedHomeserver = defaultHomeserverData;
       value.publicHomeservers = AsyncSnapshot.withData(ConnectionState.done, [
         defaultHomeserverData,
       ]);
       notifyListeners();
+      _filterHomeservers();
+      return;
     }
+
+    if (signUp) {
+      publicHomeservers.removeWhere((server) => server.regMethod == null);
+    }
+
+    final defaultServer = publicHomeservers.singleWhereOrNull(
+      (server) => server.name == AppSettings.defaultHomeserver.value,
+    );
+
+    if (defaultServer == null) {
+      publicHomeservers.insert(0, defaultHomeserverData);
+    }
+
+    value.selectedHomeserver =
+        value.selectedHomeserver ?? publicHomeservers.first;
+    value.publicHomeservers = AsyncSnapshot.withData(
+      ConnectionState.done,
+      publicHomeservers,
+    );
+    notifyListeners();
     _filterHomeservers();
   }
 
@@ -111,4 +116,19 @@ class SignInViewModel extends ValueNotifier<SignInState> {
     value.loginLoading = loginLoading;
     notifyListeners();
   }
+}
+
+/// Reads the recommended homeserver list of the confirmed repository. Without
+/// one nothing is requested and the caller keeps the default homeserver.
+@visibleForTesting
+Future<List<PublicHomeserverData>?> fetchPublicHomeservers(
+  http.Client client,
+  RepoLinks? repo,
+) async {
+  if (repo == null) return null;
+  final response = await client.get(repo.homeserverList);
+  final json = jsonDecode(response.body) as Map<String, dynamic>;
+  return (json['public_servers'] as List)
+      .map((json) => PublicHomeserverData.fromJson(json))
+      .toList();
 }

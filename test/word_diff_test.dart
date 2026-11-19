@@ -5,9 +5,9 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/chat/word_diff.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/chat/word_diff.dart';
 
 List<(DiffKind, String)> flat(List<DiffSegment> segments) => [
   for (final s in segments) (s.kind, s.text),

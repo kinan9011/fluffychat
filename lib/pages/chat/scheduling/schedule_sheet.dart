@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/scheduling/schedule_labels.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/scheduling/schedule_time.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/scheduling/schedule_labels.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/scheduling/schedule_time.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 /// The schedule picker (mockup screen 04): presets, three wheels and one
 /// button. Resolves with the chosen time, or null when closed.

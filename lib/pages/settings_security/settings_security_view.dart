@@ -3,30 +3,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_security/default_retention_sheet.dart';
-import 'package:fluffychat/pages/settings_security/privacy_toggles.dart';
-import 'package:fluffychat/pages/settings_security/settings_security.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/beautify_string_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/retention/default_retention.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/widgets/app_lock.dart';
-import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/settings/settings_group.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
-import 'package:fluffychat/widgets/settings/settings_scaffold.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings_security/default_retention_sheet.dart';
+import 'package:odango/pages/settings_security/privacy_toggles.dart';
+import 'package:odango/pages/settings_security/settings_security.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/beautify_string_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/retention/default_retention.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/widgets/app_lock.dart';
+import 'package:odango/widgets/database_unencrypted_warning.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 class SettingsSecurityView extends StatelessWidget {
   final SettingsSecurityController controller;

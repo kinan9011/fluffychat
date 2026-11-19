@@ -6,13 +6,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/search/index_policy.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/search/index_policy.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/message_index.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 import 'utils/fake_search_database.dart';
 

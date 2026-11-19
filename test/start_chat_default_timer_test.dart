@@ -5,12 +5,12 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/adaptive_dialogs/user_dialog.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';

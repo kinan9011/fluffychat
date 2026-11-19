@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/local_search.dart';
+import 'package:odango/utils/search/local_search.dart';
 
 /// The part of a message that is shown under its name in the results, with
 /// the highlight ranges moved to match.

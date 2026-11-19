@@ -5,13 +5,13 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/widgets/avatar.dart';
 
 Future<List<String>?> showFolderChatPicker(
   BuildContext context,

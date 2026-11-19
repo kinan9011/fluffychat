@@ -6,15 +6,15 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/search/index_policy.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/search/index_policy.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 /// Plaintext of encrypted rooms for global search, one document per account
 /// inside that account's encrypted database. Nothing is written to the shared
@@ -48,7 +48,7 @@ class MessageIndex {
          now: now,
        );
 
-  static const documentKey = 'im.fluffychat.search.v1';
+  static const documentKey = 'com.swovo.odango.search.v1';
   static const maxEntries = 5000;
   static const maxPendingEdits = 200;
   static const maxDocumentBytes = 2 * 1024 * 1024;

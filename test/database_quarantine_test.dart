@@ -5,8 +5,8 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine.dart';
 
 void main() {
   late Directory dir;

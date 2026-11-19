@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/html_limits.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/html_limits.dart';
 
 dom.Element body(String html) => parser.parse(html).body!;
 

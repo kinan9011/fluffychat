@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 void main() {
   final now = DateTime(2031, 6, 15, 23, 59);

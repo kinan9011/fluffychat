@@ -5,13 +5,13 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
 
 enum UtdWhyAction { verify, restore }
 

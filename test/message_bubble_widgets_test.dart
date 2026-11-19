@@ -5,21 +5,21 @@
 
 import 'dart:ui' show SemanticsAction, Tristate;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/events/file_bubble_view.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
-import 'package:fluffychat/pages/chat/events/poll.dart';
-import 'package:fluffychat/pages/chat/events/reaction_bar.dart';
-import 'package:fluffychat/pages/chat/events/reaction_pills.dart';
-import 'package:fluffychat/pages/chat/events/voice_bubble_view.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
-import 'package:fluffychat/utils/chat/reaction_summary.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/events/file_bubble_view.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
+import 'package:odango/pages/chat/events/poll.dart';
+import 'package:odango/pages/chat/events/reaction_bar.dart';
+import 'package:odango/pages/chat/events/reaction_pills.dart';
+import 'package:odango/pages/chat/events/voice_bubble_view.dart';
+import 'package:odango/pages/chat/seen_by_row.dart';
+import 'package:odango/utils/chat/reaction_summary.dart';
+import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

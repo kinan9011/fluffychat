@@ -5,10 +5,10 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/privacy/presence_policy.dart';
-import 'package:fluffychat/utils/status/status_policy.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/privacy/presence_policy.dart';
+import 'package:odango/utils/status/status_policy.dart';
 
 class StatusClearRecord {
   const StatusClearRecord(this.userId, this.message, this.clearAtMs);
@@ -34,7 +34,7 @@ class StatusClearRecord {
 class StatusClearStore {
   StatusClearStore({DateTime Function()? now}) : _now = now ?? DateTime.now;
 
-  static const key = 'chat.fluffy.status_clear';
+  static const key = 'com.swovo.odango.status_clear';
   static const maxRecords = 16;
   static const maxUserIdLength = 256;
 

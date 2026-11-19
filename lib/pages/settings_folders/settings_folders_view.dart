@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_folders/settings_folders.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings_folders/settings_folders.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/widgets/layouts/max_width_body.dart';
 
 class SettingsFoldersView extends StatelessWidget {
   final SettingsFoldersController controller;

@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/encryption.dart' show cacheTypes;
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/secure_storage.dart';
 
 typedef SecretStore = ({
   Future<Map<String, String>> Function() readAll,

@@ -3,24 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:convert';
-
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
-import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/support/support_dialog.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/update_checker.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UpdateNotifier {
   static const String versionStoreKey = 'last_known_version';
   static const String dismissedUpdateStoreKey = 'dismissed_update_version';
-  static const String _windowsInstallerAssetName =
-      'fluffychat-windows-x64-setup.exe';
 
   /// Checks GitHub for a newer release with a Windows installer and
   /// displays a banner with a download link. Only for Windows, as all other
@@ -36,30 +33,16 @@ abstract class UpdateNotifier {
     if (AppSettings.lastUpdateCheckDate.value == today) return;
     await AppSettings.lastUpdateCheckDate.setItem(today);
 
-    final String latestVersion;
-    final String downloadUrl;
-    try {
-      final response = await http.get(
-        Uri.parse(AppConfig.latestReleaseApiUrl),
-        headers: {'Accept': 'application/vnd.github+json'},
-      );
-      if (response.statusCode != 200) return;
-      final release = jsonDecode(response.body) as Map<String, Object?>;
-      latestVersion = (release['tag_name'] as String).replaceFirst(
-        RegExp('^v'),
-        '',
-      );
-      final installer = (release['assets'] as List)
-          .cast<Map<String, Object?>>()
-          .firstWhere((asset) => asset['name'] == _windowsInstallerAssetName);
-      downloadUrl = installer['browser_download_url'] as String;
-    } catch (e, s) {
-      Logs().w('Unable to check for updates', e, s);
-      return;
-    }
-
-    final currentVersion = await PlatformInfos.getVersion();
-    if (latestVersion == currentVersion) return;
+    final client = http.Client();
+    final update = await checkForUpdate(
+      client: client,
+      repo: RepoLinks.confirmed(),
+      currentVersion: await PlatformInfos.getVersion(),
+    );
+    client.close();
+    if (update == null) return;
+    final latestVersion = update.version;
+    final downloadUrl = update.downloadUrl;
 
     final store = await SharedPreferences.getInstance();
     if (store.getString(dismissedUpdateStoreKey) == latestVersion) return;
@@ -101,11 +84,13 @@ abstract class UpdateNotifier {
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 256),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-                child: Image.asset('assets/logo/mini/banner.png'),
+            title: Center(
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/logo/mini/logo_mini.png',
+                  width: 96,
+                  height: 96,
+                ),
               ),
             ),
             content: ConstrainedBox(
@@ -130,7 +115,7 @@ abstract class UpdateNotifier {
               AdaptiveDialogAction(
                 bigButtons: true,
                 targetPlatform: TargetPlatform.android,
-                onPressed: () => launchWebUrl(AppConfig.helpUrl),
+                onPressed: () => showSupportDialog(context),
                 child: Row(
                   mainAxisSize: .min,
                   spacing: 4,
@@ -151,7 +136,8 @@ abstract class UpdateNotifier {
               AdaptiveDialogAction(
                 bigButtons: true,
                 targetPlatform: TargetPlatform.android,
-                onPressed: () => launchWebUrl(AppConfig.changelogUrl),
+                onPressed: () =>
+                    launchWebUrl(RepoLinks.configured.releases.toString()),
                 child: Text(l10n.changelog),
               ),
               AdaptiveDialogAction(

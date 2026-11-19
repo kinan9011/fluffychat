@@ -3,13 +3,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat_list/peek_sheet.dart';
-import 'package:fluffychat/utils/chat_list/peek_menu.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/routes.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat_list/peek_sheet.dart';
+import 'package:odango/utils/chat_list/peek_menu.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';
@@ -54,7 +54,7 @@ void main() {
     client.backgroundSync = false;
     api = FakeMatrixApi.currentApi!;
     FakeMatrixApi.client = client;
-    for (final tag in ['im.fluffychat.archived', 'm.favourite']) {
+    for (final tag in ['com.swovo.odango.archived', 'm.favourite']) {
       api.api['PUT']!['/client/v3/user/$_user/rooms/$_roomPath/tags/$tag'] =
           (_) => {};
       api.api['DELETE']!['/client/v3/user/$_user/rooms/$_roomPath/tags/$tag'] =
@@ -415,9 +415,9 @@ void main() {
     await settle(tester);
     expect(
       FakeMatrixApi.calledEndpoints.keys.where(
-        (path) => path.contains('/tags/im.fluffychat.archived'),
+        (path) => path.contains('/tags/com.swovo.odango.archived'),
       ),
-      ['/client/v3/user/$_user/rooms/$_roomPath/tags/im.fluffychat.archived'],
+      ['/client/v3/user/$_user/rooms/$_roomPath/tags/com.swovo.odango.archived'],
     );
     await finish(tester);
   });

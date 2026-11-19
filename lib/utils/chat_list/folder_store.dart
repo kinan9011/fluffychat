@@ -6,9 +6,9 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_room_id.dart';
 
 enum FolderChatType {
   dm,
@@ -106,7 +106,7 @@ class FolderTooLargeException implements Exception {
 }
 
 abstract class FolderStore {
-  static const accountDataType = 'im.fluffychat.folders';
+  static const accountDataType = 'com.swovo.odango.folders';
   static const version = 1;
   static const maxFolders = 30;
   static const maxRoomsPerFolder = 500;

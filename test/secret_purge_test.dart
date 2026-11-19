@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/account_secret_purge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/encryption.dart' show cacheTypes;
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/account_secret_purge.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Store {
@@ -46,8 +46,8 @@ void main() {
     'FluffyChat_session_backup_a': 'b',
     'FluffyChat_session_backup_old': 'b',
     'ssss_recovery_key_@gone:example.org': 'r',
-    'chat.fluffy.app_lock': '1234',
-    'chat.fluffy.use_biometrics': 'true',
+    'com.swovo.odango.app_lock': '1234',
+    'com.swovo.odango.use_biometrics': 'true',
     'unrelated': 'keep',
   };
 
@@ -62,8 +62,8 @@ void main() {
       expect(isAccountSecretKey(key), isTrue, reason: key);
     }
     for (final key in [
-      'chat.fluffy.app_lock',
-      'chat.fluffy.use_biometrics',
+      'com.swovo.odango.app_lock',
+      'com.swovo.odango.use_biometrics',
       'unrelated',
     ]) {
       expect(isAccountSecretKey(key), isFalse, reason: key);
@@ -78,8 +78,8 @@ void main() {
 
     expect(ok, isTrue);
     expect(store.data.keys.toSet(), {
-      'chat.fluffy.app_lock',
-      'chat.fluffy.use_biometrics',
+      'com.swovo.odango.app_lock',
+      'com.swovo.odango.use_biometrics',
       'unrelated',
     });
   });
@@ -157,7 +157,7 @@ void main() {
       expect(ok, isTrue);
       expect(repair.readAlls, 0);
       expect(repair.deleted, isEmpty);
-      expect(store.data['chat.fluffy.app_lock'], '1234');
+      expect(store.data['com.swovo.odango.app_lock'], '1234');
     },
   );
 }

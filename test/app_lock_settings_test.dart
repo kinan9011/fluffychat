@@ -5,16 +5,16 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/main.dart';
-import 'package:fluffychat/pages/app_lock_unavailable/app_lock_unavailable_page.dart';
-import 'package:fluffychat/utils/app_lock_settings.dart';
-import 'package:fluffychat/utils/secure_storage.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/main.dart';
+import 'package:odango/pages/app_lock_unavailable/app_lock_unavailable_page.dart';
+import 'package:odango/utils/app_lock_settings.dart';
+import 'package:odango/utils/secure_storage.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -39,8 +39,8 @@ void main() {
       _mockStorage((call) async {
         final key = (call.arguments as Map)['key'];
         return switch (key) {
-          'chat.fluffy.app_lock' => '1234',
-          'chat.fluffy.use_biometrics' => 'true',
+          'com.swovo.odango.app_lock' => '1234',
+          'com.swovo.odango.use_biometrics' => 'true',
           _ => null,
         };
       });

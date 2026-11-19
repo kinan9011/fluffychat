@@ -5,9 +5,9 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/utils/chat/menu_placement.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/chat/menu_placement.dart';
 
 void main() {
   const screen = Size(400, 800);

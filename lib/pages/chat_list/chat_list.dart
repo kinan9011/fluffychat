@@ -5,24 +5,24 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
-import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/route_path.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/chat_list_view.dart';
+import 'package:odango/pages/chat_list/swipe_action_row.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/route_path.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
 
 import '../../../utils/account_bundles.dart';
 import '../../config/setting_keys.dart';

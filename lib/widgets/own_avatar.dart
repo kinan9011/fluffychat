@@ -5,10 +5,10 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class OwnAvatar extends StatefulWidget {
   final double size;

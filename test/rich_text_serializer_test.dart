@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 Block para(String text, {Set<InlineMark> marks = const {}, Uri? link}) =>
     Block(BlockKind.paragraph, [TextRun(text, marks: marks, link: link)]);

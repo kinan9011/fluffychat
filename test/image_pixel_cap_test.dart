@@ -5,10 +5,10 @@
 
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/image_pixel_cap.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/image_pixel_cap.dart';
 
 int _crc32(List<int> data) {
   var crc = 0xFFFFFFFF;

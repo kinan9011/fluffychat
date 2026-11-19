@@ -5,16 +5,16 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/logout_cleanup.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
-import 'package:fluffychat/utils/status/status_clear_store.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/logout_cleanup.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
+import 'package:odango/utils/status/status_clear_store.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/test_client.dart';

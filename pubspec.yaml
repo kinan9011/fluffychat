@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-name: fluffychat
+name: odango
 description: Chat with your friends.
 publish_to: none
 # On version bump please also increase the build number (for F-Droid)
@@ -145,15 +145,17 @@ flutter_launcher_icons:
   adaptive_icon_background: assets/logo/img/logo_background.png
   adaptive_icon_monochrome: assets/logo/img/logo_mono.png
   ios: true
+  remove_alpha_ios: true
   macos:
     generate: true
   windows:
     generate: true
+    icon_size: 256
   web:
     generate: true
     image_path: assets/logo/img/logo_standalone.png
-    background_color: "#FFFFFF"
-    theme_color: "#41a2bc"
+    background_color: "#FFF8F5"
+    theme_color: "#F28DA6"
 
 # Guidelines for adding a dependency override:
 # 1. Don't do it if you can avoid it or fix it upstream in a manageable time

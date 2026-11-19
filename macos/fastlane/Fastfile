@@ -28,7 +28,7 @@ def setup_signing()
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       targets: "Runner",
-      profile_name: "match AppStore im.fluffychat.app macos",
+      profile_name: "match AppStore com.swovo.odango macos",
       code_sign_identity: "Apple Distribution",
       build_configurations: "Release"
     )
@@ -61,7 +61,7 @@ platform :mac do
       app_platform: "osx",
       distribute_external: true,
       groups: "Beta",
-      changelog: "Please search for regressions and report them on: https://github.com/krille-chan/fluffychat/issues"
+      changelog: "Please search for regressions and report them on: https://github.com/swovo/odango/issues"
     )
   end
 

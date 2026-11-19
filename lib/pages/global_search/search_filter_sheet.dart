@@ -3,21 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/global_search/search_result_widgets.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/settings/settings_segmented.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/global_search/search_result_widgets.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_kind.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 Future<MessageSearchFilter?> showSearchFilterSheet(
   BuildContext context, {

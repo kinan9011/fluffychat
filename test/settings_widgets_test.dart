@@ -5,17 +5,17 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/oklch.dart';
-import 'package:fluffychat/widgets/settings/settings_group.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
-import 'package:fluffychat/widgets/settings/settings_scaffold.dart';
-import 'package:fluffychat/widgets/settings/settings_segmented.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/oklch.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 import 'utils/golden.dart';
 

@@ -5,12 +5,12 @@
 
 import 'dart:ui';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:fluffychat/utils/notification_avatar_extension.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/notification_avatar_extension.dart';
 import 'package:uuid/uuid.dart';
 
 Future<CallKitParams> buildFluffyChatCallKitParams(

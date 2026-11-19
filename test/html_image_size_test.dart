@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/html_image_size.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/parser.dart' as parser;
+import 'package:odango/utils/html_image_size.dart';
 
 void main() {
   group('htmlImageSize', () {

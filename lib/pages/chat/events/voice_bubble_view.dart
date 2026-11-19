@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
 
 /// Play button, 26 bars and the duration (DESIGN.md 7.8). [bars] are 0..1,
 /// [progress] is 0..1. [seek] is an invisible control laid over the bars.

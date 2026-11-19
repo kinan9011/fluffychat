@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/main.dart' as app;
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/main.dart' as app;
+import 'package:odango/widgets/matrix.dart';
 
 extension type FluffyChatTester(WidgetTester tester) {
   static int _printCounter = 1;

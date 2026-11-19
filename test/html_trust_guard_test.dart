@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat/events/html_message.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/pages/chat/events/html_message.dart';
 
 /// The bubble restyle (W04) must not widen what the HTML renderer accepts
 /// from other people. Adding a tag here is a security decision: change this

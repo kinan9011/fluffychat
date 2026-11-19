@@ -6,15 +6,15 @@
 import 'dart:io';
 import 'dart:ui' show Tristate;
 
-import 'package:fluffychat/pages/topics/sending_to_bar.dart';
-import 'package:fluffychat/pages/topics/topic_chip_bar.dart';
-import 'package:fluffychat/pages/topics/topic_create_sheet.dart';
-import 'package:fluffychat/pages/topics/topic_row.dart';
-import 'package:fluffychat/utils/topics/topic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/topics/sending_to_bar.dart';
+import 'package:odango/pages/topics/topic_chip_bar.dart';
+import 'package:odango/pages/topics/topic_create_sheet.dart';
+import 'package:odango/pages/topics/topic_row.dart';
+import 'package:odango/utils/topics/topic.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

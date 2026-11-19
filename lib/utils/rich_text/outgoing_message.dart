@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/editor_text.dart';
-import 'package:fluffychat/utils/rich_text/format_state.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/editor_text.dart';
+import 'package:odango/utils/rich_text/format_state.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
 
 sealed class OutgoingText {
   const OutgoingText();

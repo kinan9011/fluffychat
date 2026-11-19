@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
 
 GlobalAppearance readGlobalAppearance() => GlobalAppearance(
   preset: isWallpaperPresetId(AppSettings.chatWallpaperPreset.value)

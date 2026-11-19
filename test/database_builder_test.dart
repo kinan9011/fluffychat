@@ -6,15 +6,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/encryption.dart' show cacheTypes;
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_error.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/src/sqflite_ffi_exception.dart';
 
@@ -470,12 +470,12 @@ void main() {
           'ssss_recovery_key_@a:example.org': 'recovery',
           'ssss_recovery_key_@b:example.org': 'recovery',
           'ssss_recovery_key_@other:example.org': 'keep',
-          'chat.fluffy.app_lock': '1234',
+          'com.swovo.odango.app_lock': '1234',
         });
 
         await reset(['a', 'b']);
 
-        expect(storage.keys.toSet(), {'chat.fluffy.app_lock'});
+        expect(storage.keys.toSet(), {'com.swovo.odango.app_lock'});
       },
     );
 

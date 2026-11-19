@@ -5,62 +5,62 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/pages/archive/archive.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_page.dart';
-import 'package:fluffychat/pages/calls/calls_page.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/scheduling/scheduled_messages_page.dart';
-import 'package:fluffychat/pages/chat_access_settings/chat_access_settings_controller.dart';
-import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_members/chat_members.dart';
-import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
-import 'package:fluffychat/pages/chat_search/chat_search_page.dart';
-import 'package:fluffychat/pages/device_settings/device_settings.dart';
-import 'package:fluffychat/pages/export/export_page.dart';
-import 'package:fluffychat/pages/global_search/global_search.dart';
-import 'package:fluffychat/pages/intro/intro_page_presenter.dart';
-import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
-import 'package:fluffychat/pages/login/login.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
-import 'package:fluffychat/pages/profile/profile_page.dart';
-import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
-import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
-import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
-import 'package:fluffychat/pages/settings_data/settings_data.dart';
-import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
-import 'package:fluffychat/pages/settings_folders/folder_editor.dart';
-import 'package:fluffychat/pages/settings_folders/settings_folders.dart';
-import 'package:fluffychat/pages/settings_homeserver/homeserver_details.dart';
-import 'package:fluffychat/pages/settings_homeserver/settings_homeserver.dart';
-import 'package:fluffychat/pages/settings_ignore_list/settings_ignore_list.dart';
-import 'package:fluffychat/pages/settings_notifications/settings_notifications.dart';
-import 'package:fluffychat/pages/settings_password/settings_password.dart';
-import 'package:fluffychat/pages/settings_security/settings_security.dart';
-import 'package:fluffychat/pages/sign_in/sign_in_page.dart';
-import 'package:fluffychat/pages/space_overview/space_overview.dart';
-import 'package:fluffychat/pages/topics/topics_page.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/search/search_sections.dart';
-import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
-import 'package:fluffychat/utils/spaces/space_trail.dart';
-import 'package:fluffychat/widgets/config_viewer.dart';
-import 'package:fluffychat/widgets/database_quarantine_banner.dart';
-import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
-import 'package:fluffychat/widgets/layouts/app_shell.dart';
-import 'package:fluffychat/widgets/layouts/app_tab.dart';
-import 'package:fluffychat/widgets/layouts/empty_page.dart';
-import 'package:fluffychat/widgets/log_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/pages/archive/archive.dart';
+import 'package:odango/pages/bootstrap/bootstrap_page.dart';
+import 'package:odango/pages/calls/calls_page.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/scheduling/scheduled_messages_page.dart';
+import 'package:odango/pages/chat_access_settings/chat_access_settings_controller.dart';
+import 'package:odango/pages/chat_details/chat_details.dart';
+import 'package:odango/pages/chat_encryption_settings/chat_encryption_settings.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/chat_members/chat_members.dart';
+import 'package:odango/pages/chat_permissions_settings/chat_permissions_settings.dart';
+import 'package:odango/pages/chat_search/chat_search_page.dart';
+import 'package:odango/pages/device_settings/device_settings.dart';
+import 'package:odango/pages/export/export_page.dart';
+import 'package:odango/pages/global_search/global_search.dart';
+import 'package:odango/pages/intro/intro_page_presenter.dart';
+import 'package:odango/pages/invitation_selection/invitation_selection.dart';
+import 'package:odango/pages/login/login.dart';
+import 'package:odango/pages/new_group/new_group.dart';
+import 'package:odango/pages/new_private_chat/new_private_chat.dart';
+import 'package:odango/pages/profile/profile_page.dart';
+import 'package:odango/pages/settings/settings.dart';
+import 'package:odango/pages/settings_3pid/settings_3pid.dart';
+import 'package:odango/pages/settings_appearance/settings_appearance.dart';
+import 'package:odango/pages/settings_chat/settings_chat.dart';
+import 'package:odango/pages/settings_data/settings_data.dart';
+import 'package:odango/pages/settings_emotes/settings_emotes.dart';
+import 'package:odango/pages/settings_folders/folder_editor.dart';
+import 'package:odango/pages/settings_folders/settings_folders.dart';
+import 'package:odango/pages/settings_homeserver/homeserver_details.dart';
+import 'package:odango/pages/settings_homeserver/settings_homeserver.dart';
+import 'package:odango/pages/settings_ignore_list/settings_ignore_list.dart';
+import 'package:odango/pages/settings_notifications/settings_notifications.dart';
+import 'package:odango/pages/settings_password/settings_password.dart';
+import 'package:odango/pages/settings_security/settings_security.dart';
+import 'package:odango/pages/sign_in/sign_in_page.dart';
+import 'package:odango/pages/space_overview/space_overview.dart';
+import 'package:odango/pages/topics/topics_page.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/search/search_sections.dart';
+import 'package:odango/utils/spaces/space_hierarchy.dart';
+import 'package:odango/utils/spaces/space_trail.dart';
+import 'package:odango/widgets/config_viewer.dart';
+import 'package:odango/widgets/database_quarantine_banner.dart';
+import 'package:odango/widgets/database_unencrypted_warning.dart';
+import 'package:odango/widgets/layouts/app_shell.dart';
+import 'package:odango/widgets/layouts/app_tab.dart';
+import 'package:odango/widgets/layouts/empty_page.dart';
+import 'package:odango/widgets/log_view.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/share_scaffold_dialog.dart';
 
 final _matrixUriId = RegExp(r'^[^/?#%\\\s\x00-\x1f\x7f]{1,255}$');
 
@@ -104,10 +104,7 @@ abstract class AppRoutes {
     }
 
     // Workaround for content sharings passed to go router:
-    if ({
-      'content',
-      'sharemedia-im.fluffychat.app',
-    }.contains(state.uri.scheme)) {
+    if ({'content', 'sharemedia-com.swovo.odango'}.contains(state.uri.scheme)) {
       Logs().d('Ignore content sharing handling in go router');
       return '/';
     }

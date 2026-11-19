@@ -7,15 +7,15 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/bounded_matrix_request.dart';
-import 'package:fluffychat/utils/search/public_directory.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_query.dart';
-import 'package:fluffychat/utils/search/server_search.dart';
-import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' show BaseRequest, StreamedResponse;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/bounded_matrix_request.dart';
+import 'package:odango/utils/search/public_directory.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_query.dart';
+import 'package:odango/utils/search/server_search.dart';
+import 'package:odango/utils/spaces/space_hierarchy.dart';
 
 import 'utils/recording_api.dart';
 import 'utils/search_fixtures.dart';

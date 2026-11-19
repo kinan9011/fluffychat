@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/topics/topic.dart';
-import 'package:fluffychat/utils/topics/topic_loader.dart';
-import 'package:fluffychat/utils/topics/topic_unread.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/topics/topic.dart';
+import 'package:odango/utils/topics/topic_loader.dart';
+import 'package:odango/utils/topics/topic_unread.dart';
 
 enum TopicsStatus { loading, ready, failed }
 

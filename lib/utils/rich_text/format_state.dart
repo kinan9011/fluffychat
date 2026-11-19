@@ -5,10 +5,10 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/link_policy.dart';
 import 'package:flutter/widgets.dart' show TextRange;
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/link_policy.dart';
 
 /// Inline formatting of the composer text as ranges over its UTF-16 offsets,
 /// plus the flag that the user used the format controls ([richIntent]).

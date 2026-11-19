@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/design_constants.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 
 class ReactionEntry {
   static const maxKeyLength = 128;

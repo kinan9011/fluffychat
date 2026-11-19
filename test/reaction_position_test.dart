@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/events/reaction_bar.dart';
-import 'package:fluffychat/pages/chat/events/reaction_pills.dart';
-import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/events/reaction_bar.dart';
+import 'package:odango/pages/chat/events/reaction_pills.dart';
+import 'package:odango/utils/chat/bubble_shape.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/reaction_fixtures.dart';

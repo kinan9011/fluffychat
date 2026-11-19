@@ -5,22 +5,22 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/chat_list/unread_counts.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
-import 'package:fluffychat/widgets/layouts/app_tab.dart';
-import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/chat_list/unread_counts.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/stream_extension.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/layouts/app_nav_rail.dart';
+import 'package:odango/widgets/layouts/app_tab.dart';
+import 'package:odango/widgets/layouts/two_column_layout.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/own_avatar.dart';
 
 class AppShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;

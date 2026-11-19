@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat/events/poll.dart';
-import 'package:fluffychat/pages/chat/poll_composer/poll_composer.dart';
-import 'package:fluffychat/utils/polls/poll_content.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/events/poll.dart';
+import 'package:odango/pages/chat/poll_composer/poll_composer.dart';
+import 'package:odango/utils/polls/poll_content.dart';
 
 import 'utils/golden.dart';
 import 'utils/recording_api.dart';

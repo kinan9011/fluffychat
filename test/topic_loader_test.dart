@@ -5,11 +5,11 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/topics/topic.dart';
-import 'package:fluffychat/utils/topics/topic_loader.dart';
-import 'package:fluffychat/utils/topics/topics_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/topics/topic.dart';
+import 'package:odango/utils/topics/topic_loader.dart';
+import 'package:odango/utils/topics/topics_model.dart';
 
 import 'utils/test_client.dart';
 

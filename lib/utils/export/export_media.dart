@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 final _activeExtension = RegExp(
   r'\.(x?html?|shtml|mht(?:ml)?|svgz?|xml|xsl|xslt|m?js|hta)$',

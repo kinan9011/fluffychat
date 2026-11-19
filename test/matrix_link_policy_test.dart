@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/links/matrix_link_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/links/matrix_link_policy.dart';
 
 void main() {
   group('accepted', () {
@@ -74,7 +74,7 @@ void main() {
             event: r'$event1:example.org',
             via: const [],
           ),
-          'im.fluffychat://chat/@alice:example.org': (
+          'com.swovo.odango://chat/@alice:example.org': (
             kind: ScannedKind.user,
             id: '@alice:example.org',
             event: null,

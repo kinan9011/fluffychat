@@ -3,16 +3,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/file_bubble_view.dart';
-import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/file_description.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/pages/chat/events/file_bubble_view.dart';
+import 'package:odango/pages/chat/events/file_send_status_indicator.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/file_description.dart';
+import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:odango/utils/url_launcher.dart';
 
 class MessageDownloadContent extends StatelessWidget {
   final Event event;

@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/widgets/avatar.dart';
 
 /// A user or room in the mention suggestions. The avatar colour comes from the
 /// Matrix ID: the display name belongs to whoever set it.

@@ -5,15 +5,15 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/topics/topic_create_sheet.dart';
-import 'package:fluffychat/pages/topics/topics_view.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/topics/topic.dart';
-import 'package:fluffychat/utils/topics/topics_model.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/topics/topic_create_sheet.dart';
+import 'package:odango/pages/topics/topics_view.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/topics/topic.dart';
+import 'package:odango/utils/topics/topics_model.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class TopicsPage extends StatefulWidget {
   const TopicsPage({required this.roomId, super.key});

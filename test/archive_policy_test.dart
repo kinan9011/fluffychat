@@ -3,15 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/chat_list/archive_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/chat_list/archive_policy.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/test_client.dart';
 
-const _archived = {'im.fluffychat.archived': null};
+const _archived = {'com.swovo.odango.archived': null};
 const _user = '%40test%3AfakeServer.notExisting';
 
 void main() {
@@ -27,7 +27,7 @@ void main() {
     other = await prepareTestClient(clientName: 'Policy other client');
     FakeMatrixApi.client = client;
     for (final id in ['ap1', 'ap2', 'ap3']) {
-      api.api['DELETE']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/im.fluffychat.archived'] =
+      api.api['DELETE']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/com.swovo.odango.archived'] =
           (_) => {};
     }
   });
@@ -170,13 +170,13 @@ void main() {
     await policy.handle(mention('!ap1:x', 1));
     expect(
       FakeMatrixApi.calledEndpoints.keys.where((p) => p.contains('/tags/')),
-      ['/client/v3/user/$_user/rooms/!ap1%3Ax/tags/im.fluffychat.archived'],
+      ['/client/v3/user/$_user/rooms/!ap1%3Ax/tags/com.swovo.odango.archived'],
     );
   });
 
   test('a failing request is swallowed and logged without the room id', () async {
     room('!ap3:x');
-    api.api['DELETE']!['/client/v3/user/$_user/rooms/!ap3%3Ax/tags/im.fluffychat.archived'] =
+    api.api['DELETE']!['/client/v3/user/$_user/rooms/!ap3%3Ax/tags/com.swovo.odango.archived'] =
         (_) => throw Exception('offline');
     Logs().outputEvents.clear();
     await UnarchiveOnMention(client).handle(mention('!ap3:x', 1));
@@ -187,7 +187,7 @@ void main() {
     for (final event in Logs().outputEvents) {
       expect('${event.title}${event.exception}', isNot(contains('!ap3')));
     }
-    api.api['DELETE']!['/client/v3/user/$_user/rooms/!ap3%3Ax/tags/im.fluffychat.archived'] =
+    api.api['DELETE']!['/client/v3/user/$_user/rooms/!ap3%3Ax/tags/com.swovo.odango.archived'] =
         (_) => {};
   });
 }

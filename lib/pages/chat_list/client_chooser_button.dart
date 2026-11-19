@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:async/async.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/status/status_sheet.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' hide Result;
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/status/status_sheet.dart';
+import 'package:odango/pages/support/support_dialog.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/matrix.dart';
 
 import '../../utils/fluffy_share.dart';
 import 'chat_list.dart';
@@ -103,7 +103,7 @@ class ClientChooserButton extends StatelessWidget {
           children: [
             Icon(Icons.favorite, color: Colors.red),
             const SizedBox(width: 18),
-            Text(L10n.of(context).supportFluffyChat),
+            Text(L10n.of(context).supportOdango),
           ],
         ),
       ),
@@ -235,9 +235,7 @@ class ClientChooserButton extends StatelessWidget {
           FluffyShare.shareInviteLink(context);
           break;
         case SettingsAction.support:
-          launchWebUrl(
-            'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I',
-          );
+          showSupportDialog(context);
           break;
         case SettingsAction.settings:
           context.go('/settings');

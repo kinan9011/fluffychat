@@ -7,11 +7,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Security Policy
 
-If you believe you have discovered a security vulnerability in this project, **do not open a public issue**.
+If you believe you have discovered a security vulnerability in Odango, **do not open a public issue**.
 
 To report a security issue responsibly, please go to the Security tab or visit:
 
-https://github.com/krille-chan/fluffychat/security/advisories/new
+https://github.com/swovo/odango/security/advisories/new
 
 The following information can help us address the issue:
 
@@ -20,3 +20,5 @@ The following information can help us address the issue:
 - The affected platforms
 
 We appreciate your report and will respond as quickly as possible. Please note that this project is maintained by volunteers and is provided without guarantees.
+
+Odango is a fork of FluffyChat. If the problem is also in the upstream code, please report it to the [FluffyChat project](https://github.com/krille-chan/fluffychat/security/advisories/new) too, so that both apps get the fix.

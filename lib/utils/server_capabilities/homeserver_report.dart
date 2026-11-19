@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 
 /// The rows of the Homeserver features screen, in the order of the mockup.
 const homeserverFeatureOrder = [

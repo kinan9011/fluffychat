@@ -31,43 +31,21 @@ jobs:
       - name: Build Release Web
         run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/web/"
       - name: Create archive
-        run: tar -czf fluffychat-web.tar.gz build/web/
+        run: tar -czf odango-web.tar.gz build/web/
       - name: Upload Web Build
         uses: actions/upload-artifact@v7
         with:
           name: Web Build
-          path: fluffychat-web.tar.gz
+          path: odango-web.tar.gz
       - name: Upload to release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: fluffychat-web.tar.gz
-          asset_name: fluffychat-web.tar.gz
+          asset_path: odango-web.tar.gz
+          asset_name: odango-web.tar.gz
           asset_content_type: application/gzip
-      - name: Clone fluffychat website
-        run: git clone https://github.com/krille-chan/fluffychat-website.git
-      - name: Build website
-        working-directory: fluffychat-website
-        run: |
-          npm ci
-          npm run build
-          mv out ../public
-      - name: Copy FluffyChat web into it
-        run: |
-          mkdir public/web
-          mkdir public/nightly
-          cp -r build/web/* public/web/
-          cp -r build/web/* public/nightly/
-      - name: Deploy to GitHub Pages
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
-          cname: fluffychat.im
 
   build_apk:
     runs-on: ubuntu-26.04
@@ -98,7 +76,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: build/app/outputs/apk/release/app-release.apk
-          asset_name: fluffychat.apk
+          asset_name: odango.apk
           asset_content_type: application/vnd.android.package-archive
 
   build_linux:
@@ -119,15 +97,15 @@ jobs:
       - run: ./flutter/bin/flutter pub get
       - run: ./flutter/bin/flutter build linux --target-platform linux-${{ matrix.arch }}
       - name: Create archive
-        run: tar -czf fluffychat-linux-${{ matrix.arch }}.tar.gz -C build/linux/${{ matrix.arch }}/release/bundle/ .
+        run: tar -czf odango-linux-${{ matrix.arch }}.tar.gz -C build/linux/${{ matrix.arch }}/release/bundle/ .
       - name: Upload to release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: fluffychat-linux-${{ matrix.arch }}.tar.gz
-          asset_name: fluffychat-linux-${{ matrix.arch }}.tar.gz
+          asset_path: odango-linux-${{ matrix.arch }}.tar.gz
+          asset_name: odango-linux-${{ matrix.arch }}.tar.gz
           asset_content_type: application/gzip
 
   deploy_snapstore:
@@ -173,8 +151,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/windows/installer/fluffychat-windows-x64-setup.exe
-          asset_name: fluffychat-windows-x64-setup.exe
+          asset_path: build/windows/installer/odango-windows-x64-setup.exe
+          asset_name: odango-windows-x64-setup.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
   deploy_playstore:
@@ -208,7 +186,7 @@ jobs:
           FDROID_KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: ./scripts/prepare-android-release.sh
-      # Because of https://ko-fi.com/post/Why-FluffyChat-is-no-longer-available-on-Android-A-A4E426QCYI
+      # The Play Store build drops the Android Auto metadata (Google Play developer verification requirements)
       - name: Remove Android Auto metadata for Play Store
         run: sed -i '/Android Auto/,/automotive_app_desc/d' android/app/src/main/AndroidManifest.xml
       - name: Build Android Release
@@ -274,6 +252,10 @@ jobs:
         run: gem install fastlane -NV
       - name: Deploy with fastlane
         env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
+          FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
+          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.FASTLANE_MATCH_PASSWORD }}
           APP_STORE_API_KEY: ${{ secrets.APP_STORE_API_KEY }}
@@ -306,6 +288,10 @@ jobs:
         run: gem install fastlane -NV
       - name: Deploy with fastlane
         env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
+          FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
+          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.FASTLANE_MATCH_PASSWORD }}
           APP_STORE_API_KEY: ${{ secrets.APP_STORE_API_KEY }}

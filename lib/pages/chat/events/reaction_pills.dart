@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat/reaction_summary.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/reaction_summary.dart';
+import 'package:odango/widgets/mxc_image.dart';
 
 /// Reactions under a bubble (DESIGN.md 7.6): own reactions accent filled,
 /// others on the surface colour. Taps are 44 px, the pill itself 28 px.

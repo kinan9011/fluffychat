@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
-import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/appearance/chat_appearance_scope.dart';
+import 'package:odango/utils/chat/bubble_shape.dart';
 
 enum BubbleKind { normal, error, undecryptable, deleted }
 

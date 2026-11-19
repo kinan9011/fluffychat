@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/database_key_error/database_key_error_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/database_key_error/database_key_error_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

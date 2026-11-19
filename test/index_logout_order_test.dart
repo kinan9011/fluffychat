@@ -5,14 +5,14 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/message_index.dart';
+import 'package:odango/utils/search/search_kind.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/recording_api.dart';

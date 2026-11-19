@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/utils/oklch.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/utils/oklch.dart';
 
 /// DESIGN.md 13 for the conversation: text pairs 4.5:1, graphics 3:1, for
 /// every accent hue in both themes.

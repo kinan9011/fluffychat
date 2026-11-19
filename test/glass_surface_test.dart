@@ -5,13 +5,13 @@
 
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/widgets/glass_surface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> pumpGlass(

@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
 
 /// "‹Name› signed in on a new device · Verify" (DESIGN.md 9.18, mockup C8).
 /// The name is one bounded line of its own, so it can never push the warning

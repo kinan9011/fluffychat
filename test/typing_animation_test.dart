@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/widgets/typing_animation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/widgets/typing_animation.dart';
 
 Widget _app({required bool reduceMotion}) => MaterialApp(
   home: MediaQuery(

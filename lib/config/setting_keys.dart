@@ -8,14 +8,16 @@ import 'dart:ui' show Color;
 
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/oklch.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:managed_configurations/managed_configurations.dart';
 import 'package:matrix/matrix.dart' show ShareKeysWith;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/branding/support_links.dart';
+import 'package:odango/utils/oklch.dart';
+import 'package:odango/utils/platform_infos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const defaultColorSchemeSeed = 0xFF5625BA;
@@ -24,102 +26,139 @@ enum AppSettings<T> {
   textMessageMaxLength<int>('textMessageMaxLength', 16384),
 
   /// Max lines for unselected HTML/text bubbles; 0 = unlimited (no fade).
-  messagePreviewMaxLines<int>('chat.fluffy.message_preview_max_lines', 50),
+  messagePreviewMaxLines<int>('com.swovo.odango.message_preview_max_lines', 50),
   audioRecordingNumChannels<int>('audioRecordingNumChannels', 1),
   audioRecordingAutoGain<bool>('audioRecordingAutoGain', true),
   audioRecordingEchoCancel<bool>('audioRecordingEchoCancel', false),
   audioRecordingNoiseSuppress<bool>('audioRecordingNoiseSuppress', true),
   audioRecordingBitRate<int>('audioRecordingBitRate', 64000),
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 48000),
-  showNoGoogle<bool>('chat.fluffy.show_no_google', false),
-  unifiedPushRegistered<bool>('chat.fluffy.unifiedpush.registered', false),
-  unifiedPushEndpoint<String>('chat.fluffy.unifiedpush.endpoint', ''),
-  pushNotificationsGatewayUrl<String>(
-    'pushNotificationsGatewayUrl',
-    'https://push.fluffychat.im/_matrix/push/v1/notify',
-  ),
+  showNoGoogle<bool>('com.swovo.odango.show_no_google', false),
+  unifiedPushRegistered<bool>('com.swovo.odango.unifiedpush.registered', false),
+  unifiedPushEndpoint<String>('com.swovo.odango.unifiedpush.endpoint', ''),
+  pushNotificationsGatewayUrl<String>('pushNotificationsGatewayUrl', ''),
   pushNotificationsPusherFormat<String>(
     'pushNotificationsPusherFormat',
     'event_id_only',
   ),
-  renderHtml<bool>('chat.fluffy.renderHtml', true),
-  fontSizeFactor<double>('chat.fluffy.font_size_factor', 1.0),
-  hideRedactedEvents<bool>('chat.fluffy.hideRedactedEvents', false),
-  hideUnknownEvents<bool>('chat.fluffy.hideUnknownEvents', true),
-  autoplayImages<bool>('chat.fluffy.autoplay_images', true),
-  sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', false),
-  sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', false),
-  shareOnlineStatus<bool>('chat.fluffy.share_online_status', false),
-  appearOffline<bool>('chat.fluffy.appear_offline', false),
-  presenceAway<bool>('chat.fluffy.presence_away', false),
-  defaultDisappearSeconds<int>('chat.fluffy.default_disappear_seconds', 0),
-  swipeRightToLeftToReply<bool>('chat.fluffy.swipeRightToLeftToReply', true),
-  sendOnEnter<bool>('chat.fluffy.send_on_enter', false),
-  shareKeysWith<String>('chat.fluffy.share_keys_with_2', 'all'),
+  renderHtml<bool>('com.swovo.odango.renderHtml', true),
+  fontSizeFactor<double>('com.swovo.odango.font_size_factor', 1.0),
+  hideRedactedEvents<bool>('com.swovo.odango.hideRedactedEvents', false),
+  hideUnknownEvents<bool>('com.swovo.odango.hideUnknownEvents', true),
+  autoplayImages<bool>('com.swovo.odango.autoplay_images', true),
+  sendTypingNotifications<bool>(
+    'com.swovo.odango.send_typing_notifications',
+    false,
+  ),
+  sendPublicReadReceipts<bool>(
+    'com.swovo.odango.send_public_read_receipts',
+    false,
+  ),
+  shareOnlineStatus<bool>('com.swovo.odango.share_online_status', false),
+  appearOffline<bool>('com.swovo.odango.appear_offline', false),
+  presenceAway<bool>('com.swovo.odango.presence_away', false),
+  defaultDisappearSeconds<int>('com.swovo.odango.default_disappear_seconds', 0),
+  swipeRightToLeftToReply<bool>(
+    'com.swovo.odango.swipeRightToLeftToReply',
+    true,
+  ),
+  sendOnEnter<bool>('com.swovo.odango.send_on_enter', false),
+  shareKeysWith<String>('com.swovo.odango.share_keys_with_2', 'all'),
   noEncryptionWarningShown<bool>(
-    'chat.fluffy.no_encryption_warning_shown',
+    'com.swovo.odango.no_encryption_warning_shown',
     false,
   ),
   databaseUnencryptedClients<List<String>>(
-    'chat.fluffy.database_unencrypted_clients',
+    'com.swovo.odango.database_unencrypted_clients',
     [],
   ),
   databaseQuarantinedClients<List<String>>(
-    'chat.fluffy.database_quarantined_clients',
+    'com.swovo.odango.database_quarantined_clients',
     [],
   ),
   databaseUnencryptedNoticeDismissed<bool>(
-    'chat.fluffy.database_unencrypted_notice_dismissed',
+    'com.swovo.odango.database_unencrypted_notice_dismissed',
     false,
   ),
-  displayChatDetailsColumn('chat.fluffy.display_chat_details_column', false),
+  displayChatDetailsColumn(
+    'com.swovo.odango.display_chat_details_column',
+    false,
+  ),
   // AppConfig-mirrored settings
-  applicationName<String>('chat.fluffy.application_name', 'FluffyChat'),
-  defaultHomeserver<String>('chat.fluffy.default_homeserver', 'matrix.org'),
+  applicationName<String>('com.swovo.odango.application_name', 'Odango'),
+  defaultHomeserver<String>(
+    'com.swovo.odango.default_homeserver',
+    'matrix.org',
+  ),
   // colorSchemeSeed stored as ARGB int
   colorSchemeSeedInt<int>(
-    'chat.fluffy.color_scheme_seed',
+    'com.swovo.odango.color_scheme_seed',
     defaultColorSchemeSeed,
   ),
-  accentHue<int>('chat.fluffy.accent_hue', 268),
-  reduceTransparency<bool>('chat.fluffy.reduce_transparency', false),
-  glassMode<String>('chat.fluffy.glass_mode', 'auto'),
-  chatWallpaperPreset<String>('chat.fluffy.chat_wallpaper_preset', 'default'),
-  chatWallpaperLocal<bool>('chat.fluffy.chat_wallpaper_local', false),
-  bubbleCorners<String>('chat.fluffy.bubble_corners', 'standard'),
-  callsEnabled<bool>('chat.fluffy.calls_enabled', true),
+  accentHue<int>('com.swovo.odango.accent_hue', 268),
+  reduceTransparency<bool>('com.swovo.odango.reduce_transparency', false),
+  glassMode<String>('com.swovo.odango.glass_mode', 'auto'),
+  chatWallpaperPreset<String>(
+    'com.swovo.odango.chat_wallpaper_preset',
+    'default',
+  ),
+  chatWallpaperLocal<bool>('com.swovo.odango.chat_wallpaper_local', false),
+  bubbleCorners<String>('com.swovo.odango.bubble_corners', 'standard'),
+  callsEnabled<bool>('com.swovo.odango.calls_enabled', true),
   emojiSuggestionLocale<String>('emoji_suggestion_locale', ''),
-  enableSoftLogout<bool>('chat.fluffy.enable_soft_logout', true),
-  enableMatrixNativeOIDC<bool>('chat.fluffy.enable_matrix_native_oidc', true),
-  presetHomeserver<String>('chat.fluffy.preset_homeserver', ''),
-  welcomeText<String>('chat.fluffy.welcome_text', ''),
-  website<String>('chat.fluffy.website_url', 'https://fluffychat.im'),
+  enableSoftLogout<bool>('com.swovo.odango.enable_soft_logout', true),
+  enableMatrixNativeOIDC<bool>(
+    'com.swovo.odango.enable_matrix_native_oidc',
+    true,
+  ),
+  presetHomeserver<String>('com.swovo.odango.preset_homeserver', ''),
+  welcomeText<String>('com.swovo.odango.welcome_text', ''),
+  website<String>('com.swovo.odango.website_url', 'https://odango.swovo.de'),
   logoUrl<String>(
-    'chat.fluffy.logo_url',
-    'https://fluffychat.im/assets/favicon.png',
+    'com.swovo.odango.logo_url',
+    'https://odango.swovo.de/assets/favicon.png',
   ),
   privacyPolicy<String>(
-    'chat.fluffy.privacy_policy_url',
-    'https://fluffychat.im/privacy',
+    'com.swovo.odango.privacy_policy_url',
+    'https://odango.swovo.de/privacy',
   ),
-  tos<String>('chat.fluffy.tos_url', 'https://fluffychat.im/tos'),
-  sendTimelineEventTimeout<int>('chat.fluffy.send_timeline_event_timeout', 15),
-  webNotificationSound<bool>('chat.fluffy.web_notification_sound', true),
-  chatFilter<String>('chat.fluffy.chat_filter', 'allChats'),
-  hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false),
-  spaceNavigation<String>('chat.fluffy.space_navigation', 'tabs'),
-  showFoldersAfterSpaces<bool>('chat.fluffy.show_folders_after_spaces', true),
-  showTabUnreadCounts<bool>('chat.fluffy.show_tab_unread_counts', true),
-  unarchiveOnMention<bool>('chat.fluffy.unarchive_on_mention', false),
-  showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true),
-  doubleTapToReact<bool>('chat.fluffy.double_tap_to_react', false),
-  doubleTapReaction<String>('chat.fluffy.double_tap_reaction', '❤️'),
-  benchmarksInLogs<bool>('chat.fluffy.benchmarks_in_logs', false),
-  autoSendErrorReports<bool?>('chat.fluffy.auto_send_eror_reports', null),
-  knownErrorHashes<List<String>>('chat.fluffy.known_crash_hashes', []),
-  checkForUpdates<bool>('chat.fluffy.check_for_updates', true),
-  lastUpdateCheckDate<String>('chat.fluffy.last_update_check_date', ''),
-  fallbackLiveKitInstance<String>('chat.fluffy.fallback_live_kit_instance', '');
+  tos<String>('com.swovo.odango.tos_url', 'https://odango.swovo.de/tos'),
+  repositoryUrl<String>(
+    'com.swovo.odango.repository_url',
+    'https://github.com/swovo/odango',
+  ),
+  repositoryConfirmed<bool>('com.swovo.odango.repository_confirmed', false),
+  koFiUrl<String>('com.swovo.odango.ko_fi_url', ''),
+  buyMeACoffeeUrl<String>('com.swovo.odango.buy_me_a_coffee_url', ''),
+  sendTimelineEventTimeout<int>(
+    'com.swovo.odango.send_timeline_event_timeout',
+    15,
+  ),
+  webNotificationSound<bool>('com.swovo.odango.web_notification_sound', true),
+  chatFilter<String>('com.swovo.odango.chat_filter', 'allChats'),
+  hideRoomsInSpaces<bool>('com.swovo.odango.hideRoomsInSpaces', false),
+  spaceNavigation<String>('com.swovo.odango.space_navigation', 'tabs'),
+  showFoldersAfterSpaces<bool>(
+    'com.swovo.odango.show_folders_after_spaces',
+    true,
+  ),
+  showTabUnreadCounts<bool>('com.swovo.odango.show_tab_unread_counts', true),
+  unarchiveOnMention<bool>('com.swovo.odango.unarchive_on_mention', false),
+  showThumbnailsInTimeline<bool>(
+    'com.swovo.odango.showThumbnailsInTimeline',
+    true,
+  ),
+  doubleTapToReact<bool>('com.swovo.odango.double_tap_to_react', false),
+  doubleTapReaction<String>('com.swovo.odango.double_tap_reaction', '❤️'),
+  benchmarksInLogs<bool>('com.swovo.odango.benchmarks_in_logs', false),
+  autoSendErrorReports<bool?>('com.swovo.odango.auto_send_eror_reports', null),
+  knownErrorHashes<List<String>>('com.swovo.odango.known_crash_hashes', []),
+  checkForUpdates<bool>('com.swovo.odango.check_for_updates', true),
+  lastUpdateCheckDate<String>('com.swovo.odango.last_update_check_date', ''),
+  fallbackLiveKitInstance<String>(
+    'com.swovo.odango.fallback_live_kit_instance',
+    '',
+  );
 
   final String key;
   final T _defaultValue;
@@ -208,7 +247,7 @@ enum AppSettings<T> {
         PlatformInfos.isMobile,
       );
     }
-    await store.remove('chat.fluffy.database_unencrypted');
+    await store.remove('com.swovo.odango.database_unencrypted');
     await migrateLegacyAccent(store);
 
     // Load configuration from config.json file or MDM:
@@ -305,6 +344,10 @@ final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
   AppSettings.logoUrl: _isHttpsUrl,
   AppSettings.privacyPolicy: _isHttpsUrl,
   AppSettings.tos: _isHttpsUrl,
+  AppSettings.repositoryUrl: (value) =>
+      value is String && RepoLinks.parse(value) != null,
+  AppSettings.koFiUrl: isAcceptableSupportUrl,
+  AppSettings.buyMeACoffeeUrl: isAcceptableSupportUrl,
 };
 
 const webAllowedSettings = <AppSettings<Object?>>{
@@ -319,6 +362,7 @@ const webAllowedSettings = <AppSettings<Object?>>{
   AppSettings.enableMatrixNativeOIDC,
   AppSettings.enableSoftLogout,
   AppSettings.checkForUpdates,
+  AppSettings.repositoryConfirmed,
   AppSettings.chatFilter,
   AppSettings.emojiSuggestionLocale,
   AppSettings.benchmarksInLogs,

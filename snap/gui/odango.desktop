@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Odango
+GenericName=Matrix Client
+Comment=Chat with your friends
+Exec=odango
+Icon=${SNAP}/meta/gui/odango.png
+Terminal=false
+Type=Application
+Categories=Network;Chat;InstantMessaging;

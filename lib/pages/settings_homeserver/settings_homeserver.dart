@@ -6,15 +6,15 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_homeserver/settings_homeserver_view.dart';
-import 'package:fluffychat/utils/bounded_body.dart';
-import 'package:fluffychat/utils/server_capabilities/homeserver_report.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings_homeserver/settings_homeserver_view.dart';
+import 'package:odango/utils/bounded_body.dart';
+import 'package:odango/utils/server_capabilities/homeserver_report.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SettingsHomeserver extends StatefulWidget {

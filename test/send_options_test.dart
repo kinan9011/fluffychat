@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/chat/scheduling/send_options_flow.dart';
-import 'package:fluffychat/utils/scheduling/send_options.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/scheduling/send_options_flow.dart';
+import 'package:odango/utils/scheduling/send_options.dart';
 
 import 'utils/test_client.dart';
 

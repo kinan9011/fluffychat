@@ -8,10 +8,10 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/archive_guard.dart';
-import 'package:fluffychat/utils/backup_dump_validator.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/archive_guard.dart';
+import 'package:odango/utils/backup_dump_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeFile extends XFile {

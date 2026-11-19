@@ -5,13 +5,13 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/format_state.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/outgoing_message.dart';
-import 'package:fluffychat/utils/rich_text/rich_mentions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/format_state.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/outgoing_message.dart';
+import 'package:odango/utils/rich_text/rich_mentions.dart';
 
 import 'utils/test_client.dart';
 

@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/launch_web_url.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 
 @immutable
 class FolderContext {

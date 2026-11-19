@@ -5,8 +5,8 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
 
 /// The only place that posts read receipts. [public] defaults to the privacy
 /// setting; the private receipt (`m.read.private`) always goes out so the

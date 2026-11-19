@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
 
 import '../../widgets/layouts/max_width_body.dart';
 import '../../widgets/matrix.dart';

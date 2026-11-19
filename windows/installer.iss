@@ -1,4 +1,4 @@
-﻿; Inno Setup script for the FluffyChat Windows installer.
+﻿; Inno Setup script for the Odango Windows installer.
 ; Build with: scripts/package-windows.ps1
 
 #ifndef AppVersion
@@ -12,29 +12,29 @@
 [Setup]
 ; Never change the AppId! Inno Setup uses it to detect an existing
 ; installation, so that a new installer updates it in place.
-AppId={{4914EA58-B990-4CA5-BFAA-8EAC9A24F6A5}
-AppName=FluffyChat
+AppId={{12DA406B-54CE-4BFB-847D-96FDD5825DA1}
+AppName=Odango
 AppVersion={#AppVersion}
-AppVerName=FluffyChat {#AppVersion}
-AppPublisher=Christian Kußowski
-AppPublisherURL=https://fluffychat.im
-AppSupportURL=https://github.com/krille-chan/fluffychat/issues
-AppUpdatesURL=https://github.com/krille-chan/fluffychat/releases
+AppVerName=Odango {#AppVersion}
+AppPublisher=Odango contributors
+AppPublisherURL=https://odango.swovo.de
+AppSupportURL=https://github.com/swovo/odango/issues
+AppUpdatesURL=https://github.com/swovo/odango/releases
 VersionInfoVersion={#AppVersion}
 ; Per-user installation into %LOCALAPPDATA%\Programs, so that neither the
 ; installation nor updates require admin rights.
 PrivilegesRequired=lowest
-DefaultDirName={autopf}\FluffyChat
+DefaultDirName={autopf}\Odango
 DisableProgramGroupPage=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 CloseApplications=yes
 RestartApplications=yes
 SetupIconFile=runner\resources\app_icon.ico
-UninstallDisplayIcon={app}\fluffychat.exe
+UninstallDisplayIcon={app}\odango.exe
 LicenseFile=..\LICENSE
 OutputDir=..\build\windows\installer
-OutputBaseFilename=fluffychat-windows-x64-setup
+OutputBaseFilename=odango-windows-x64-setup
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -66,8 +66,8 @@ Type: filesandordirs; Name: "{app}\data"
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\FluffyChat"; Filename: "{app}\fluffychat.exe"
-Name: "{autodesktop}\FluffyChat"; Filename: "{app}\fluffychat.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Odango"; Filename: "{app}\odango.exe"
+Name: "{autodesktop}\Odango"; Filename: "{app}\odango.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\fluffychat.exe"; Description: "{cm:LaunchProgram,FluffyChat}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\odango.exe"; Description: "{cm:LaunchProgram,Odango}"; Flags: nowait postinstall skipifsilent

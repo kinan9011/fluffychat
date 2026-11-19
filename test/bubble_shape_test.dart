@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/chat/bubble_shape.dart';
 
 void main() {
   const none = BorderRadiusDirectional.all(Radius.circular(20));

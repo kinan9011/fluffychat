@@ -7,28 +7,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
-import 'package:fluffychat/utils/account_hooks.dart';
-import 'package:fluffychat/utils/app_start_hooks.dart';
-import 'package:fluffychat/utils/chat_list/archive_policy.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/draft_migration.dart';
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/init_with_restore.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/logout_cleanup.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/privacy/presence_policy.dart';
-import 'package:fluffychat/utils/push_helper.dart';
-import 'package:fluffychat/utils/spaces/legacy_cache_purge.dart';
-import 'package:fluffychat/utils/status/status_clear_store.dart';
-import 'package:fluffychat/utils/uia_request_manager.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -37,6 +15,28 @@ import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/key_backup_banner.dart';
+import 'package:odango/utils/account_hooks.dart';
+import 'package:odango/utils/app_start_hooks.dart';
+import 'package:odango/utils/chat_list/archive_policy.dart';
+import 'package:odango/utils/client_manager.dart';
+import 'package:odango/utils/draft_migration.dart';
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/init_with_restore.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/logout_cleanup.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:odango/utils/notification_background_handler.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/privacy/presence_policy.dart';
+import 'package:odango/utils/push_helper.dart';
+import 'package:odango/utils/spaces/legacy_cache_purge.dart';
+import 'package:odango/utils/status/status_clear_store.dart';
+import 'package:odango/utils/uia_request_manager.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -699,7 +699,7 @@ class MatrixState extends State<Matrix> {
     final exportBytes = Uint8List.fromList(const Utf8Codec().encode(export));
 
     final exportFileName =
-        'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
+        'odango-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.odangobackup';
 
     final file = MatrixFile(bytes: exportBytes, name: exportFileName);
     if (!context.mounted) return;

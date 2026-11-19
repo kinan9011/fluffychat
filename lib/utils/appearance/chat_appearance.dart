@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' show Color;
 
-import 'package:fluffychat/utils/oklch.dart';
+import 'package:odango/utils/oklch.dart';
 
 /// Bubble corner radius presets (DESIGN.md 7.5 fixes 20 px as the default).
 enum BubbleCorners {
@@ -74,7 +74,7 @@ bool isWallpaperPresetId(Object? id) =>
 class RoomAppearance {
   const RoomAppearance({this.preset, this.accentHue, this.corners});
 
-  static const type = 'im.fluffychat.chat_appearance';
+  static const type = 'com.swovo.odango.chat_appearance';
   static const maxBytes = 512;
 
   final String? preset;

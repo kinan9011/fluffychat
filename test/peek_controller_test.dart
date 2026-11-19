@@ -7,11 +7,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/chat_list/peek_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/models/timeline_chunk.dart';
+import 'package:odango/utils/chat_list/peek_controller.dart';
 
 import 'utils/test_client.dart';
 

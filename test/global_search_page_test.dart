@@ -6,23 +6,23 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/global_search/global_search.dart';
-import 'package:fluffychat/pages/global_search/global_search_view.dart';
-import 'package:fluffychat/pages/global_search/search_filter_sheet.dart';
-import 'package:fluffychat/pages/global_search/search_result_widgets.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/search/index_feeder.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
-import 'package:fluffychat/utils/search/server_search.dart';
-import 'package:fluffychat/utils/search/unencrypted_scan.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/global_search/global_search.dart';
+import 'package:odango/pages/global_search/global_search_view.dart';
+import 'package:odango/pages/global_search/search_filter_sheet.dart';
+import 'package:odango/pages/global_search/search_result_widgets.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/search/index_feeder.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/message_index.dart';
+import 'package:odango/utils/search/search_kind.dart';
+import 'package:odango/utils/search/server_search.dart';
+import 'package:odango/utils/search/unencrypted_scan.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';

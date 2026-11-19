@@ -5,9 +5,9 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
+import 'package:odango/utils/chat_list/folder_store.dart';
 
 Object? randomTree(Random random, int depth) {
   final kind = random.nextInt(depth <= 0 ? 6 : 9);

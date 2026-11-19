@@ -5,11 +5,11 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/html_parser.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/html_parser.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 import 'utils/rich_fixtures.dart';
 

@@ -3,16 +3,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
-import 'package:fluffychat/utils/polls/poll_content.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' hide Result;
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
+import 'package:odango/utils/polls/poll_content.dart';
+import 'package:odango/utils/url_launcher.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
 
 class PollWidget extends StatelessWidget {
   final Event event;

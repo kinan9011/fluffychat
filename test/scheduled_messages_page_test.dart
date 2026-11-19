@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/scheduling/scheduled_messages_page.dart';
-import 'package:fluffychat/utils/scheduling/delayed_events_api.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/scheduling/scheduled_messages_page.dart';
+import 'package:odango/utils/scheduling/delayed_events_api.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 import 'utils/golden.dart';
 import 'utils/scheduling_fakes.dart';
@@ -285,7 +285,7 @@ void main() {
     );
     await open(tester);
     expect(
-      find.text("Not sent: FluffyChat wasn't running at 9:00 AM"),
+      find.text("Not sent: Odango wasn't running at 9:00 AM"),
       findsOneWidget,
     );
     await tester.tap(find.text('Missed one'));
@@ -296,7 +296,7 @@ void main() {
 
   testWidgets('every failure says what really happened', (tester) async {
     final reasons = {
-      ScheduledFailure.late: "Not sent: FluffyChat wasn't running at 9:00 AM",
+      ScheduledFailure.late: "Not sent: Odango wasn't running at 9:00 AM",
       ScheduledFailure.sendFailed:
           'Not sent: sending failed or was interrupted. Check the chat before '
           'you send it again.',
@@ -357,7 +357,7 @@ void main() {
       ),
     );
     await open(tester);
-    expect(find.textContaining("FluffyChat wasn't running"), findsNothing);
+    expect(find.textContaining("Odango wasn't running"), findsNothing);
     expect(
       find.textContaining('sending failed or was interrupted'),
       findsOneWidget,
@@ -379,7 +379,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('scheduled_device_banner')), findsOneWidget);
-    expect(find.textContaining('Keep FluffyChat running'), findsOneWidget);
+    expect(find.textContaining('Keep Odango running'), findsOneWidget);
   });
 
   testWidgets('a when-online message is grouped by the person, no reschedule', (

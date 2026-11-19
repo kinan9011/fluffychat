@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
+import 'package:odango/pages/chat_list/swipe_action_row.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/golden.dart';

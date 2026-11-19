@@ -3,15 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/space_overview/community_widgets.dart';
-import 'package:fluffychat/pages/space_overview/space_overview.dart';
-import 'package:fluffychat/pages/space_overview/space_overview_widgets.dart';
-import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/space_overview/community_widgets.dart';
+import 'package:odango/pages/space_overview/space_overview.dart';
+import 'package:odango/pages/space_overview/space_overview_widgets.dart';
+import 'package:odango/utils/spaces/space_hierarchy.dart';
 
 class SpaceOverviewView extends StatelessWidget {
   final SpaceOverviewController controller;

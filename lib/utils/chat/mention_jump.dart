@@ -6,8 +6,8 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/design_constants.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 
 /// Unread mentions of the own user in the loaded timeline, and which of them
 /// the user already jumped to. Sends nothing.

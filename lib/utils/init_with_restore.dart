@@ -6,14 +6,14 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/safe_init_client.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/client_manager.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_init_client.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/secure_storage.dart';
 
 class SessionBackup {
   final String? olmAccount;
@@ -121,7 +121,10 @@ extension InitWithRestoreExtension on Client {
       if (sessionBackupString == null) {
         ClientManager.sendInitNotification(
           l10n.initAppError,
-          l10n.sessionLostBody(AppConfig.newIssueUrl.toString(), e.toString()),
+          l10n.sessionLostBody(
+            RepoLinks.configured.newIssue.toString(),
+            e.toString(),
+          ),
         );
         rethrow;
       }
@@ -144,7 +147,7 @@ extension InitWithRestoreExtension on Client {
         ClientManager.sendInitNotification(
           l10n.initAppError,
           l10n.restoreSessionBody(
-            AppConfig.newIssueUrl.toString(),
+            RepoLinks.configured.newIssue.toString(),
             e.toString(),
           ),
         );
@@ -153,7 +156,10 @@ extension InitWithRestoreExtension on Client {
         Logs().wtf('Restore client failed!', e, s);
         ClientManager.sendInitNotification(
           l10n.initAppError,
-          l10n.sessionLostBody(AppConfig.newIssueUrl.toString(), e.toString()),
+          l10n.sessionLostBody(
+            RepoLinks.configured.newIssue.toString(),
+            e.toString(),
+          ),
         );
         rethrow;
       }

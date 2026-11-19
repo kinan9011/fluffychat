@@ -6,12 +6,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
-import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat_list/key_backup_banner.dart';
+import 'package:odango/utils/crypto_identity.dart' as crypto_identity;
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

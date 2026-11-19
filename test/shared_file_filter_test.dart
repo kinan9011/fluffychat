@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/shared_media_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/shared_media_filter.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-const _appData = '/data/user/0/im.fluffychat';
+const _appData = '/data/user/0/com.swovo.odango';
 const _cache = '$_appData/cache';
 const _root = '$_cache/receive_sharing_intent';
 const _u = '123e4567-e89b-12d3-a456-426614174000';
@@ -34,7 +34,7 @@ void main() {
       '$_appData/shared_prefs/FlutterSharedPreferences.xml',
       '$_appData/databases/x.sqlite',
       '$_cache/IMG_1.png',
-      '$_cache/fluffychat_download_cache/abc',
+      '$_cache/odango_download_cache/abc',
       '$_root/a.png',
       '$_root/not-a-uuid/a.png',
       '$_root/$_u/sub/a.png',
@@ -42,7 +42,7 @@ void main() {
       _root,
       'receive_sharing_intent/$_u/a.png',
       '/storage/emulated/0/Download/a.pdf',
-      '/data/user/0/im.fluffychat.evil/receive_sharing_intent/$_u/a.png',
+      '/data/user/0/com.swovo.odango.evil/receive_sharing_intent/$_u/a.png',
     ]) {
       test('drops $path', () {
         expect(isPluginShareCopy(path, shareRoot: _root), isFalse);

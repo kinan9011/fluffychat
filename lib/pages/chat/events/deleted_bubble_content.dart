@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 
 /// "‹Name› deleted this message": italic, muted, with a block icon.
 class DeletedBubbleContent extends StatelessWidget {

@@ -5,13 +5,13 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/platform_infos.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-const appTempDirName = 'fluffychat_tmp';
+const appTempDirName = 'odango_tmp';
 
 /// On Linux the temporary directory is the shared /tmp, where another user
 /// could have created the directory first and read the decrypted media.

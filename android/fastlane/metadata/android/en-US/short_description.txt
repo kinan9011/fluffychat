@@ -1,1 +1,1 @@
-The open-source, non-profit European alternative to big tech’s messaging and video-call monopoly. End-to-end encrypted, decentralized, and easy to use for everyone.
+Open-source Matrix messenger with a familiar look and end-to-end encryption.

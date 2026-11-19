@@ -10,8 +10,10 @@ typedef AppLockRead = ({String? pincode, bool useBiometrics, bool failed});
 
 Future<AppLockRead> readAppLockSettings(FlutterSecureStorage storage) async {
   try {
-    final pincode = await storage.read(key: 'chat.fluffy.app_lock');
-    final biometrics = await storage.read(key: 'chat.fluffy.use_biometrics');
+    final pincode = await storage.read(key: 'com.swovo.odango.app_lock');
+    final biometrics = await storage.read(
+      key: 'com.swovo.odango.use_biometrics',
+    );
     return (
       pincode: pincode,
       useBiometrics: biometrics == 'true',

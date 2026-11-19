@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
 
 /// Reads the newest events of a room from the local database. Peeking must
 /// leave no trace for other users, so this class never sends receipts,

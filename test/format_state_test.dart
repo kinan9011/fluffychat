@@ -5,11 +5,11 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/format_state.dart';
 import 'package:flutter/widgets.dart' show TextRange;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/format_state.dart';
 
 FormatState state(List<FormatRange> ranges) => FormatState(ranges: ranges);
 

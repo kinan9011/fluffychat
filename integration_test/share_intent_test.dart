@@ -5,9 +5,9 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/shared_media_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:odango/utils/shared_media_filter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';

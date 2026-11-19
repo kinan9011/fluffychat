@@ -5,17 +5,17 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/file_description.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/blur_hash.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/file_description.dart';
+import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/url_launcher.dart';
+import 'package:odango/widgets/blur_hash.dart';
+import 'package:odango/widgets/mxc_image.dart';
 
 import '../../image_viewer/image_viewer.dart';
 

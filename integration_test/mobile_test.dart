@@ -15,6 +15,7 @@ import 'flows/conversation_flows.dart';
 import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
+import 'flows/odango_flows.dart';
 import 'flows/privacy_topics_flows.dart';
 import 'flows/scheduling_flows.dart';
 import 'flows/search_flows.dart';
@@ -25,10 +26,11 @@ import 'flows/space_flows.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('FluffyChat Integration Tests', () {
+  group('Odango Integration Tests', () {
     testWidgets('Login and logout flow', loginAndChatBackup);
     testWidgets('Basic Messaging', basicMessaging);
     testWidgets('Shell navigation', shellNavigation);
+    testWidgets('Odango branding and support dialog', odangoBranding);
     testWidgets('Calls hidden without a call service', callsHiddenFlow);
     testWidgets('Chat list tabs', chatListTabs);
     testWidgets('Chat list folders', chatListFolders);

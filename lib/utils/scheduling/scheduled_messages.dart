@@ -5,14 +5,14 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/scheduling/delayed_events_api.dart';
-import 'package:fluffychat/utils/scheduling/schedule_time.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_queue.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/delayed_events_api.dart';
+import 'package:odango/utils/scheduling/schedule_time.dart';
+import 'package:odango/utils/scheduling/scheduled_content.dart';
+import 'package:odango/utils/scheduling/scheduled_queue.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
 
 enum ScheduleError {
   tooSoon,

@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/chat_matcher.dart';
-import 'package:fluffychat/utils/search/search_query.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/search/chat_matcher.dart';
+import 'package:odango/utils/search/search_query.dart';
 
 import 'utils/search_fixtures.dart';
 import 'utils/test_client.dart';
@@ -75,7 +75,7 @@ void main() {
     archived.roomAccountData['m.tag'] = BasicEvent(
       type: 'm.tag',
       content: {
-        'tags': {'im.fluffychat.archived': <String, Object?>{}},
+        'tags': {'com.swovo.odango.archived': <String, Object?>{}},
       },
     );
     final matches = ChatMatcher.run(

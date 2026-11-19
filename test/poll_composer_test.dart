@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/poll_composer/poll_composer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/poll_composer/poll_composer.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';
@@ -190,7 +190,7 @@ void main() {
       '1',
       '2',
     ]);
-    expect(sentBody.containsKey('im.fluffychat.poll.quiz'), isFalse);
+    expect(sentBody.containsKey('com.swovo.odango.poll.quiz'), isFalse);
     expect(find.byType(PollComposer), findsNothing);
     await harness.finish(tester);
   });
@@ -205,7 +205,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('poll_create')));
     await waitForSend(tester);
     final sentBody = body();
-    expect(sentBody['im.fluffychat.poll.quiz'], {
+    expect(sentBody['com.swovo.odango.poll.quiz'], {
       'correct_answer_ids': ['2'],
     });
     await harness.finish(tester);

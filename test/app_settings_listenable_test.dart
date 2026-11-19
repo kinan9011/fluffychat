@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/setting_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

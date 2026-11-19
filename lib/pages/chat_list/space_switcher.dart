@@ -5,14 +5,14 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/glass_surface.dart';
 
 class SpaceSwitcherChip extends StatefulWidget {
   final List<SpaceTab> spaces;

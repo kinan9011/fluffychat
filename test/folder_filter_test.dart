@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat_list/folder_filter.dart';
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/utils/chat_list/unread_counts.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat_list/folder_filter.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/utils/chat_list/unread_counts.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 
 import 'utils/space_fixtures.dart';
 import 'utils/test_client.dart';

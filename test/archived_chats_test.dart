@@ -3,28 +3,28 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
-import 'package:fluffychat/pages/global_search/global_search.dart';
-import 'package:fluffychat/pages/global_search/global_search_view.dart';
-import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/layouts/chats_badge.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/routes.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat_list/key_backup_banner.dart';
+import 'package:odango/pages/global_search/global_search.dart';
+import 'package:odango/pages/global_search/global_search_view.dart';
+import 'package:odango/utils/crypto_identity.dart' as crypto_identity;
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/layouts/chats_badge.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/test_client.dart';
 
 const _user = '%40test%3AfakeServer.notExisting';
-const _archived = {'im.fluffychat.archived': null};
+const _archived = {'com.swovo.odango.archived': null};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +42,7 @@ void main() {
     api = FakeMatrixApi.currentApi!;
     FakeMatrixApi.client = client;
     for (final id in ['ar1', 'ar2', 'ar3', 'ar4', 'ar5', 'ar6', 'arn']) {
-      api.api['PUT']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/im.fluffychat.archived'] =
+      api.api['PUT']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/com.swovo.odango.archived'] =
           (_) => {};
     }
   });
@@ -287,7 +287,7 @@ void main() {
       FakeMatrixApi.calledEndpoints.keys.where(
         (path) => path.contains('/tags/'),
       ),
-      ['/client/v3/user/$_user/rooms/!arn%3Ax/tags/im.fluffychat.archived'],
+      ['/client/v3/user/$_user/rooms/!arn%3Ax/tags/com.swovo.odango.archived'],
     );
     await finish(tester);
   });

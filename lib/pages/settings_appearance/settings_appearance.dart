@@ -7,22 +7,22 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_appearance/settings_appearance_view.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
-import 'package:fluffychat/utils/appearance/wallpaper_ingest.dart';
-import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
-import 'package:fluffychat/utils/file_selector.dart';
-import 'package:fluffychat/utils/oklch.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings_appearance/settings_appearance_view.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/appearance/chat_appearance_scope.dart';
+import 'package:odango/utils/appearance/wallpaper_ingest.dart';
+import 'package:odango/utils/appearance/wallpaper_store.dart';
+import 'package:odango/utils/file_selector.dart';
+import 'package:odango/utils/oklch.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/theme_builder.dart';
 
 enum AppearanceScope { all, room }
 

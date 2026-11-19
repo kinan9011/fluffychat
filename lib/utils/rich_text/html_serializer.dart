@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/link_policy.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/link_policy.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 class RichMessage {
   const RichMessage({required this.body, required this.formattedBody});

@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/sync_status_localization.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/sync_status_localization.dart';
 
 class ChatListTopBar extends StatelessWidget {
   final String title;

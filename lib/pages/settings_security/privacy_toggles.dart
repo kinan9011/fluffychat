@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/settings/settings_group.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 /// What other people can see about this user: typing, read receipts and
 /// online status. Every toggle is off until the user turns it on.

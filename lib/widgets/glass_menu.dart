@@ -5,10 +5,10 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/widgets/glass_surface.dart';
 
 /// Glass menu card (DESIGN.md 7.16): radius 22, blur 24, menu shadow.
 class GlassMenuCard extends StatelessWidget {

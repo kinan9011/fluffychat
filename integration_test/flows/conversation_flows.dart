@@ -3,15 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat/chat_jump_buttons.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
-import 'package:fluffychat/pages/chat/events/message_footer.dart';
-import 'package:fluffychat/pages/chat/events/reaction_bar.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/chat/chat_jump_buttons.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
+import 'package:odango/pages/chat/events/message_footer.dart';
+import 'package:odango/pages/chat/events/reaction_bar.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
 
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';

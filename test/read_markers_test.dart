@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/privacy/read_markers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/utils/privacy/read_markers.dart';
 
 import 'utils/recording_api.dart';
 import 'utils/test_client.dart';

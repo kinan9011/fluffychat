@@ -6,8 +6,8 @@
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:fluffychat/utils/archive_guard.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/archive_guard.dart';
 
 Uint8List zipOf(Map<String, List<int>> files) {
   final archive = Archive();

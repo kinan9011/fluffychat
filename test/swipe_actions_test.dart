@@ -5,15 +5,15 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/routes.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/chat_row_fixtures.dart';
@@ -41,7 +41,7 @@ void main() {
     second.backgroundSync = false;
     FakeMatrixApi.client = second;
     for (final id in ['swa', 'swb', 'swc', 'swi', 'swl']) {
-      for (final tag in ['im.fluffychat.archived', 'm.favourite']) {
+      for (final tag in ['com.swovo.odango.archived', 'm.favourite']) {
         api.api['PUT']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/$tag'] =
             (_) => {};
         api.api['DELETE']!['/client/v3/user/$_user/rooms/!$id%3Ax/tags/$tag'] =
@@ -136,12 +136,12 @@ void main() {
         FakeMatrixApi.calledEndpoints.keys.where(
           (path) => path.contains('/tags/'),
         ),
-        ['/client/v3/user/$_user/rooms/!swa%3Ax/tags/im.fluffychat.archived'],
+        ['/client/v3/user/$_user/rooms/!swa%3Ax/tags/com.swovo.odango.archived'],
       );
     });
 
     test('unarchive removes the tag', () async {
-      chat('!swa:x', tags: {'im.fluffychat.archived': null});
+      chat('!swa:x', tags: {'com.swovo.odango.archived': null});
       await runSwipeAction(
         client,
         '!swa:x',
@@ -151,12 +151,12 @@ void main() {
       expect(
         FakeMatrixApi.calledEndpoints,
         contains(
-          '/client/v3/user/$_user/rooms/!swa%3Ax/tags/im.fluffychat.archived',
+          '/client/v3/user/$_user/rooms/!swa%3Ax/tags/com.swovo.odango.archived',
         ),
       );
       expect(
         FakeMatrixApi
-            .calledEndpoints['/client/v3/user/$_user/rooms/!swa%3Ax/tags/im.fluffychat.archived'],
+            .calledEndpoints['/client/v3/user/$_user/rooms/!swa%3Ax/tags/com.swovo.odango.archived'],
         hasLength(1),
       );
     });
@@ -373,7 +373,7 @@ void main() {
       (path) => path.contains('/tags/'),
     );
     expect(tags, [
-      '/client/v3/user/$_user/rooms/!swa%3Ax/tags/im.fluffychat.archived',
+      '/client/v3/user/$_user/rooms/!swa%3Ax/tags/com.swovo.odango.archived',
     ]);
 
     await tester.pumpWidget(const SizedBox());

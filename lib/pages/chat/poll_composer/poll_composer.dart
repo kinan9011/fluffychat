@@ -5,14 +5,14 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/pages/chat/poll_composer/poll_composer_view.dart';
-import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/polls/poll_content.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/pages/chat/poll_composer/poll_composer_view.dart';
+import 'package:odango/pages/chat/trust_user_key_dialog.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/polls/poll_content.dart';
 
 Future<void> showPollComposer(BuildContext context, Room room) =>
     showAdaptiveBottomSheet<void>(

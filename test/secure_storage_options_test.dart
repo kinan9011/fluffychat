@@ -5,9 +5,9 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/secure_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/secure_storage.dart';
 
 void main() {
   test('the Android plugin never deletes stored data on an error', () {

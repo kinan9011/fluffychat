@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/pages/chat/edit_history_sheet.dart';
-import 'package:fluffychat/utils/chat/edit_history.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/pages/chat/edit_history_sheet.dart';
+import 'package:odango/utils/chat/edit_history.dart';
 
 import 'utils/golden.dart';
 

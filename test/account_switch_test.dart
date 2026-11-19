@@ -5,35 +5,35 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/calls/calls_page.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/global_search/global_search.dart';
-import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/pages/space_overview/space_overview.dart';
-import 'package:fluffychat/utils/app_start_hooks.dart';
-import 'package:fluffychat/utils/chat_list/unread_counts.dart';
-import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
-import 'package:fluffychat/widgets/layouts/app_shell.dart';
-import 'package:fluffychat/widgets/layouts/app_tab.dart';
-import 'package:fluffychat/widgets/layouts/chats_badge.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/routes.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/calls/calls_page.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/global_search/global_search.dart';
+import 'package:odango/pages/settings/settings.dart';
+import 'package:odango/pages/space_overview/space_overview.dart';
+import 'package:odango/utils/app_start_hooks.dart';
+import 'package:odango/utils/chat_list/unread_counts.dart';
+import 'package:odango/utils/crypto_identity.dart' as crypto_identity;
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/layouts/app_nav_rail.dart';
+import 'package:odango/widgets/layouts/app_shell.dart';
+import 'package:odango/widgets/layouts/app_tab.dart';
+import 'package:odango/widgets/layouts/chats_badge.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/own_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/call_support_fakes.dart';
@@ -1209,7 +1209,7 @@ void main() {
 
   group('unarchive on mention (W03-3)', () {
     const tagPath =
-        '/client/v3/user/%40test%3AfakeServer.notExisting/rooms/!unar%3Ax/tags/im.fluffychat.archived';
+        '/client/v3/user/%40test%3AfakeServer.notExisting/rooms/!unar%3Ax/tags/com.swovo.odango.archived';
 
     SyncUpdate mention(int count) => SyncUpdate(
       nextBatch: 'unarchive$count',
@@ -1227,7 +1227,7 @@ void main() {
     Room archived(Client client) => testSpaceChild(
       client,
       '!unar:x',
-      tags: const ['im.fluffychat.archived'],
+      tags: const ['com.swovo.odango.archived'],
     );
 
     tearDown(() async {
@@ -1378,7 +1378,7 @@ void main() {
 
   group('wordmark (W03-1)', () {
     setUp(() => AppSettings.applicationName.setItem('Acme'));
-    tearDown(() => AppSettings.applicationName.setItem('FluffyChat'));
+    tearDown(() => AppSettings.store.remove(AppSettings.applicationName.key));
 
     accountTest('follows the application name', (tester, matrix) async {
       await goTo(tester, '/rooms');

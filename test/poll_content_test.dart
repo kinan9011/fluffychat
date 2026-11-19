@@ -5,10 +5,10 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/utils/polls/poll_content.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/polls/poll_content.dart';
 
 Map<String, Object?> poll({
   Object? question = 'Which one?',
@@ -31,7 +31,7 @@ Map<String, Object?> poll({
           {'id': 'b', 'org.matrix.msc1767.text': 'XMPP'},
         ],
   },
-  'im.fluffychat.poll.quiz': ?quiz,
+  'com.swovo.odango.poll.quiz': ?quiz,
 };
 
 void main() {

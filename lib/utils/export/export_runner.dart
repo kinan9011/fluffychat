@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:fluffychat/utils/export/export_events.dart';
-import 'package:fluffychat/utils/export/export_html.dart';
-import 'package:fluffychat/utils/export/export_json.dart';
-import 'package:fluffychat/utils/export/export_media.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/export/export_events.dart';
+import 'package:odango/utils/export/export_html.dart';
+import 'package:odango/utils/export/export_json.dart';
+import 'package:odango/utils/export/export_media.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
 
 /// What the runner needs from a timeline; the SDK one is [SdkExportTimeline].
 abstract class ExportTimeline {

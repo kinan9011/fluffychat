@@ -3,26 +3,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
-import 'package:fluffychat/pages/chat/chat_overflow_menu.dart';
-import 'package:fluffychat/pages/chat/retention_sheet.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/calls_gate.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/pulsating_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/chat_app_bar_title.dart';
+import 'package:odango/pages/chat/chat_overflow_menu.dart';
+import 'package:odango/pages/chat/retention_sheet.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/calls_gate.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/glass_surface.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/pulsating_widget.dart';
 
 enum _EventContextAction { info, report }
 

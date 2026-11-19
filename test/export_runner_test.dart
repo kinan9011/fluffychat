@@ -7,11 +7,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/utils/export/export_runner.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_runner.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
 
 import 'utils/test_client.dart';
 

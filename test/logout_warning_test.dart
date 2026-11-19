@@ -5,10 +5,10 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 import 'utils/chat_page_harness.dart';
 

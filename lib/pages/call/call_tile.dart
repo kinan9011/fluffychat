@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/widgets/avatar.dart';
 
 class CallTile extends StatelessWidget {
   final lk.TrackPublication<lk.VideoTrack>? video;

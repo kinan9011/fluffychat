@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/pages/chat/events/reaction_pills.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/chat/reaction_summary.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/events/reaction_pills.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/chat/reaction_summary.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class MessageReactions extends StatelessWidget {
   final Event event;

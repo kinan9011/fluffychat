@@ -5,12 +5,12 @@
 
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' show BaseClient;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/crypto_identity.dart' as crypto_identity;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

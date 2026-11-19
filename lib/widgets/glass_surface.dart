@@ -5,11 +5,11 @@
 
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/glass_policy.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/glass_policy.dart';
 
 /// The only glass implementation (DESIGN.md 6.1): blur(20) saturate(1.4), a
 /// hairline border and a shadow. Every blurred surface in the app must use

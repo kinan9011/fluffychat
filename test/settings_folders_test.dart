@@ -5,16 +5,16 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/routes.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/space_fixtures.dart';

@@ -5,7 +5,7 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 const _alphabet = [
   'a',

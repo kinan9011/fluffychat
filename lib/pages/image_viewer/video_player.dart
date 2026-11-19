@@ -6,14 +6,14 @@
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
-import 'package:fluffychat/utils/app_temp_directory.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/blur_hash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/widgets/blur_hash.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../utils/error_reporter.dart';

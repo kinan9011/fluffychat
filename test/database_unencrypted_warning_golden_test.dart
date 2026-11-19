@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/widgets/database_unencrypted_warning.dart';
 
 import 'utils/golden.dart';
 

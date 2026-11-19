@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/scheduled_content.dart';
 
 /// Whether a notification for [event] is shown without sound or vibration.
 ///

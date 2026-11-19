@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/space_switcher.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
+import 'package:odango/pages/chat_list/space_switcher.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
 
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';
@@ -118,7 +118,7 @@ extension on FluffyChatTester {
     await waitFor(find.widgetWithText(ListTile, _folderName));
 
     final alice = await SynapseUser.login(user1Name, user1Pw);
-    final stored = await alice.getAccountData('im.fluffychat.folders');
+    final stored = await alice.getAccountData('com.swovo.odango.folders');
     await alice.logout();
     final folders = (stored! as Map)['folders'] as List;
     expect((stored as Map)['version'], 1);

@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:flutter/foundation.dart';
+import 'package:odango/utils/matrix_room_id.dart';
 
 /// The spaces the user went through to get to this overview. A space that is
 /// already on the trail cannot be entered again (cycle) and the trail stops

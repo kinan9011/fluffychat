@@ -5,10 +5,10 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/glass_menu.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/glass_menu.dart';
 
 enum ChatOverflowAction {
   mute,

@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
+import 'package:odango/utils/chat/display_text.dart';
 
 enum StatusClearAfter { hour, today, week, never }
 

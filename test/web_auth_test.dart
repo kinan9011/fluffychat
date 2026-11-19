@@ -5,11 +5,11 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/sign_in_flows/web_auth.dart';
 
 void main() {
   final calls = <String>[];

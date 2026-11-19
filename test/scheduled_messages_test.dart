@@ -5,15 +5,15 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/scheduling/delayed_events_api.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_queue.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/delayed_events_api.dart';
+import 'package:odango/utils/scheduling/scheduled_messages.dart';
+import 'package:odango/utils/scheduling/scheduled_queue.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
 
 import 'utils/test_client.dart';
 

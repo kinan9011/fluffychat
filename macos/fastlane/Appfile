@@ -1,8 +1,8 @@
-app_identifier("im.fluffychat.app") # The bundle identifier of your app
-apple_id("christian-kussowski@posteo.de") # Your Apple Developer Portal username
+app_identifier("com.swovo.odango") # The bundle identifier of your app
+apple_id(ENV["FASTLANE_APPLE_ID"]) # Your Apple Developer Portal username
 
-itc_team_id("123574188") # App Store Connect Team ID
-team_id("4HV29TJN3A") # Developer Portal Team ID
+itc_team_id(ENV["FASTLANE_ITC_TEAM_ID"]) # App Store Connect Team ID
+team_id(ENV["FASTLANE_TEAM_ID"]) # Developer Portal Team ID
 
 # For more information about the Appfile, see:
 #     https://docs.fastlane.tools/advanced/#appfile

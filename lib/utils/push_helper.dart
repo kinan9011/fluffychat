@@ -9,19 +9,6 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/call_kit_params.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/notification_avatar_extension.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/scheduling/silent_notification.dart';
-import 'package:fluffychat/utils/server_capabilities/call_support.dart';
-import 'package:fluffychat/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -30,6 +17,19 @@ import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' hide Result;
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/call_kit_params.dart';
+import 'package:odango/utils/client_manager.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/notification_avatar_extension.dart';
+import 'package:odango/utils/notification_background_handler.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/scheduling/silent_notification.dart';
+import 'package:odango/utils/server_capabilities/call_support.dart';
+import 'package:odango/utils/start_push_foreground_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -76,7 +76,7 @@ Future<void> pushHelper(
     if (notification.roomId != null) {
       await flutterLocalNotificationsPlugin.show(
         id: notification.notificationId,
-        title: l10n.newMessageInFluffyChat,
+        title: l10n.newMessageInOdango,
         body: l10n.openAppToReadMessages,
         notificationDetails: NotificationDetails(
           iOS: DarwinNotificationDetails(
@@ -210,7 +210,7 @@ Future<void> _tryPushHelper(
 
   // Calculate the body
   final body = event.type == EventTypes.Encrypted
-      ? l10n.newMessageInFluffyChat
+      ? l10n.newMessageInOdango
       : await event.calcLocalizedBody(
           matrixLocals,
           plaintextBody: true,

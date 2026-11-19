@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 final _controls = RegExp(
   r'[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u061C\u200E\u200F'

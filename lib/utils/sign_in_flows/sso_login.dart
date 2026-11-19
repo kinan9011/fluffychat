@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/sign_in_flows/calc_redirect_url.dart';
-import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/sign_in_flows/calc_redirect_url.dart';
+import 'package:odango/utils/sign_in_flows/web_auth.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 
 Future<void> ssoLoginFlow(
   Client client,

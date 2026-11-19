@@ -3,13 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/platform_infos.dart';
 import 'package:particles_network/particles_network.dart';
 
 class LoginScaffold extends StatelessWidget {
@@ -125,7 +126,8 @@ class _PrivacyButtons extends StatelessWidget {
               child: Text(L10n.of(context).website, style: shadowTextStyle),
             ),
             TextButton(
-              onPressed: () => launchWebUrl(AppConfig.supportUrl),
+              onPressed: () =>
+                  launchWebUrl(RepoLinks.configured.issues.toString()),
               child: Text(L10n.of(context).help, style: shadowTextStyle),
             ),
             TextButton(

@@ -3,21 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
-import 'package:fluffychat/pages/chat/scheduling/schedule_labels.dart';
-import 'package:fluffychat/pages/chat/scheduling/scheduled_messages_page.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/scheduling/schedule_time.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/chat_wallpaper.dart';
+import 'package:odango/pages/chat/scheduling/schedule_labels.dart';
+import 'package:odango/pages/chat/scheduling/scheduled_messages_page.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/date_time_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/scheduling/schedule_time.dart';
+import 'package:odango/utils/scheduling/scheduled_messages.dart';
+import 'package:odango/widgets/glass_surface.dart';
 
 class ScheduledMessagesView extends StatelessWidget {
   const ScheduledMessagesView(this.controller, {super.key});

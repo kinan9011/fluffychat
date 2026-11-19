@@ -3,19 +3,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
-import 'package:fluffychat/pages/sign_in/view_model/sign_in_view_model.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/utils/sign_in_flows/check_homeserver.dart';
-import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/view_model_builder.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:odango/pages/sign_in/view_model/sign_in_view_model.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/sign_in_flows/check_homeserver.dart';
+import 'package:odango/widgets/layouts/login_scaffold.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/view_model_builder.dart';
 
 class SignInPage extends StatelessWidget {
   final bool signUp;

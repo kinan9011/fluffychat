@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 
 int unreadChatCount(Iterable<Room> rooms) => rooms
     .where(

@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/export/export_html.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/export/export_html.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 const _payloads = <String>[
   '<script>alert(1)</script>',

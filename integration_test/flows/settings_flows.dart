@@ -5,15 +5,15 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
-import 'package:fluffychat/pages/export/export_page.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/dialog_text_field.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
+import 'package:odango/pages/export/export_page.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
 
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';

@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/launch_web_url.dart';
+import 'package:odango/utils/launch_web_url.dart';
 
 const _maxServiceUrlLength = 2048;
 

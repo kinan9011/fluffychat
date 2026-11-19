@@ -6,15 +6,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/export/export_page.dart';
-import 'package:fluffychat/pages/settings_data/settings_data.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/utils/export/export_runner.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/export/export_page.dart';
+import 'package:odango/pages/settings_data/settings_data.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_runner.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 import 'utils/chat_page_harness.dart';
 

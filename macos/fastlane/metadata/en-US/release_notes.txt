@@ -1,1 +1,1 @@
-Many fixes under the hood, call improvements and automatic recovery from database corruptions.
+Odango is a new app forked from FluffyChat. Sign in again to get started: data from other Matrix apps is not migrated.

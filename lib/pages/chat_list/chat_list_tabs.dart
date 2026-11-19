@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat_list/folder_filter.dart';
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat_list/folder_filter.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/widgets/avatar.dart';
 
 @immutable
 class ChatListTabData {

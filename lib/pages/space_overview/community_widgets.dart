@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/date_time_extension.dart';
+import 'package:odango/utils/string_color.dart';
+import 'package:odango/widgets/avatar.dart';
 
 /// The top of a community (DESIGN S6): a banner made from the colour of the
 /// space (spaces have no banner image in Matrix) and the avatar overlapping

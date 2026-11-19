@@ -194,7 +194,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: debug-windows-x64-setup
-          path: build/windows/installer/fluffychat-windows-x64-setup.exe
+          path: build/windows/installer/odango-windows-x64-setup.exe
 
   integration_test:
     runs-on: ubuntu-26.04

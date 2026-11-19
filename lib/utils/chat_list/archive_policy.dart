@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 
 /// Takes archived chats out of the archive when someone mentions the user
 /// again, but only if the user asked for it and only for a mention that is

@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/composer/rich_text_editing_controller.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 class MarkdownContextBuilder extends StatelessWidget {
   final EditableTextState editableTextState;

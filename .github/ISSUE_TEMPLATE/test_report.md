@@ -25,7 +25,7 @@ labels: test
 	- [ ] iOS
 	- [ ] Web
 	- [ ] Linux
-7. Sharing texts/files/images from other apps to FluffyChat works:
+7. Sharing texts/files/images from other apps to Odango works:
 	- [ ] Android
 	- [ ] iOS
 8. Login with single sign on works:
@@ -39,6 +39,6 @@ labels: test
 10. Drag&Drop to send a file into a chat still works:
 	- [ ] Web
 	- [ ] Linux
-11. Deeplinks are still working? https://matrix.to/#/@krille:janian.de
+11. Deeplinks are still working? https://matrix.to/#/@example:example.org
 	- [ ] Android
 	- [ ] iOS

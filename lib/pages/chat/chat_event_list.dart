@@ -4,25 +4,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/edit_history_sheet.dart';
-import 'package:fluffychat/pages/chat/encryption_info.dart';
-import 'package:fluffychat/pages/chat/events/message.dart';
-import 'package:fluffychat/pages/chat/message_menu.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
-import 'package:fluffychat/pages/chat/typing_indicators.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/chat/message_ticks.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/mxc_image_viewer.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/edit_history_sheet.dart';
+import 'package:odango/pages/chat/encryption_info.dart';
+import 'package:odango/pages/chat/events/message.dart';
+import 'package:odango/pages/chat/message_menu.dart';
+import 'package:odango/pages/chat/seen_by_row.dart';
+import 'package:odango/pages/chat/typing_indicators.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/chat/message_ticks.dart';
+import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/mxc_image_viewer.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import '../../config/app_config.dart';

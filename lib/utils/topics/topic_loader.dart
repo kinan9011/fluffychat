@@ -5,8 +5,8 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/topics/topic.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/topics/topic.dart';
 
 class TopicsLoadFailed implements Exception {
   const TopicsLoadFailed();

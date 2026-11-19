@@ -5,8 +5,8 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/config/design_constants.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
 
 void main() {
   test('the mono font family literal lives only in design_constants', () {

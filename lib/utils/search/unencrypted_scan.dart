@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/search/db_event_reader.dart';
-import 'package:fluffychat/utils/search/index_policy.dart';
-import 'package:fluffychat/utils/search/local_search.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/search/db_event_reader.dart';
+import 'package:odango/utils/search/index_policy.dart';
+import 'package:odango/utils/search/local_search.dart';
+import 'package:odango/utils/search/search_filter.dart';
 
 /// Filter-only searches ("files from Mara", no search word) cannot go to the
 /// server, which needs a word. For unencrypted rooms they look at the events

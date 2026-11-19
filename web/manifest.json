@@ -1,11 +1,11 @@
 {
-    "name": "FluffyChat",
-    "short_name": "FluffyChat",
+    "name": "Odango",
+    "short_name": "Odango",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#41a2bc",
-    "description": "The cutest messenger in the Matrix network",
+    "background_color": "#FFF8F5",
+    "theme_color": "#F28DA6",
+    "description": "An open-source Matrix messenger with a familiar look",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

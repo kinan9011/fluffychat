@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/launch_web_url.dart';
 
 export 'package:flutter_web_auth_2/flutter_web_auth_2.dart'
     show FlutterWebAuth2Options;

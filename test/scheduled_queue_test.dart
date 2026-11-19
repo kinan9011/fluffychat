@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:fluffychat/utils/scheduling/scheduled_queue.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/scheduled_queue.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 import 'utils/test_client.dart';
 

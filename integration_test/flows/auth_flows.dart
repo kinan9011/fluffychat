@@ -5,12 +5,12 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
-import 'package:fluffychat/utils/app_temp_directory.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/safe_init_client.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_init_client.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 

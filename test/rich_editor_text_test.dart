@@ -5,11 +5,11 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/utils/rich_text/editor_text.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/rich_text/editor_text.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 import 'utils/rich_fixtures.dart';
 

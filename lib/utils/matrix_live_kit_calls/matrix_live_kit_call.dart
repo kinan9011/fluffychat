@@ -8,11 +8,11 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/call_keys_event_content.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
 import 'package:matrix/matrix.dart' hide Result;
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/matrix_live_kit_calls/call_keys_event_content.dart';
+import 'package:odango/utils/matrix_live_kit_calls/livekit_service_url.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
 
 /// Used where no app state exists (the push isolate): calls are on and the
 /// homeserver (or the configured fallback) names a usable LiveKit service.

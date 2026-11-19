@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/chat_list/start_chat_fab.dart';
 
 import 'chat_list_body.dart';
 

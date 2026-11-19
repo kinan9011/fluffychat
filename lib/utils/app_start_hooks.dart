@@ -8,23 +8,23 @@
 import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/shared_media_filter.dart';
-import 'package:fluffychat/utils/show_scaffold_dialog.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/shared_media_filter.dart';
+import 'package:odango/utils/show_scaffold_dialog.dart';
+import 'package:odango/utils/url_launcher.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/share_scaffold_dialog.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 typedef CallJoinTarget = ({Client client, String roomId});

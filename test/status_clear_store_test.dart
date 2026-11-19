@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/status/status_clear_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/recording_api.dart';

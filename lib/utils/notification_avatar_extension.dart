@@ -6,8 +6,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/client_download_content_extension.dart';
 import 'package:path/path.dart' as path;
 
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';

@@ -6,17 +6,17 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/archive_guard.dart';
-import 'package:fluffychat/utils/backup_dump_validator.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/other_party_can_receive.dart';
-import 'package:fluffychat/utils/sign_in_flows/web_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/archive_guard.dart';
+import 'package:odango/utils/backup_dump_validator.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/other_party_can_receive.dart';
+import 'package:odango/utils/sign_in_flows/web_auth.dart';
 
 import 'uia_request_manager.dart';
 

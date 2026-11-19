@@ -5,14 +5,14 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/pages/new_private_chat/scan_confirm_sheet.dart';
-import 'package:fluffychat/pages/space_overview/space_overview.dart';
-import 'package:fluffychat/pages/space_overview/space_overview_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/new_private_chat/new_private_chat.dart';
+import 'package:odango/pages/new_private_chat/new_private_chat_view.dart';
+import 'package:odango/pages/new_private_chat/scan_confirm_sheet.dart';
+import 'package:odango/pages/space_overview/space_overview.dart';
+import 'package:odango/pages/space_overview/space_overview_view.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';

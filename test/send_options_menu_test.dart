@@ -5,13 +5,13 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/pages/chat/scheduling/send_options_menu.dart';
-import 'package:fluffychat/utils/scheduling/send_options.dart';
-import 'package:fluffychat/widgets/glass_menu.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/pages/chat/scheduling/send_options_menu.dart';
+import 'package:odango/utils/scheduling/send_options.dart';
+import 'package:odango/widgets/glass_menu.dart';
 
 import 'utils/golden.dart';
 

@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/search_kind.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 /// One searchable message of an encrypted room. Holds plaintext: it only ever
 /// lives in memory or inside the encrypted database.

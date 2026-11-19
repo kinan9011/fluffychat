@@ -7,19 +7,19 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat_list/peek_controller.dart';
-import 'package:fluffychat/utils/chat_list/peek_menu.dart';
-import 'package:fluffychat/utils/glass_policy.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat_list/peek_controller.dart';
+import 'package:odango/utils/chat_list/peek_menu.dart';
+import 'package:odango/utils/glass_policy.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/string_color.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/glass_surface.dart';
 
 Future<void> showPeek(
   BuildContext context,

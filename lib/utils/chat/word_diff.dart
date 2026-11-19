@@ -5,7 +5,7 @@
 
 import 'dart:typed_data';
 
-import 'package:fluffychat/config/design_constants.dart';
+import 'package:odango/config/design_constants.dart';
 
 enum DiffKind { same, added, removed }
 

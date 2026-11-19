@@ -5,21 +5,21 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/scheduling/schedule_labels.dart';
-import 'package:fluffychat/pages/chat/scheduling/schedule_sheet.dart';
-import 'package:fluffychat/pages/chat/scheduling/send_options_menu.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
-import 'package:fluffychat/utils/scheduling/send_options.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/scheduling/schedule_labels.dart';
+import 'package:odango/pages/chat/scheduling/schedule_sheet.dart';
+import 'package:odango/pages/chat/scheduling/send_options_menu.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/scheduling/scheduled_content.dart';
+import 'package:odango/utils/scheduling/scheduled_messages.dart';
+import 'package:odango/utils/scheduling/send_options.dart';
 
 /// The partner of a direct chat when their presence is known and not online.
 /// Only what is cached counts: the menu never waits for the network.

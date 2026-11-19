@@ -1,31 +1,18 @@
-<b>Messaging how it should be</b>
+<b>Your communication should be yours.</b>
 
-Whether for your friends, your company or local community, FluffyChat supports a variety of features to cover all your daily needs.
-
-<b>Easy to use</b>
-
-Simply install, log in and start chatting. The intuitive user interface makes secure communication as easy as possible.
+Odango is an open-source Matrix messenger with a familiar, Telegram-style interface. It is end-to-end encrypted, decentralized, and easy to use.
 
 <b>Secure</b>
 
-With olm/megolm end-to-end encryption, encrypted message backups and an automated key trust system, FluffyChat is among the most secure messengers available.
+Odango supports Matrix end-to-end encryption, encrypted message backups and device verification.
 
 <b>Decentral</b>
 
-Based on the open Matrix protocol we build a decentralized messaging network together, which no entity can control. Host your own chat server while remaining in contact with everyone.
+Based on the open Matrix protocol, Odango works with any Matrix server and is compatible with other Matrix clients like Element, Nheko, Cinny or NeoChat. Learn more at matrix.org.
 
-<b>Feature rich and reliable</b>
+<b>A fork of FluffyChat</b>
 
-From public chats with tens of thousands of participants and polls to custom stickers, spaces, rich moderation tools, and multi-device support, FluffyChat delivers a comprehensive communication suite.
+Odango is a fork of FluffyChat and keeps its AGPL-3.0 licence and upstream attribution. Part of the support you give Odango goes on to support the FluffyChat source it is built on.
 
-<b>Secure video calls</b>
-
-Direct calls and video conferences, fully secured with Matrix RTC-compatible encryption.
-
-<b>Not another walled garden</b>
-
-We do not build another walled garden! FluffyChat is fully compatible with any other Matrix client like Element, Nheko, Cinny or NeoChat. Learn more at matrix.org.
-
-<b>Made by volunteers</b>
-
-FluffyChat is a non-profit project based on open standards and driven entirely by volunteers. Infrastructure is funded by donations, and participation is open to everyone.
+Website: https://odango.swovo.de
+Source: https://github.com/swovo/odango

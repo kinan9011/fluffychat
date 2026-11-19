@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
 
 class SignInState {
   PublicHomeserverData? selectedHomeserver;

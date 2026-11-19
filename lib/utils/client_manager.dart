@@ -4,23 +4,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/custom_http_client.dart';
-import 'package:fluffychat/utils/custom_image_resizer.dart';
-import 'package:fluffychat/utils/init_with_restore.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/privacy/presence_policy.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:http/http.dart' show BaseClient;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/custom_http_client.dart';
+import 'package:odango/utils/custom_image_resizer.dart';
+import 'package:odango/utils/init_with_restore.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:odango/utils/notification_background_handler.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/privacy/presence_policy.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
@@ -29,7 +29,7 @@ import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_open_err
 import 'matrix_sdk_extensions/safe_init_client.dart';
 
 abstract class ClientManager {
-  static const String clientNamespace = 'im.fluffychat.store.clients';
+  static const String clientNamespace = 'com.swovo.odango.store.clients';
 
   static Future<List<Client>> getClients({
     bool initialize = true,

@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
 
 /// What the background fetch mode (no GUI) tells the server about presence.
 const backgroundFetchPresence = PresenceType.offline;

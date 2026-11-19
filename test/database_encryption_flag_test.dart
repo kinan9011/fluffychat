@@ -5,14 +5,14 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n_en.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
-import 'package:fluffychat/widgets/database_unencrypted_warning.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n_en.dart';
+import 'package:odango/utils/client_manager.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
+import 'package:odango/widgets/database_unencrypted_warning.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _secureStorageChannel = MethodChannel(

@@ -6,8 +6,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/backup_dump_validator.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/backup_dump_validator.dart';
 
 Map<String, Object?> validDump() => {
   for (final box in requiredBackupBoxes) box: <String, Object?>{},

@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 class ScheduledEncryptionUnavailable implements Exception {
   const ScheduledEncryptionUnavailable();

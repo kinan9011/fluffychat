@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
 
 enum RowTick { none, sending, sent, read, error }
 

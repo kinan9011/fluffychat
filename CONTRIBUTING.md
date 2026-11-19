@@ -5,7 +5,9 @@ SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# Contributing to FluffyChat
+# Contributing to Odango
+
+Odango is a fork of [FluffyChat](https://github.com/krille-chan/fluffychat) and these guidelines are adapted from the FluffyChat ones. Please keep the upstream copyright and SPDX headers of existing files untouched and add `SPDX-FileCopyrightText: 2026-Present Odango contributors` to new files.
 Contributions are always welcome but limited to collaborators only for now duo to spam. You can request collaboration access to the repository in an issue. Further collaboration will then be decided on the quality of your first pull request.
 
 To improve the process please make sure that you read the following guidelines carefully:
@@ -19,9 +21,9 @@ To improve the process please make sure that you read the following guidelines c
 5. Every Pull Request should change only one thing. For bigger changes it is often better to split them up in multiple Pull Requests.
 6. [Sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 7. Format the commit message as [Conventional Commits](https://www.conventionalcommits.org).
-8. For bigger or complex changes (more than a couple of code lines) write an issue or refer to an existing issue and ask for approval from the maintainers (@krille-chan) **before** starting to implement it. This way you reduce the risk that your Pull Request get's declined.
+8. For bigger or complex changes (more than a couple of code lines) write an issue or refer to an existing issue and ask for approval from the maintainers **before** starting to implement it. This way you reduce the risk that your Pull Request get's declined.
 9. Prefer simple and easy to maintain solutions over complexity and fancy ones.
-10. Translations in the .arb files are managed in [Weblate](https://hosted.weblate.org/projects/fluffychat/) and not here.
+10. Translations in the .arb files other than `lib/l10n/intl_en.arb` are inherited from the FluffyChat translators and are not edited by hand here.
 11. Do not comment your code! Code comments are a sign that the code is not self-explanatory. Instead use comments to mark workarounds (always with a link to the upstream problem!) or explain **why** something is done in an unusual way.
 12. Do not fire&forget a pull request! Contributing also means taking over responsibility, reacting on comments and reviews and be able to collaborate.
 13. Do not overengineer something. Not everything needs to be abstracted, if it isn't used in more than one place. Code must fit in the current architecture.
@@ -31,7 +33,7 @@ To improve the process please make sure that you read the following guidelines c
 
 # Code Style
 
-FluffyChat tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
+Odango tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
 
 <!-- editorconfig-checker-disable -->
 <!-- prettier-ignore-start -->

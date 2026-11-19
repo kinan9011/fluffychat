@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_top_bar.dart';
-import 'package:fluffychat/pages/chat_list/space_switcher.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat_list/chat_list_top_bar.dart';
+import 'package:odango/pages/chat_list/space_switcher.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';
@@ -51,7 +51,7 @@ void main() {
     await AppSettings.applicationName.setItem('Acme');
     await pumpGoldenWidget(tester, bar());
     expect(find.text('Acme'), findsOneWidget);
-    expect(find.text('FluffyChat'), findsNothing);
+    expect(find.text('Odango'), findsNothing);
   });
 
   testWidgets('avatar opens the profile, search starts the search', (

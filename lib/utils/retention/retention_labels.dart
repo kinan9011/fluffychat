@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 
 String formatRetention(L10n l10n, Duration lifetime) {
   if (lifetime == const Duration(days: 7)) return l10n.retentionWeek;

@@ -5,9 +5,9 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/utils/topics/topic.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/topics/topic.dart';
 
 void main() {
   final bidi = String.fromCharCode(0x202e);

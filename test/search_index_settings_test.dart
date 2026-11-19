@@ -5,16 +5,16 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_data/search_index_group.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
-import 'package:fluffychat/utils/search/index_feeder.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings_data/search_index_group.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
+import 'package:odango/utils/search/index_feeder.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/message_index.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 import 'utils/chat_page_harness.dart';
 

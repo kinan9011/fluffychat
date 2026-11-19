@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
-import 'package:fluffychat/utils/search/search_query.dart';
-import 'package:fluffychat/utils/search/server_search.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_kind.dart';
+import 'package:odango/utils/search/search_query.dart';
+import 'package:odango/utils/search/server_search.dart';
 
 import 'utils/recording_api.dart';
 import 'utils/search_fixtures.dart';

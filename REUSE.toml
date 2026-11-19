@@ -28,10 +28,14 @@ path = [
     "windows/**",
     "web/**",
     "test/metadata/**",
-    "test/goldens/**"
+    "test/goldens/**",
+    "test/data/**"
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2019-Present Christian Kußowski"
+SPDX-FileCopyrightText = [
+    "2019-Present Christian Kußowski",
+    "2026-Present Odango contributors"
+]
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 [[annotations]]
@@ -48,30 +52,22 @@ path = [
 SPDX-FileCopyrightText = "Matrix Foundation"
 SPDX-License-Identifier = "Apache-2.0"
 
-# App Logo
+# Odango app logo and generated icons (placeholder licence until the owner decides)
 [[annotations]]
 path = [
     "assets/logo/*/logo**",
     "android/app/src/main/res/mipmap**/**",
+    "android/app/src/main/res/drawable*/*.png",
+    "android/fastlane/metadata/android/en-US/images/logo.png",
     "ios/Runner/Assets.xcassets/AppIcon.appiconset/**",
     "macos/Runner/Assets.xcassets/AppIcon.appiconset/**",
     "web/icons/**",
-    "web/splash/**",
+    "web/favicon.png",
     "snap/gui/*.png",
     "windows/runner/resources/app_icon.ico",
 ]
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2017-Present Fabiyamada"
-SPDX-License-Identifier = "CC-BY-4.0"
-
-# Artwork
-[[annotations]]
-path = [
-    "assets/logo/*/mascot.**",
-    "assets/logo/*/banner.**",
-]
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2026-Present Christian Kußowski"
+precedence = "override"
+SPDX-FileCopyrightText = "2026-Present Odango contributors"
 SPDX-License-Identifier = "LicenseRef-All-Rights-Reserved"
 
 # Fonts
@@ -96,7 +92,10 @@ path = [
     "assets/fonts/SOURCES.md",
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2019-Present Christian Kußowski"
+SPDX-FileCopyrightText = [
+    "2019-Present Christian Kußowski",
+    "2026-Present Odango contributors"
+]
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 [[annotations]]

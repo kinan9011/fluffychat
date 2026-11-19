@@ -5,6 +5,15 @@ SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
+## Odango (unreleased)
+
+Odango is a new app forked from FluffyChat (see NOTICE.md). The sections below are the FluffyChat history up to the fork and are kept unchanged.
+
+- feat: rename the app to Odango (app id `com.swovo.odango`, name, icons, links, documentation)
+- feat: *Support Odango* dialog that explains that part of the support goes to the FluffyChat source
+- fix: no crash reports, update checks or push gateways point at the FluffyChat project any more; the push gateway is empty by default
+- note: new app id, so there is no data migration from a FluffyChat installation; sign in again
+
 ## v2.11.5
 
 - fix: release iOS from CI and set ubuntu CI version for Linux builds

@@ -3,21 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/pages/calls/calls_page.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
-import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/pages/calls/calls_page.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat_details/chat_details.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/settings/settings.dart';
+import 'package:odango/pages/settings_appearance/settings_appearance.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/layouts/app_nav_rail.dart';
+import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/call_support_fakes.dart';

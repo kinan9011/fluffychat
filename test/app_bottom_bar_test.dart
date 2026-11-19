@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/layouts/app_tab.dart';
-import 'package:fluffychat/widgets/layouts/chats_badge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/widgets/glass_surface.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/layouts/app_tab.dart';
+import 'package:odango/widgets/layouts/chats_badge.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';

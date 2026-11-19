@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/chat/bubble_shape.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/chat/bubble_shape.dart';
 
 void main() {
   group('RoomAppearance.tryParse', () {

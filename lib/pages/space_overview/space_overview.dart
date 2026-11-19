@@ -6,26 +6,26 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/space_overview/space_overview_view.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/links/matrix_link_policy.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/retention/default_retention.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/route_path.dart';
-import 'package:fluffychat/utils/spaces/community_model.dart';
-import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
-import 'package:fluffychat/utils/spaces/space_trail.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/space_overview/space_overview_view.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/fluffy_share.dart';
+import 'package:odango/utils/links/matrix_link_policy.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/retention/default_retention.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/route_path.dart';
+import 'package:odango/utils/spaces/community_model.dart';
+import 'package:odango/utils/spaces/space_hierarchy.dart';
+import 'package:odango/utils/spaces/space_trail.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 enum SpaceOverviewTab { joined, suggested }
 

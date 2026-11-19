@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/spaces/legacy_cache_purge.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/spaces/legacy_cache_purge.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -15,7 +15,7 @@ void main() {
       'spaces_history_cache!a:example.org': ['{"name":"Private room"}'],
       'spaces_history_cache!b:example.org': ['{"name":"Other"}'],
       'draft_unrelated': 'keep',
-      'im.fluffychat.search.server': 'other.example',
+      'com.swovo.odango.search.server': 'other.example',
       'spaces_history': 'not the cache but similar',
     });
     store = await SharedPreferences.getInstance();
@@ -33,7 +33,7 @@ void main() {
   test('other keys are untouched', () async {
     await purgeLegacySpaceHierarchyCache(store);
     expect(store.getString('draft_unrelated'), 'keep');
-    expect(store.getString('im.fluffychat.search.server'), 'other.example');
+    expect(store.getString('com.swovo.odango.search.server'), 'other.example');
     expect(store.getString('spaces_history'), 'not the cache but similar');
   });
 

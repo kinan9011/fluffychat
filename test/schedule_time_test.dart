@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/scheduling/schedule_time.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/scheduling/schedule_time.dart';
 
 void main() {
   final thursday = DateTime(2025, 11, 13, 14, 30);

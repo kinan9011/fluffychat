@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
+import 'package:odango/config/design_constants.dart';
 
 /// The only gate for links the composer writes into a message.
 ///

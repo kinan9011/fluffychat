@@ -6,15 +6,15 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
-import 'package:fluffychat/widgets/settings/settings_segmented.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/settings_appearance/settings_appearance.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/appearance/wallpaper_store.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';

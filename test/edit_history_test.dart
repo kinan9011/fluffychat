@@ -5,11 +5,11 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/chat/edit_history.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' show BaseClient, BaseRequest, StreamedResponse;
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/chat/edit_history.dart';
 
 import 'utils/test_client.dart';
 

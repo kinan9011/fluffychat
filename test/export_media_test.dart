@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/export/export_media.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/export/export_media.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 void main() {
   group('safeMediaName', () {

@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
+import 'package:odango/utils/chat/display_text.dart';
 
 /// What the user typed, reduced to a few lowercase terms. The raw text is not
 /// kept anywhere else and is never logged.

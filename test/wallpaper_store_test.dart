@@ -6,8 +6,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/appearance/wallpaper_store.dart';
 
 void main() {
   late Directory base;

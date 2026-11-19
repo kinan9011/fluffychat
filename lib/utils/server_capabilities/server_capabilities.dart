@@ -5,7 +5,7 @@
 
 import 'dart:collection';
 
-import 'package:fluffychat/utils/matrix_live_kit_calls/livekit_service_url.dart';
+import 'package:odango/utils/matrix_live_kit_calls/livekit_service_url.dart';
 
 enum FeatureSupport { supported, partial, unsupported, unknown }
 

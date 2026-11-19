@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/search/db_event_reader.dart';
-import 'package:fluffychat/utils/search/index_policy.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/search/db_event_reader.dart';
+import 'package:odango/utils/search/index_policy.dart';
+import 'package:odango/utils/search/message_index.dart';
 
 class CancelFlag {
   var cancelled = false;

@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/privacy/read_markers.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/privacy/read_markers.dart';
 
 enum SwipeAction { toggleRead, mute, pin, archive }
 

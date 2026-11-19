@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/utils/oklch.dart';
-import 'package:fluffychat/utils/string_color.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/utils/oklch.dart';
+import 'package:odango/utils/string_color.dart';
 
 /// Expected sRGB values of DESIGN.md section 6.1, computed with an independent
 /// CSS Color 4 implementation (python), not with lib/utils/oklch.dart.

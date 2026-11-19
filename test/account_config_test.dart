@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/account_config.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/account_config.dart';
 
 void main() {
   group('wallpaper_url', () {

@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/global_search/global_search.dart';
-import 'package:fluffychat/pages/global_search/search_result_widgets.dart';
-import 'package:fluffychat/utils/search/search_sections.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/global_search/global_search.dart';
+import 'package:odango/pages/global_search/search_result_widgets.dart';
+import 'package:odango/utils/search/search_sections.dart';
 
 class GlobalSearchView extends StatelessWidget {
   final GlobalSearchController controller;

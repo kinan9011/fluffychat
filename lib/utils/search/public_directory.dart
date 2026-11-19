@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/bounded_matrix_request.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/bounded_matrix_request.dart';
 
 const maxDirectoryBytes = 2 * 1024 * 1024;
 

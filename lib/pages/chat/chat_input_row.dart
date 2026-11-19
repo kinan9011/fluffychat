@@ -4,26 +4,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/composer/composer_panel_model.dart';
-import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
-import 'package:fluffychat/pages/chat/recording_input_row.dart';
-import 'package:fluffychat/pages/chat/recording_view_model.dart';
-import 'package:fluffychat/pages/chat/scheduling/send_button.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/utils/other_party_can_receive.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
-import 'package:fluffychat/widgets/hover_builder.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/composer/composer_panel_model.dart';
+import 'package:odango/pages/chat/composer/rich_text_editing_controller.dart';
+import 'package:odango/pages/chat/recording_input_row.dart';
+import 'package:odango/pages/chat/recording_view_model.dart';
+import 'package:odango/pages/chat/scheduling/send_button.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/other_party_can_receive.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/glass_surface.dart';
+import 'package:odango/widgets/hover_builder.dart';
+import 'package:odango/widgets/matrix.dart';
 
 import '../../config/themes.dart';
 import 'chat.dart';

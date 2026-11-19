@@ -5,7 +5,7 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/glass_policy.dart';
+import 'package:odango/utils/glass_policy.dart';
 
 /// Whatever machine runs the tests, the glass looks the same: the device is
 /// not low end unless a test says so.

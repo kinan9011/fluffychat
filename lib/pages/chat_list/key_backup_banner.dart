@@ -5,12 +5,12 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/crypto_identity.dart' as crypto_identity;
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/crypto_identity.dart' as crypto_identity;
 
 class KeyBackupBanner extends StatefulWidget {
   final Client client;

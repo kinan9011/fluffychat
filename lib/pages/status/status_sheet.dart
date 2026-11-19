@@ -5,16 +5,16 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/status/status_sheet_view.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/privacy/presence_policy.dart';
-import 'package:fluffychat/utils/status/status_clear_store.dart';
-import 'package:fluffychat/utils/status/status_policy.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/status/status_sheet_view.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/privacy/presence_policy.dart';
+import 'package:odango/utils/status/status_clear_store.dart';
+import 'package:odango/utils/status/status_policy.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 enum StatusPresenceChoice { online, away, appearOffline }
 

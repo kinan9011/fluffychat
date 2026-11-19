@@ -6,10 +6,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/utils/export/export_runner.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_runner.dart';
 
 import 'utils/test_client.dart';
 

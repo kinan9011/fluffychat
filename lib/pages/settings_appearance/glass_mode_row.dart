@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/glass_policy.dart';
-import 'package:fluffychat/widgets/settings/settings_segmented.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/glass_policy.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
 
 /// Auto, full or lite glass (blur on, or solid surfaces).
 class GlassModeRow extends StatelessWidget {

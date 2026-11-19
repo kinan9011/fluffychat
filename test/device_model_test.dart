@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/devices/device_model.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/devices/device_model.dart';
 
 Device _device(String id, {String? name, int? ts}) =>
     Device(deviceId: id, displayName: name, lastSeenTs: ts);

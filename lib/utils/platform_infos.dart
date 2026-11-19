@@ -5,15 +5,15 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/launch_web_url.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import '../config/app_config.dart';
 
 abstract class PlatformInfos {
   static bool get isWeb => kIsWeb;
@@ -69,10 +69,16 @@ abstract class PlatformInfos {
       context: context,
       children: [
         Text(l10n.versionWithNumber(version)),
+        Text(l10n.aboutBasedOnFluffyChat),
         TextButton.icon(
-          onPressed: () => launchWebUrl(AppConfig.sourceCodeUrl),
+          onPressed: () => launchWebUrl(RepoLinks.configured.page.toString()),
           icon: const Icon(Icons.source_outlined),
           label: Text(l10n.sourceCode),
+        ),
+        TextButton.icon(
+          onPressed: () => launchWebUrl(AppConfig.upstreamRepoUrl),
+          icon: const Icon(Icons.source_outlined),
+          label: Text(l10n.supportUpstreamSource),
         ),
         Builder(
           builder: (innerContext) {

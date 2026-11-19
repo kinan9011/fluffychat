@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/spaces/community_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/spaces/community_model.dart';
 
 const _me = '@me:example.org';
 

@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/motion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/utils/motion.dart';
 
 class UnreadBubble extends StatelessWidget {
   final Room room;

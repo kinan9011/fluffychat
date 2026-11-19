@@ -5,9 +5,9 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/pages/chat/utd_why_sheet.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

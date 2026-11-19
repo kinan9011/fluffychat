@@ -4,31 +4,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/archived_chats_row.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_tabs.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_top_bar.dart';
-import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/folder_tab_actions.dart';
-import 'package:fluffychat/pages/chat_list/key_backup_banner.dart';
-import 'package:fluffychat/pages/chat_list/space_switcher.dart';
-import 'package:fluffychat/utils/chat_list/folder_filter.dart';
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/own_avatar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/archived_chats_row.dart';
+import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
+import 'package:odango/pages/chat_list/chat_list_tabs.dart';
+import 'package:odango/pages/chat_list/chat_list_top_bar.dart';
+import 'package:odango/pages/chat_list/client_chooser_button.dart';
+import 'package:odango/pages/chat_list/dummy_chat_list_item.dart';
+import 'package:odango/pages/chat_list/folder_tab_actions.dart';
+import 'package:odango/pages/chat_list/key_backup_banner.dart';
+import 'package:odango/pages/chat_list/space_switcher.dart';
+import 'package:odango/utils/chat_list/folder_filter.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/stream_extension.dart';
+import 'package:odango/widgets/own_avatar.dart';
 
 import '../../widgets/matrix.dart';
 

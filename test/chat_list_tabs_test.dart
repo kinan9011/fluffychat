@@ -5,14 +5,14 @@
 
 import 'dart:ui' show Tristate;
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_tabs.dart';
-import 'package:fluffychat/utils/chat_list/folder_filter.dart';
-import 'package:fluffychat/utils/chat_list/folder_ref.dart';
-import 'package:fluffychat/utils/chat_list/space_tabs_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/chat_list_tabs.dart';
+import 'package:odango/utils/chat_list/folder_filter.dart';
+import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/utils/chat_list/space_tabs_model.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/display_text.dart';
 
 abstract class PollLimits {
   static const questionMax = 255;
@@ -21,7 +21,7 @@ abstract class PollLimits {
 
 /// Matrix content key of the quiz extension (a client extension, other apps
 /// show a normal poll). The correct answer is stored in clear in the event.
-const pollQuizKey = 'im.fluffychat.poll.quiz';
+const pollQuizKey = 'com.swovo.odango.poll.quiz';
 
 final _controlChars = RegExp(r'[\u0000-\u001F\u007F]');
 

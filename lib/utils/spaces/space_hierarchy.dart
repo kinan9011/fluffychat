@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/bounded_matrix_request.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/spaces/space_trail.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/bounded_matrix_request.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/spaces/space_trail.dart';
 
 @immutable
 class HierarchyChild {

@@ -5,7 +5,7 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 const _secretKeys = {'key', 'iv', 'hashes'};
 const _encryptedFileKeys = {'file', 'thumbnail_file'};
@@ -59,7 +59,7 @@ String buildJson(
 }) {
   const encoder = JsonEncoder.withIndent('  ');
   final head = encoder.convert({
-    'format': 'im.fluffychat.export',
+    'format': 'com.swovo.odango.export',
     'version': 1,
     'exported_at': meta.exportedAt.toUtc().toIso8601String(),
     'truncated': meta.truncated,

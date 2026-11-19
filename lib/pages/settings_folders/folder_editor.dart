@@ -5,15 +5,15 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/settings_folders/folder_actions.dart';
-import 'package:fluffychat/pages/settings_folders/folder_chat_picker.dart';
-import 'package:fluffychat/pages/settings_folders/folder_editor_view.dart';
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/settings_folders/folder_actions.dart';
+import 'package:odango/pages/settings_folders/folder_chat_picker.dart';
+import 'package:odango/pages/settings_folders/folder_editor_view.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class FolderEditor extends StatefulWidget {
   final String? folderId;

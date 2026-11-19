@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/motion.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/motion.dart';
 
 Future<Duration> _resolve(WidgetTester tester, bool reduce) async {
   late Duration result;

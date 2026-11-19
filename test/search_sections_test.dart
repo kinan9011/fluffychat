@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/local_search.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
-import 'package:fluffychat/utils/search/search_sections.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/local_search.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_kind.dart';
+import 'package:odango/utils/search/search_sections.dart';
 
 void main() {
   group('chip to filter', () {

@@ -4,25 +4,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:async/async.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/pages/status/status_sheet.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/qr_code_viewer.dart';
-import 'package:fluffychat/widgets/settings/settings_group.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
-import 'package:fluffychat/widgets/settings/settings_scaffold.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' hide Result;
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/settings/settings.dart';
+import 'package:odango/pages/status/status_sheet.dart';
+import 'package:odango/utils/fluffy_share.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/qr_code_viewer.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 class SettingsView extends StatelessWidget {
   final SettingsController controller;

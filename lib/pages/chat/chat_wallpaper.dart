@@ -7,16 +7,16 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance_scope.dart';
-import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/appearance/chat_appearance_scope.dart';
+import 'package:odango/utils/appearance/wallpaper_store.dart';
+import 'package:odango/widgets/mxc_image.dart';
 
 /// Gradient plus dot grid (DESIGN.md 6.1 `--wallG`, `--dot2`). A picture the
 /// user picked (local file, or the legacy account data one) is drawn over the

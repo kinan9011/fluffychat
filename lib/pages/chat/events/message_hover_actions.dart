@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/glass_surface.dart';
-import 'package:fluffychat/widgets/hover_builder.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/glass_surface.dart';
+import 'package:odango/widgets/hover_builder.dart';
 
 /// Desktop hover actions (DESIGN.md 12): react, reply and more, at the far
 /// end of the message row. Touch devices never hover, so nothing shows there.

@@ -4,27 +4,27 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
-import 'package:fluffychat/pages/settings_appearance/glass_mode_row.dart';
-import 'package:fluffychat/pages/settings_appearance/settings_appearance.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/appearance/chat_appearance.dart';
-import 'package:fluffychat/utils/appearance/wallpaper_store.dart';
-import 'package:fluffychat/utils/chat/bubble_shape.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/color_value.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/settings/settings_group.dart';
-import 'package:fluffychat/widgets/settings/settings_row.dart';
-import 'package:fluffychat/widgets/settings/settings_scaffold.dart';
-import 'package:fluffychat/widgets/settings/settings_segmented.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/chat_wallpaper.dart';
+import 'package:odango/pages/settings_appearance/glass_mode_row.dart';
+import 'package:odango/pages/settings_appearance/settings_appearance.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/appearance/chat_appearance.dart';
+import 'package:odango/utils/appearance/wallpaper_store.dart';
+import 'package:odango/utils/chat/bubble_shape.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/color_value.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 class SettingsAppearanceView extends StatelessWidget {
   const SettingsAppearanceView(this.controller, {super.key});

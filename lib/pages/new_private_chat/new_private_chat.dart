@@ -6,20 +6,20 @@
 import 'dart:async';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/pages/new_private_chat/qr_scanner_modal.dart';
-import 'package:fluffychat/pages/new_private_chat/scan_confirm_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/links/matrix_link_policy.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/new_message/contact_list.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/new_private_chat/new_private_chat_view.dart';
+import 'package:odango/pages/new_private_chat/qr_scanner_modal.dart';
+import 'package:odango/pages/new_private_chat/scan_confirm_sheet.dart';
+import 'package:odango/utils/adaptive_bottom_sheet.dart';
+import 'package:odango/utils/fluffy_share.dart';
+import 'package:odango/utils/links/matrix_link_policy.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/new_message/contact_list.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/url_launcher.dart';
+import 'package:odango/widgets/matrix.dart';
 
 import '../../widgets/adaptive_dialogs/user_dialog.dart';
 

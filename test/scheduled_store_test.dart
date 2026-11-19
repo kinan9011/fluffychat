@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/test_client.dart';

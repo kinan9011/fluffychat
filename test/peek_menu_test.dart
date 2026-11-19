@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat_list/peek_menu.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat_list/peek_menu.dart';
 
 import 'utils/chat_row_fixtures.dart';
 import 'utils/test_client.dart';
@@ -43,7 +43,7 @@ void main() {
       client,
       '!pm5:x',
       name: 'e',
-      tags: {'im.fluffychat.archived': null},
+      tags: {'com.swovo.odango.archived': null},
     );
     expect(peekStillShown(plain, PeekMenuItem.pin, false), isTrue);
     expect(peekStillShown(plain, PeekMenuItem.pin, true), isFalse);

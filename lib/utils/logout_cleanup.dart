@@ -3,15 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/app_temp_directory.dart';
-import 'package:fluffychat/utils/draft_migration.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
-import 'package:fluffychat/utils/status/status_clear_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/draft_migration.dart';
+import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
+import 'package:odango/utils/status/status_clear_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// What an account leaves on the device besides the database the SDK clears at

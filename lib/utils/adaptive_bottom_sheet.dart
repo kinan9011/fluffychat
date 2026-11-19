@@ -5,9 +5,9 @@
 
 import 'dart:math';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/themes.dart';
 
 Future<T?> showAdaptiveBottomSheet<T>({
   required BuildContext context,

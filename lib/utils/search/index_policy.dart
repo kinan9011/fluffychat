@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/polls/poll_content.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/polls/poll_content.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 /// Which events become searchable entries. Matrix content is untrusted: every
 /// field is type-checked, nothing is cast.

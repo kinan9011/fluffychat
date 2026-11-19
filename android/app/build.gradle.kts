@@ -33,7 +33,7 @@ configurations.all {
 
 
 android {
-    namespace = "chat.fluffy.fluffychat"
+    namespace = "com.swovo.odango"
     // Workaround for https://github.com/juliansteenbakker/flutter_secure_storage/issues/1224
     compileSdk = 37 //flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -66,7 +66,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "chat.fluffy.fluffychat"
+        applicationId = "com.swovo.odango"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

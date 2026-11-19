@@ -5,19 +5,19 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/launch_web_url.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/branding/repo_links.dart';
+import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:universal_html/universal_html.dart' as html;
 
 class ErrorReporter {
@@ -94,7 +94,7 @@ class ErrorReporter {
             onPressed: () async {
               final existingIssueUrl = stackTrace == null
                   ? null
-                  : await _searchIssue(
+                  : await findExistingIssue(
                       (error.toString() + stackTrace.toString()).hashCode
                           .toString(),
                     );
@@ -103,7 +103,7 @@ class ErrorReporter {
                 return;
               }
               launchWebUrl(
-                AppConfig.newIssueUrl
+                RepoLinks.configured.newIssue
                     .resolveUri(
                       Uri(
                         queryParameters: {
@@ -138,28 +138,29 @@ class ErrorReporter {
       ),
     );
   }
+}
 
-  Future<Uri?> _searchIssue(String hash) async {
-    final result = await http.get(
-      Uri(
-        scheme: 'https',
-        host: 'api.github.com',
-        path: '/search/issues',
-        query: 'q=repo:krille-chan/fluffychat+is:issue+$hash',
-      ),
-    );
-    try {
-      final jsonResult =
-          jsonDecode(utf8.decode(result.bodyBytes)) as Map<String, Object?>;
-      final uriString = jsonResult
-          .tryGetList<Map<String, Object?>>('items')
-          ?.firstOrNull
-          ?.tryGet<String>('html_url');
-      if (uriString == null) return null;
-      return Uri.tryParse(uriString);
-    } catch (e, s) {
-      Logs().w('Unable to search for existing issues on GitHub', e, s);
-      return null;
-    }
+/// Looks for an existing issue of the confirmed repository. Without a
+/// confirmed, valid repository nothing is requested.
+@visibleForTesting
+Future<Uri?> findExistingIssue(String hash, {http.Client? client}) async {
+  final repo = RepoLinks.confirmed();
+  if (repo == null) return null;
+  final httpClient = client ?? http.Client();
+  try {
+    final result = await httpClient.get(repo.searchIssues(hash));
+    final jsonResult =
+        jsonDecode(utf8.decode(result.bodyBytes)) as Map<String, Object?>;
+    final uriString = jsonResult
+        .tryGetList<Map<String, Object?>>('items')
+        ?.firstOrNull
+        ?.tryGet<String>('html_url');
+    if (uriString == null) return null;
+    return Uri.tryParse(uriString);
+  } catch (e, s) {
+    Logs().w('Unable to search for existing issues on GitHub', e, s);
+    return null;
+  } finally {
+    if (client == null) httpClient.close();
   }
 }

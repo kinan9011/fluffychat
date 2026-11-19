@@ -6,11 +6,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/utils/logged_in_database.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/logged_in_database.dart';
+import 'package:odango/utils/matrix_room_id.dart';
 
 class DraftEntry {
   const DraftEntry(this.text, {this.format});
@@ -41,7 +41,7 @@ class DraftStore {
   DraftStore.forTesting(DatabaseApi Function() database, {int Function()? now})
     : this._(database, now ?? _wallClock);
 
-  static const documentKey = 'im.fluffychat.drafts.v1';
+  static const documentKey = 'com.swovo.odango.drafts.v1';
   static const maxDrafts = 50;
   static const maxDraftChars = 8000;
   static const maxFormatJsonUnits = 16384;

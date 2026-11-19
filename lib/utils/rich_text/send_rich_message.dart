@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/rich_text/outgoing_message.dart';
-import 'package:fluffychat/utils/rich_text/rich_mentions.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/rich_text/outgoing_message.dart';
+import 'package:odango/utils/rich_text/rich_mentions.dart';
 
 /// The event content of a formatted message, shared by the normal send path
 /// and the scheduled one so both stay identical.

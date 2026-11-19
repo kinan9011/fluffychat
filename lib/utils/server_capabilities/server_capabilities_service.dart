@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/server_capabilities/call_support.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/server_capabilities/call_support.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerCapabilitiesUnavailable implements Exception {
@@ -97,7 +97,7 @@ class _Entry {
 }
 
 class ServerCapabilitiesService extends ChangeNotifier {
-  static const callSupportKeyPrefix = 'chat.fluffy.call_support.';
+  static const callSupportKeyPrefix = 'com.swovo.odango.call_support.';
 
   final Duration maxAge;
   final Duration incompleteMaxAge;

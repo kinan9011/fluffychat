@@ -5,8 +5,8 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/utils/app_temp_directory.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/app_temp_directory.dart';
 
 void main() {
   late Directory base;
@@ -20,7 +20,7 @@ void main() {
   test('the app temp directory is a created child of the cache (G1)', () async {
     final dir = await appTempDirectory(base: baseDir);
 
-    expect(dir.path, '${base.path}/fluffychat_tmp');
+    expect(dir.path, '${base.path}/odango_tmp');
     expect(dir.existsSync(), isTrue);
   });
 

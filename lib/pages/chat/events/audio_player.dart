@@ -7,18 +7,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:fluffychat/pages/chat/events/voice_bubble_view.dart';
-import 'package:fluffychat/utils/app_temp_directory.dart';
-import 'package:fluffychat/utils/chat/waveform.dart';
-import 'package:fluffychat/utils/error_reporter.dart';
-import 'package:fluffychat/utils/file_description.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/events/voice_bubble_view.dart';
+import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/chat/waveform.dart';
+import 'package:odango/utils/error_reporter.dart';
+import 'package:odango/utils/file_description.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/url_launcher.dart';
 import 'package:ogg_caf_converter/ogg_caf_converter.dart';
 
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';

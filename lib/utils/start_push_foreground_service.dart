@@ -3,10 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/platform_infos.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../l10n/l10n.dart';
@@ -45,7 +46,7 @@ abstract class ForegroundServices {
         );
         FlutterForegroundTask.init(
           androidNotificationOptions: AndroidNotificationOptions(
-            channelId: 'fluffychat_sync',
+            channelId: 'odango_sync',
             channelName: l10n.loadingMessages,
             channelDescription: l10n.loadingMessages,
             onlyAlertOnce: true,
@@ -68,7 +69,7 @@ abstract class ForegroundServices {
         }
         final result = await FlutterForegroundTask.startService(
           serviceTypes: [ForegroundServiceTypes.shortService],
-          notificationTitle: 'FluffyChat',
+          notificationTitle: AppSettings.applicationName.value,
           notificationText: l10n.loadingMessages,
           notificationIcon: NotificationIcon(metaDataName: 'ic_launcher'),
         );

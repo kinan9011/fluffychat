@@ -5,13 +5,13 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/new_device_banner.dart';
-import 'package:fluffychat/utils/chat/new_device_banner_model.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/new_device_banner.dart';
+import 'package:odango/utils/chat/new_device_banner_model.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/golden.dart';

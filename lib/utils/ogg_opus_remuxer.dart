@@ -13,7 +13,7 @@ import 'dart:typed_data';
 /// file from the same Opus packets.
 ///
 /// Returns the original bytes if the input can not be parsed.
-Uint8List remuxOggOpus(Uint8List input, {String vendor = 'FluffyChat'}) {
+Uint8List remuxOggOpus(Uint8List input, {String vendor = 'Odango'}) {
   try {
     final packets = _readOggPackets(input);
     if (packets.isEmpty || !_startsWith(packets.first, 'OpusHead')) {

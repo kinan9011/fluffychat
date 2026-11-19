@@ -11,16 +11,18 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/main.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
-import 'package:fluffychat/utils/push_helper.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/main.dart';
+import 'package:odango/utils/branding/docs_links.dart';
+import 'package:odango/utils/notification_background_handler.dart';
+import 'package:odango/utils/push_gateway_policy.dart';
+import 'package:odango/utils/push_helper.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
@@ -188,7 +190,7 @@ class BackgroundPush {
     }
     final thisAppId = deviceAppId;
     if (gatewayUrl == null || token == null) {
-      Logs().w('[Push] Missing required push credentials');
+      Logs().w('[Push] No push gateway or token configured, push stays off');
       return;
     }
 
@@ -214,13 +216,7 @@ class BackgroundPush {
 
     if (!client.isLogged()) return;
 
-    final legacyPushers = pushers.where(
-      (pusher) =>
-          pusher.appId == thisAppId || // To migrate older app-id format:
-          ((pusher.appId == 'chat.fluffy.fluffychat.data_message' ||
-                  pusher.appId == 'chat.fluffy.fluffychat') &&
-              pusher.pushkey == token),
-    );
+    final legacyPushers = pushers.where((pusher) => pusher.appId == thisAppId);
     for (final pusher in legacyPushers) {
       try {
         await client.deletePusher(pusher);
@@ -329,12 +325,21 @@ class BackgroundPush {
       if (PlatformInfos.isAndroid) {
         onFcmError?.call(
           l10n!.noGoogleServicesWarning,
-          link: Uri.parse(AppConfig.enablePushTutorial),
+          link: docsUrl(DocsPage.push),
         );
         return;
       }
       onFcmError?.call(l10n!.oopsPushError);
     });
+  }
+
+  Future<void> _noGatewayWarning() async {
+    Logs().w('[Push] No push gateway configured, push stays off');
+    if (AppSettings.showNoGoogle.value) return;
+    await loadLocale();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => onFcmError?.call(l10n!.pushNeedsOwnGateway),
+    );
   }
 
   Future<void> setupFirebase(Client client) async {
@@ -366,11 +371,14 @@ class BackgroundPush {
         return;
       }
     }
-    await setupPusher(
-      client: client,
-      gatewayUrl: AppSettings.pushNotificationsGatewayUrl.value,
-      token: _fcmToken,
+    final gatewayUrl = resolvePushGateway(
+      AppSettings.pushNotificationsGatewayUrl.value,
     );
+    if (gatewayUrl == null) {
+      await _noGatewayWarning();
+      return;
+    }
+    await setupPusher(client: client, gatewayUrl: gatewayUrl, token: _fcmToken);
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {

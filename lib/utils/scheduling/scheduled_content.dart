@@ -5,19 +5,19 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/outgoing_message.dart';
-import 'package:fluffychat/utils/rich_text/rich_mentions.dart';
-import 'package:fluffychat/utils/rich_text/send_rich_message.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/outgoing_message.dart';
+import 'package:odango/utils/rich_text/rich_mentions.dart';
+import 'package:odango/utils/rich_text/send_rich_message.dart';
 
 /// The event content of a message sent through the send options (silent,
 /// scheduled, when online). Built once, validated again whenever it comes
 /// back from storage.
 abstract class ScheduledContent {
-  static const silentKey = 'im.fluffychat.silent';
+  static const silentKey = 'com.swovo.odango.silent';
   static const maxMentions = 100;
   static const maxEventIdLength = 255;
   static const maxPreviewChars = 500;

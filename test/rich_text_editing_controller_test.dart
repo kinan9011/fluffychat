@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/pages/chat/composer/rich_text_editing_controller.dart';
-import 'package:fluffychat/utils/rich_text/editor_text.dart';
-import 'package:fluffychat/utils/rich_text/format_range.dart';
-import 'package:fluffychat/utils/rich_text/format_state.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/pages/chat/composer/rich_text_editing_controller.dart';
+import 'package:odango/utils/rich_text/editor_text.dart';
+import 'package:odango/utils/rich_text/format_range.dart';
+import 'package:odango/utils/rich_text/format_state.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 import 'utils/golden.dart';
 

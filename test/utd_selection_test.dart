@@ -5,19 +5,19 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/events/message.dart';
-import 'package:fluffychat/pages/chat/events/utd_bubble_content.dart';
-import 'package:fluffychat/pages/chat/message_action_runner.dart';
-import 'package:fluffychat/pages/chat/utd_why_sheet.dart';
-import 'package:fluffychat/utils/chat/message_actions.dart';
-import 'package:fluffychat/widgets/glass_menu.dart';
-import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/events/message.dart';
+import 'package:odango/pages/chat/events/utd_bubble_content.dart';
+import 'package:odango/pages/chat/message_action_runner.dart';
+import 'package:odango/pages/chat/utd_why_sheet.dart';
+import 'package:odango/utils/chat/message_actions.dart';
+import 'package:odango/widgets/glass_menu.dart';
+import 'package:odango/widgets/share_scaffold_dialog.dart';
 
 import 'utils/chat_page_harness.dart';
 

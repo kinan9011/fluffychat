@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/oklch.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/oklch.dart';
 
 const double defaultAccentHue = 268;
 
@@ -193,7 +193,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     final tokens = theme.extension<AppTokens>();
     assert(
       tokens != null,
-      'AppTokens missing: build ThemeData with FluffyThemes.buildTheme',
+      'AppTokens missing: build ThemeData with the app theme builder',
     );
     return tokens ??
         (theme.brightness == Brightness.dark

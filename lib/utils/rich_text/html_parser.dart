@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/utils/rich_text/link_policy.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/rich_text/link_policy.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 class ParsedRichHtml {
   const ParsedRichHtml(this.document, {required this.lossy});

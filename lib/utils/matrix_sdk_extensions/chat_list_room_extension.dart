@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:matrix/matrix.dart';
 
-const archivedTag = 'im.fluffychat.archived';
+const archivedTag = 'com.swovo.odango.archived';
 
 extension ChatListRoomExtension on Room {
   bool get isJoinedSpace => isSpace && membership == Membership.join;

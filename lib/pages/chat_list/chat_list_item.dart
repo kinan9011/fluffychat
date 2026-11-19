@@ -3,25 +3,25 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/active_call_indicator.dart';
-import 'package:fluffychat/pages/chat_list/swipe_action_row.dart';
-import 'package:fluffychat/utils/chat_list/chat_row_model.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/widgets/hover_builder.dart';
-import 'package:fluffychat/widgets/typing_animation.dart';
 import 'package:flutter/semantics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/active_call_indicator.dart';
+import 'package:odango/pages/chat_list/swipe_action_row.dart';
+import 'package:odango/utils/chat_list/chat_row_model.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/room_status_extension.dart';
+import 'package:odango/widgets/hover_builder.dart';
+import 'package:odango/widgets/typing_animation.dart';
 
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';

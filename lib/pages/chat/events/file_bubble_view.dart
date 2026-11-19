@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
 
 /// 46 px download circle, file name and "size · TYPE" (DESIGN.md 7.11). The
 /// file name belongs to the sender: one plain line.

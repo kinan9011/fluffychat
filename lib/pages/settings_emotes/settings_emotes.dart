@@ -8,18 +8,18 @@ import 'dart:async';
 import 'package:archive/archive.dart'
     if (dart.library.io) 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/archive_guard.dart';
-import 'package:fluffychat/utils/file_selector.dart';
-import 'package:fluffychat/utils/image_pixel_cap.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' hide Client;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/archive_guard.dart';
+import 'package:odango/utils/file_selector.dart';
+import 'package:odango/utils/image_pixel_cap.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
 
 import '../../widgets/matrix.dart';
 import 'import_archive_dialog.dart';

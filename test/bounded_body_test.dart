@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/bounded_body.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
+import 'package:odango/utils/bounded_body.dart';
 
 class _Server extends BaseClient {
   _Server(this.chunks, {this.contentLength});

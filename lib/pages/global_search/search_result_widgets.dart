@@ -3,18 +3,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/search/chat_matcher.dart';
-import 'package:fluffychat/utils/search/local_search.dart';
-import 'package:fluffychat/utils/search/search_sections.dart';
-import 'package:fluffychat/utils/search/snippet.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/date_time_extension.dart';
+import 'package:odango/utils/search/chat_matcher.dart';
+import 'package:odango/utils/search/local_search.dart';
+import 'package:odango/utils/search/search_sections.dart';
+import 'package:odango/utils/search/snippet.dart';
+import 'package:odango/widgets/avatar.dart';
 
 /// A 34 px pill with a 44 px tap area (DESIGN 7.2, WCAG target size).
 class SearchChip extends StatelessWidget {

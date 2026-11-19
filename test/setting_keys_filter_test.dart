@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/config/setting_keys.dart';
 
 void main() {
   group('filterPlatformConfiguration (web config.json)', () {
@@ -193,6 +193,65 @@ void main() {
           'lastUpdateCheckDate': 'x',
           'showNoGoogle': true,
         }, PlatformConfigSource.mdm),
+        isEmpty,
+      );
+    });
+  });
+
+  group('repository and donation links (web config.json)', () {
+    Map<String, Object?> web(Map<String, Object?> config) =>
+        filterPlatformConfiguration(config, PlatformConfigSource.web);
+
+    test('a GitHub https repository is accepted', () {
+      final config = {'repositoryUrl': 'https://github.com/acme/chat'};
+      expect(web(config), config);
+    });
+
+    test('anything else as repository is dropped', () {
+      for (final value in [
+        'http://github.com/acme/chat',
+        'https://evil.example/acme/chat',
+        'https://github.com/acme',
+        'https://github.com/acme/chat/issues',
+        'javascript:alert(1)',
+        '',
+        7,
+      ]) {
+        expect(web({'repositoryUrl': value}), isEmpty, reason: '$value');
+      }
+    });
+
+    test('donation links are https or empty', () {
+      final ok = {
+        'koFiUrl': 'https://ko-fi.com/acme',
+        'buyMeACoffeeUrl': 'https://buymeacoffee.com/acme',
+      };
+      expect(web(ok), ok);
+      expect(web({'koFiUrl': '', 'buyMeACoffeeUrl': ''}), {
+        'koFiUrl': '',
+        'buyMeACoffeeUrl': '',
+      });
+      for (final value in [
+        'http://ko-fi.com/acme',
+        'javascript:alert(1)',
+        'intent://x#Intent;end',
+        'https://user:pw@ko-fi.com/acme',
+        3,
+      ]) {
+        expect(
+          web({'koFiUrl': value, 'buyMeACoffeeUrl': value}),
+          isEmpty,
+          reason: '$value',
+        );
+      }
+    });
+
+    test('the push gateway and automatic reports stay locked down', () {
+      expect(
+        web({
+          'pushNotificationsGatewayUrl': 'https://push.example.org/x',
+          'autoSendErrorReports': true,
+        }),
         isEmpty,
       );
     });

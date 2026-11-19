@@ -3,17 +3,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/scheduling/schedule_sheet.dart';
-import 'package:fluffychat/utils/draft_store.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/scheduling/schedule_sheet.dart';
+import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/scheduling/scheduled_content.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 import 'utils/chat_page_harness.dart';
 

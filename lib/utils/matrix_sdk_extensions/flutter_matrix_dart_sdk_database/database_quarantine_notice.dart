@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
+import 'package:odango/config/setting_keys.dart';
 
 bool get hasDatabaseQuarantineNotice =>
     AppSettings.databaseQuarantinedClients.value.isNotEmpty;

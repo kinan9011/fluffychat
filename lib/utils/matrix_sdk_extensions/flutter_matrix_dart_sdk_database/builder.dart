@@ -5,15 +5,15 @@
 
 import 'dart:io';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/app_temp_directory.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/secure_storage.dart';
-import 'package:fluffychat/utils/shared_media_filter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/client_manager.dart';
+import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/secure_storage.dart';
+import 'package:odango/utils/shared_media_filter.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
@@ -112,7 +112,7 @@ Future<Directory?> getFileStorageLocation() async {
       temporaryDirectory = await getTemporaryDirectory();
     }
     return await Directory(
-      join(temporaryDirectory.path, 'fluffychat_download_cache'),
+      join(temporaryDirectory.path, 'odango_download_cache'),
     ).create(recursive: true);
   } on MissingPlatformDirectoryException catch (_) {
     Logs().w(

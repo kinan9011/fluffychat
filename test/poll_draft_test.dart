@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/polls/poll_content.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/polls/poll_content.dart';
 
 PollDraft draft({
   String question = 'Question?',

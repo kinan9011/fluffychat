@@ -5,18 +5,18 @@
 
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_list/peek_sheet.dart';
-import 'package:fluffychat/utils/chat_list/peek_menu.dart';
-import 'package:fluffychat/utils/chat_list/swipe_actions.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat_list/peek_sheet.dart';
+import 'package:odango/utils/chat_list/peek_menu.dart';
+import 'package:odango/utils/chat_list/swipe_actions.dart';
+import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class ChatRowActions {
   final Future<void> Function(String roomId, SwipeAction action) run;

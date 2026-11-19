@@ -127,7 +127,7 @@ void main() {
   test('the silent flag is written in one place only', () {
     final writers = [
       for (final file in dart('lib'))
-        if (code(file).contains('im.fluffychat.silent')) file.path,
+        if (code(file).contains('com.swovo.odango.silent')) file.path,
     ];
     expect(writers, ['lib/utils/scheduling/scheduled_content.dart']);
   });

@@ -3,17 +3,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/bootstrap/view_model/bootstrap_view_model.dart';
-import 'package:fluffychat/pages/bootstrap/widgets/new_passphrase_view.dart';
-import 'package:fluffychat/pages/bootstrap/widgets/restore_bootstrap_view.dart';
-import 'package:fluffychat/pages/bootstrap/widgets/store_recovery_key_view.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/view_model_builder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/bootstrap/view_model/bootstrap_view_model.dart';
+import 'package:odango/pages/bootstrap/widgets/new_passphrase_view.dart';
+import 'package:odango/pages/bootstrap/widgets/restore_bootstrap_view.dart';
+import 'package:odango/pages/bootstrap/widgets/store_recovery_key_view.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/layouts/login_scaffold.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/view_model_builder.dart';
 
 class BootstrapPage extends StatelessWidget {
   final bool reset;

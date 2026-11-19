@@ -5,7 +5,7 @@
 
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/design_constants.dart';
+import 'package:odango/config/design_constants.dart';
 
 const _maxInput = 1024;
 

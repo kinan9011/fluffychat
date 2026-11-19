@@ -3,12 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/branding/docs_links.dart';
+import 'package:odango/utils/url_launcher.dart';
+import 'package:odango/widgets/mxc_image.dart';
 
 import '../../widgets/avatar.dart';
 
@@ -83,7 +84,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                       OutlinedButton.icon(
                         onPressed: () => UrlLauncher(
                           context,
-                          AppConfig.howDoIGetStickersTutorial,
+                          docsUrl(DocsPage.stickers).toString(),
                         ).launchUrl(),
                         icon: const Icon(Icons.explore_outlined),
                         label: Text(L10n.of(context).discover),

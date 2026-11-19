@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/spaces/space_trail.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/spaces/space_trail.dart';
 
 void main() {
   test('a space on the trail cannot be entered again', () {

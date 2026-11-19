@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/matrix_room_id.dart';
 
 /// Content key a topic root event carries (a client convention; other apps
 /// show the root as a normal message and the first line of its body).
-const topicContentKey = 'im.fluffychat.topic';
+const topicContentKey = 'com.swovo.odango.topic';
 
 /// The only icons a topic can ask for. Sender controlled text never picks an
 /// icon by itself: it is looked up here, anything else falls back.

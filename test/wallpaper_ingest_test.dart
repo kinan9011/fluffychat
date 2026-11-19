@@ -6,9 +6,9 @@
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart' show getCrc32;
-import 'package:fluffychat/utils/appearance/wallpaper_ingest.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart';
+import 'package:odango/utils/appearance/wallpaper_ingest.dart';
 
 Uint8List _jpeg(int width, int height, {bool gps = false, int? orientation}) {
   final image = Image(width: width, height: height);

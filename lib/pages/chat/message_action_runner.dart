@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/edit_history_sheet.dart';
-import 'package:fluffychat/utils/chat/message_actions.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/edit_history_sheet.dart';
+import 'package:odango/utils/chat/message_actions.dart';
+import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 
 MessageActionContext messageActionContext(ChatController c, Event event) {
   if (event.redacted) return const MessageActionContext(canSelect: false);

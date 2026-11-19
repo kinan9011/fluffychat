@@ -5,12 +5,12 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/settings_security/settings_security.dart';
-import 'package:fluffychat/utils/crypto_identity.dart';
-import 'package:fluffychat/widgets/settings/settings_toggle_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/pages/settings_security/settings_security.dart';
+import 'package:odango/utils/crypto_identity.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';

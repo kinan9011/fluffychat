@@ -7,12 +7,12 @@
 
 # Usage: scripts/test_share_intent.sh <adb serial of a throwaway emulator>
 # Refuses any serial that is not emulator-* reporting qemu=1: the flutter test
-# install can uninstall a differently signed FluffyChat and wipe its data.
+# install can uninstall a differently signed Odango and wipe its data.
 # Proves that content:// shares from another app arrive as copies below
 # cache/receive_sharing_intent/<uuid>/ and cannot reach other app files.
 set -euo pipefail
 DEVICE=${1:?usage: scripts/test_share_intent.sh <adb serial>}
-APP=chat.fluffy.fluffychat
+APP=com.swovo.odango
 ADB="adb -s $DEVICE"
 
 case "$DEVICE" in

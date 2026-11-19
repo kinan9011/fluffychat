@@ -786,7 +786,6 @@
     "accessAndVisibility": "Access and visibility",
     "accessAndVisibilityDescription": "Who is allowed to join this chat and how the chat can be discovered.",
     "customEmojisAndStickers": "Custom emojis and stickers",
-    "customEmojisAndStickersBody": "Add or share custom emojis or stickers which can be used in any chat.",
     "emoteShortcode": "Emote shortcode",
     "@emoteShortcode": {
         "type": "String",
@@ -978,7 +977,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "inviteText": "{username} invited you to FluffyChat.\n1. Visit fluffychat.im and install the app \n2. Sign up or sign in \n3. Open the invite link: \n {link}",
+    "inviteText": "{username} invited you to Odango.\n1. Visit odango.swovo.de and install the app \n2. Sign up or sign in \n3. Open the invite link: \n {link}",
     "@inviteText": {
         "type": "String",
         "placeholders": {
@@ -1138,8 +1137,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "💬 New message in FluffyChat",
-    "@newMessageInFluffyChat": {
+    "newMessageInOdango": "💬 New message in Odango",
+    "@newMessageInOdango": {
         "type": "String",
         "placeholders": {}
     },
@@ -2565,7 +2564,7 @@
     "advancedConfigurations": "Advanced configurations",
     "signIn": "Sign in",
     "createNewAccount": "Create new account",
-    "signUpGreeting": "FluffyChat is decentralized! Select a server where you want to create your account and let's go!",
+    "signUpGreeting": "Odango is decentralized! Select a server where you want to create your account and let's go!",
     "signInGreeting": "You already have an account in Matrix? Welcome back! Select your homeserver and sign in.",
     "theProcessWasCanceled": "The process was canceled.",
     "join": "Join",
@@ -2585,7 +2584,17 @@
     },
     "createNewChat": "Create new chat",
     "reset": "Reset",
-    "supportFluffyChat": "Support FluffyChat",
+    "supportOdango": "Support Odango",
+    "supportOdangoBody": "Odango is free and open source. It is built on FluffyChat, and part of what you give goes on to support the FluffyChat source it is built on. Thank you.",
+    "@supportOdangoBody": {
+        "description": "Body of the dialog that opens from the Support Odango menu entry. It tells people that part of their support reaches the upstream FluffyChat project."
+    },
+    "supportKoFi": "Support on Ko-fi",
+    "supportBuyMeACoffee": "Buy me a coffee",
+    "supportUpstreamSource": "FluffyChat source code",
+    "supportLinksNotSet": "No donation links are set up in this build.",
+    "aboutBasedOnFluffyChat": "Odango is a fork of FluffyChat and is licensed under AGPL-3.0.",
+    "pushNeedsOwnGateway": "Push notifications need a push gateway. This build has none configured, so notifications only arrive while the app is open. Ask your administrator to set one up.",
     "support": "Support",
     "setLowPriority": "Set low priority",
     "unsetLowPriority": "Unset low priority",
@@ -2595,7 +2604,7 @@
     "tagName": "Tag name",
     "createNewTag": "Create new tag",
     "hideRoomsInSpaces": "Hide rooms that are in a space",
-    "possibleByYou": "This release was only possible thanks to your support. FluffyChat remains free, open-source, and entirely community-driven.",
+    "possibleByYou": "This release was only possible thanks to your support. Odango remains free and open source.",
     "showThumbnailsInTimeline": "Show thumbnails of images and videos",
     "appSubtitle": "Secure [matrix] Communication",
     "appDescription": "Communicate encrypted over the decentralized [matrix] network in an easy and accessible way for everyone.",
@@ -2679,7 +2688,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "newPassphraseDescription": "FluffyChat uses end to end encryption. To not lose your messages, please choose a strong passphrase to secure your crypto identity and your encrypted message backup.",
+    "newPassphraseDescription": "Odango uses end to end encryption. To not lose your messages, please choose a strong passphrase to secure your crypto identity and your encrypted message backup.",
     "@newPassphraseDescription": {
         "type": "String",
         "placeholders": {}
@@ -3443,7 +3452,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "scheduleDeviceNote": "Your server can't schedule messages, so this device sends it. FluffyChat must be running at that time.",
+    "scheduleDeviceNote": "Your server can't schedule messages, so this device sends it. Odango must be running at that time.",
     "@scheduleDeviceNote": {
         "type": "String",
         "placeholders": {}
@@ -3575,7 +3584,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "scheduledMissed": "Not sent: FluffyChat wasn't running at {time}",
+    "scheduledMissed": "Not sent: Odango wasn't running at {time}",
     "@scheduledMissed": {
         "type": "String",
         "placeholders": {
@@ -3614,7 +3623,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "scheduledDeviceBanner": "Some messages are sent from this device. Keep FluffyChat running until then.",
+    "scheduledDeviceBanner": "Some messages are sent from this device. Keep Odango running until then.",
     "@scheduledDeviceBanner": {
         "type": "String",
         "placeholders": {}

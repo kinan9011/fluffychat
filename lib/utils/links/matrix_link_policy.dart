@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
 import 'package:flutter/foundation.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/utils/matrix_room_id.dart';
 
 enum ScannedKind { user, room, alias }
 

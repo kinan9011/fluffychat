@@ -6,8 +6,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
 
 typedef ScheduledSender =
     Future<void> Function(String roomId, Map<String, Object?> content);

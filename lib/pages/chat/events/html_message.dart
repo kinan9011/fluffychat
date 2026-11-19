@@ -5,24 +5,24 @@
 
 import 'package:collection/collection.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:fluffychat/config/design_constants.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/code_highlight_theme.dart';
-import 'package:fluffychat/utils/event_checkbox_extension.dart';
-import 'package:fluffychat/utils/html_image_size.dart';
-import 'package:fluffychat/utils/html_limits.dart';
-import 'package:fluffychat/utils/motion.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:highlight/highlight.dart' show highlight;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/code_highlight_theme.dart';
+import 'package:odango/utils/event_checkbox_extension.dart';
+import 'package:odango/utils/html_image_size.dart';
+import 'package:odango/utils/html_limits.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/future_loading_dialog.dart';
+import 'package:odango/widgets/mxc_image.dart';
 
 import '../../../utils/url_launcher.dart';
 

@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 
 /// Whether the call entry points are shown. An unknown answer counts as not
 /// available: nothing call related is shown until the server is known to

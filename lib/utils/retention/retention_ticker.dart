@@ -5,8 +5,8 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/utils/retention/retention_policy.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
 
 /// One timer that calls [onExpire] when the next message of a room expires,
 /// so the view can hide it. The wait is never shorter than [minWait], which

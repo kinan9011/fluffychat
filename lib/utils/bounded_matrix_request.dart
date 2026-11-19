@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/bounded_body.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/bounded_body.dart';
 
 /// A request to the own homeserver whose answer is read with a size cap. The
 /// SDK buffers and decodes whatever the server sends; `/search`,

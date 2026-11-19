@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 ExportMediaKind? exportMediaKind(Map<String, Object?> content) {
   final type = content['msgtype'];

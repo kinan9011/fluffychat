@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat_search/chat_search_view.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class ChatSearchPage extends StatefulWidget {
   final String roomId;

@@ -5,9 +5,9 @@
 
 import 'dart:convert';
 
-import 'package:fluffychat/utils/export/export_json.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/export/export_json.dart';
+import 'package:odango/utils/export/export_model.dart';
 
 ExportEvent _event(Map<String, Object?> content) => ExportEvent(
   eventId: r'$e1',
@@ -129,7 +129,7 @@ void main() {
                 ]),
               )
               as Map;
-      expect(json['format'], 'im.fluffychat.export');
+      expect(json['format'], 'com.swovo.odango.export');
       expect(json['version'], 1);
       expect(json['exported_at'], '2030-05-11T00:00:00.000Z');
       expect(json['truncated'], false);
@@ -182,7 +182,7 @@ void main() {
         expect(
           buildJson(_meta, events),
           const JsonEncoder.withIndent('  ').convert({
-            'format': 'im.fluffychat.export',
+            'format': 'com.swovo.odango.export',
             'version': 1,
             'exported_at': '2030-05-11T00:00:00.000Z',
             'truncated': false,

@@ -3,17 +3,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/bootstrap/view_model/bootstrap_view_model.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/device_extension.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_config.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/bootstrap/view_model/bootstrap_view_model.dart';
+import 'package:odango/pages/key_verification/key_verification_dialog.dart';
+import 'package:odango/utils/date_time_extension.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/device_extension.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 
 class RestoreBootstrapView extends StatelessWidget {
   final BootstrapViewModel viewModel;

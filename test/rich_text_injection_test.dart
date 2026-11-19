@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/rich_text/html_serializer.dart';
-import 'package:fluffychat/utils/rich_text/link_policy.dart';
-import 'package:fluffychat/utils/rich_text/rich_document.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:odango/utils/rich_text/html_serializer.dart';
+import 'package:odango/utils/rich_text/link_policy.dart';
+import 'package:odango/utils/rich_text/rich_document.dart';
 
 const corpus = [
   '<script>alert(1)</script>',

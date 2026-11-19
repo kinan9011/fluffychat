@@ -5,13 +5,13 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/profile/profile_view.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/qr_code_viewer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/profile/profile_view.dart';
+import 'package:odango/utils/fluffy_share.dart';
+import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/qr_code_viewer.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

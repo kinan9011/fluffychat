@@ -5,9 +5,9 @@
 
 import 'dart:io' show Platform;
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart' show BuildContext, MediaQuery;
+import 'package:odango/config/setting_keys.dart';
 
 /// How much of the glass look the user wants: `auto` follows the device,
 /// `full` always blurs, `lite` never does.

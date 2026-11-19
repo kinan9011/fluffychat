@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
+import 'package:odango/widgets/matrix.dart';
 
 /// Answers the capability request of the real app like a homeserver with or
 /// without a LiveKit service, per client, changeable at any time.

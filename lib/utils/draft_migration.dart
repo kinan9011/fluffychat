@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/utils/draft_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/draft_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const legacyDraftKeyPrefix = 'draft_';

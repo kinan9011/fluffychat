@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/search/local_search.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter/foundation.dart';
+import 'package:odango/utils/search/local_search.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 /// The chips above the results of the global search.
 enum SearchSection { all, chats, messages, media, files, links, publicRooms }

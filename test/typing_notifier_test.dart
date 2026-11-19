@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/pages/chat/typing_notifier.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/pages/chat/typing_notifier.dart';
 
 void main() {
   const idle = Duration(milliseconds: 40);

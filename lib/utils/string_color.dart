@@ -6,9 +6,9 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/utils/oklch.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/utils/oklch.dart';
 
 Color avatarColorForHue(double hue) => oklchColor(0.55, 0.12, hue);
 

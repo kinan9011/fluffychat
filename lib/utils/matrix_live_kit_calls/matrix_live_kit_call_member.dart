@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:matrix/matrix_api_lite/utils/try_get_map_extension.dart';
+import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 
 class MatrixRtcCallMember {
   static const String eventType = 'org.matrix.msc3401.call.member';

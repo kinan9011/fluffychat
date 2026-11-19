@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/server_capabilities/homeserver_report.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
 import 'package:flutter/widgets.dart' show Locale, StringCharacters;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/server_capabilities/homeserver_report.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 
 ServerCapabilities _caps(Map<String, bool> unstable, {bool? oidc}) =>
     ServerCapabilities.derive(

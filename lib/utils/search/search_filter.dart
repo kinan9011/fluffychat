@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/search/indexed_message.dart';
-import 'package:fluffychat/utils/search/search_kind.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/search/indexed_message.dart';
+import 'package:odango/utils/search/search_kind.dart';
 
 enum DatePreset { any, today, week, month, custom }
 

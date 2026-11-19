@@ -3,26 +3,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/app_tokens.dart';
-import 'package:fluffychat/pages/chat/chat_wallpaper.dart';
-import 'package:fluffychat/pages/chat/events/deleted_bubble_content.dart';
-import 'package:fluffychat/pages/chat/events/file_bubble_view.dart';
-import 'package:fluffychat/pages/chat/events/message_bubble.dart';
-import 'package:fluffychat/pages/chat/events/message_footer.dart';
-import 'package:fluffychat/pages/chat/events/poll.dart';
-import 'package:fluffychat/pages/chat/events/reaction_pills.dart';
-import 'package:fluffychat/pages/chat/events/reply_content.dart';
-import 'package:fluffychat/pages/chat/events/utd_bubble_content.dart';
-import 'package:fluffychat/pages/chat/events/voice_bubble_view.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
-import 'package:fluffychat/utils/account_config.dart';
-import 'package:fluffychat/utils/chat/message_ticks.dart';
-import 'package:fluffychat/utils/chat/reaction_summary.dart';
-import 'package:fluffychat/utils/chat/waveform.dart';
-import 'package:fluffychat/utils/string_color.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/pages/chat/chat_wallpaper.dart';
+import 'package:odango/pages/chat/events/deleted_bubble_content.dart';
+import 'package:odango/pages/chat/events/file_bubble_view.dart';
+import 'package:odango/pages/chat/events/message_bubble.dart';
+import 'package:odango/pages/chat/events/message_footer.dart';
+import 'package:odango/pages/chat/events/poll.dart';
+import 'package:odango/pages/chat/events/reaction_pills.dart';
+import 'package:odango/pages/chat/events/reply_content.dart';
+import 'package:odango/pages/chat/events/utd_bubble_content.dart';
+import 'package:odango/pages/chat/events/voice_bubble_view.dart';
+import 'package:odango/pages/chat/seen_by_row.dart';
+import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/chat/message_ticks.dart';
+import 'package:odango/utils/chat/reaction_summary.dart';
+import 'package:odango/utils/chat/waveform.dart';
+import 'package:odango/utils/string_color.dart';
 
 import 'utils/golden.dart';
 import 'utils/test_client.dart';

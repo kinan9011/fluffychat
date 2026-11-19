@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/settings_folders/settings_folders_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/settings_folders/settings_folders_view.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class SettingsFolders extends StatefulWidget {
   const SettingsFolders({super.key});

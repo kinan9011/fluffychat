@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/waveform.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/chat/waveform.dart';
 
 void main() {
   test('always 26 bars between 0 and 1', () {

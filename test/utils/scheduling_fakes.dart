@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/scheduling/delayed_events_api.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_messages.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_queue.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_store.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities_service.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/scheduling/delayed_events_api.dart';
+import 'package:odango/utils/scheduling/scheduled_messages.dart';
+import 'package:odango/utils/scheduling/scheduled_queue.dart';
+import 'package:odango/utils/scheduling/scheduled_store.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities_service.dart';
 
 /// Keeps the one custom document in memory: no sqlite, no real timers.
 class MemoryDatabase implements DatabaseApi {

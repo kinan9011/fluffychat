@@ -7,11 +7,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:fluffychat/utils/logged_in_database.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/scheduling/scheduled_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/logged_in_database.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/scheduling/scheduled_content.dart';
 
 enum ScheduledMode { device, server }
 
@@ -228,7 +228,7 @@ class ScheduledStore {
     DateTime Function()? now,
   }) : this._(database, now ?? DateTime.now);
 
-  static const documentKey = 'im.fluffychat.scheduled.v1';
+  static const documentKey = 'com.swovo.odango.scheduled.v1';
   static const maxEntries = 100;
   static const maxDocumentBytes = 4 * 1024 * 1024;
 

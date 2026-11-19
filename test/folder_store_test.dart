@@ -6,10 +6,10 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:fluffychat/utils/chat_list/folder_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' show StringCharacters;
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat_list/folder_store.dart';
 
 import 'utils/test_client.dart';
 

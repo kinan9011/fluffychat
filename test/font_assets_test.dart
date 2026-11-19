@@ -6,9 +6,9 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:fluffychat/utils/font_licenses.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:odango/utils/font_licenses.dart';
 
 void main() {
   final pinned = <String, String>{

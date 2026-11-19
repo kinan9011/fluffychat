@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/design_constants.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:odango/config/design_constants.dart';
 
 const _headings = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'};
 

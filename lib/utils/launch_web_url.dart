@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/link_scheme_policy.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/link_scheme_policy.dart';
 import 'package:url_launcher/url_launcher.dart' show LaunchMode, launchUrl;
 
 export 'package:url_launcher/url_launcher.dart' show LaunchMode;

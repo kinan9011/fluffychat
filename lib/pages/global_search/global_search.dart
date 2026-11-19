@@ -5,31 +5,31 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/global_search/global_search_view.dart';
-import 'package:fluffychat/pages/global_search/search_filter_sheet.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/utils/route_path.dart';
-import 'package:fluffychat/utils/search/chat_matcher.dart';
-import 'package:fluffychat/utils/search/index_feeder.dart';
-import 'package:fluffychat/utils/search/local_search.dart';
-import 'package:fluffychat/utils/search/message_index.dart';
-import 'package:fluffychat/utils/search/public_directory.dart';
-import 'package:fluffychat/utils/search/search_filter.dart';
-import 'package:fluffychat/utils/search/search_query.dart';
-import 'package:fluffychat/utils/search/search_sections.dart';
-import 'package:fluffychat/utils/search/server_search.dart';
-import 'package:fluffychat/utils/search/unencrypted_scan.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/user_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/global_search/global_search_view.dart';
+import 'package:odango/pages/global_search/search_filter_sheet.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/utils/route_path.dart';
+import 'package:odango/utils/search/chat_matcher.dart';
+import 'package:odango/utils/search/index_feeder.dart';
+import 'package:odango/utils/search/local_search.dart';
+import 'package:odango/utils/search/message_index.dart';
+import 'package:odango/utils/search/public_directory.dart';
+import 'package:odango/utils/search/search_filter.dart';
+import 'package:odango/utils/search/search_query.dart';
+import 'package:odango/utils/search/search_sections.dart';
+import 'package:odango/utils/search/server_search.dart';
+import 'package:odango/utils/search/unencrypted_scan.dart';
+import 'package:odango/widgets/adaptive_dialogs/public_room_dialog.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:odango/widgets/adaptive_dialogs/user_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 enum SourceStatus { idle, loading, done, error }
 
@@ -44,7 +44,7 @@ class GlobalSearch extends StatefulWidget {
 
 class GlobalSearchController extends State<GlobalSearch> {
   static const debounce = Duration(milliseconds: 300);
-  static const serverStoreKey = 'im.fluffychat.search.server';
+  static const serverStoreKey = 'com.swovo.odango.search.server';
   static const maxPublicPages = 5;
   static const maxPublicRooms = 100;
   static const publicPageSize = 20;

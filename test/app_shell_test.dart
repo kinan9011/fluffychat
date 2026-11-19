@@ -5,18 +5,18 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/layouts/app_bottom_bar.dart';
-import 'package:fluffychat/widgets/layouts/app_nav_rail.dart';
-import 'package:fluffychat/widgets/layouts/app_shell.dart';
-import 'package:fluffychat/widgets/layouts/app_tab.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/config/themes.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/layouts/app_bottom_bar.dart';
+import 'package:odango/widgets/layouts/app_nav_rail.dart';
+import 'package:odango/widgets/layouts/app_shell.dart';
+import 'package:odango/widgets/layouts/app_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';

@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/rich_text/editor_text.dart';
-import 'package:fluffychat/utils/rich_text/format_state.dart';
-import 'package:fluffychat/utils/rich_text/html_parser.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/rich_text/editor_text.dart';
+import 'package:odango/utils/rich_text/format_state.dart';
+import 'package:odango/utils/rich_text/html_parser.dart';
 
 /// What the composer holds when the user edits a message: the formatted
 /// version when `formatted_body` opens without loss, else the plain text.

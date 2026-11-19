@@ -5,19 +5,19 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/export/export_page_view.dart';
-import 'package:fluffychat/utils/chat/display_text.dart';
-import 'package:fluffychat/utils/export/export_model.dart';
-import 'package:fluffychat/utils/export/export_runner.dart';
-import 'package:fluffychat/utils/export/export_sink.dart';
-import 'package:fluffychat/utils/matrix_room_id.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/retention/retention_policy.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/export/export_page_view.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/export/export_model.dart';
+import 'package:odango/utils/export/export_runner.dart';
+import 'package:odango/utils/export/export_sink.dart';
+import 'package:odango/utils/matrix_room_id.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/retention/retention_policy.dart';
+import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class ExportPage extends StatefulWidget {
   const ExportPage({required this.roomId, super.key});

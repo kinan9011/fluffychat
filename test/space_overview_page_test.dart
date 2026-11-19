@@ -5,14 +5,14 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/space_overview/space_overview.dart';
-import 'package:fluffychat/pages/space_overview/space_overview_view.dart';
-import 'package:fluffychat/utils/spaces/space_hierarchy.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/setting_keys.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/space_overview/space_overview.dart';
+import 'package:odango/pages/space_overview/space_overview_view.dart';
+import 'package:odango/utils/spaces/space_hierarchy.dart';
+import 'package:odango/widgets/fluffy_chat_app.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/recording_api.dart';
@@ -597,7 +597,7 @@ void main() {
           ['{"name":"Private room"}'],
         );
         await AppSettings.store.setString(
-          'im.fluffychat.search.server',
+          'com.swovo.odango.search.server',
           'keep.example',
         );
         answers[_space] = (_) => pageOf([]);
@@ -610,7 +610,7 @@ void main() {
           isEmpty,
         );
         expect(
-          AppSettings.store.getString('im.fluffychat.search.server'),
+          AppSettings.store.getString('com.swovo.odango.search.server'),
           'keep.example',
         );
         await harness.finish(tester);

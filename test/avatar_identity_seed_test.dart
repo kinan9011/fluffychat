@@ -6,16 +6,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat/events/html_message.dart';
-import 'package:fluffychat/pages/chat/mention_suggestion_tile.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/chat/chat_view.dart';
+import 'package:odango/pages/chat/events/html_message.dart';
+import 'package:odango/pages/chat/mention_suggestion_tile.dart';
+import 'package:odango/pages/key_verification/key_verification_dialog.dart';
+import 'package:odango/utils/string_color.dart';
+import 'package:odango/widgets/avatar.dart';
 
 import 'utils/chat_page_harness.dart';
 import 'utils/golden.dart';

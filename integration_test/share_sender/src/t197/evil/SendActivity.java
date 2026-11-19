@@ -16,7 +16,7 @@ public class SendActivity extends Activity {
         Intent in = getIntent();
         String target = in.getStringExtra("target");
         Intent send = new Intent(Intent.ACTION_SEND);
-        send.setClassName(target, "chat.fluffy.fluffychat.MainActivity");
+        send.setClassName(target, "com.swovo.odango.MainActivity");
         send.setType("application/octet-stream");
         send.putExtra(Intent.EXTRA_STREAM, Uri.parse(in.getStringExtra("uri")));
         send.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

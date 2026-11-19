@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:fluffychat/pages/calls/calls_view.dart';
-import 'package:fluffychat/utils/server_capabilities/server_capabilities.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/calls/calls_view.dart';
+import 'package:odango/utils/server_capabilities/server_capabilities.dart';
+import 'package:odango/widgets/matrix.dart';
 
 class CallsPage extends StatefulWidget {
   const CallsPage({super.key});

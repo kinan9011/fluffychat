@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/chat/display_text.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/display_text.dart';
 
 enum DeviceTrust { verified, unverified, blocked, unknown }
 

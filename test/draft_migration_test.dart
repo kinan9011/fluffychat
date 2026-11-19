@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/utils/draft_migration.dart';
-import 'package:fluffychat/utils/draft_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/draft_migration.dart';
+import 'package:odango/utils/draft_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/chat_row_fixtures.dart';
